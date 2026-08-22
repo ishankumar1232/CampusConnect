@@ -9,9 +9,9 @@ public class DBTest {
         Connection con = DBConnection.getConnection();
 
         if (con != null) {
-            System.out.println("CampusConnect Database Connected!");
+            System.out.println("Connection Successful");
         } else {
-            System.out.println("Database Connection Failed!");
+            System.out.println("Connection Failed");
         }
     }
 }
