@@ -4,11 +4,10 @@ import java.io.*;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.WebServlet;
-
+ 
 import com.campusconnect.bean.StudentAcademic;
 
-@WebServlet("/studentAcademic")
+ 
 public class StudentAcademicServlet extends HttpServlet
 {
     public void doPost(HttpServletRequest req, HttpServletResponse res)

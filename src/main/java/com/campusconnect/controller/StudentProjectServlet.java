@@ -8,7 +8,7 @@ import jakarta.servlet.annotation.WebServlet;
 
 import com.campusconnect.bean.StudentProject;
 
-@WebServlet("/studentProject")
+ 
 public class StudentProjectServlet extends HttpServlet
 {
     public void doPost(HttpServletRequest req, HttpServletResponse res)
