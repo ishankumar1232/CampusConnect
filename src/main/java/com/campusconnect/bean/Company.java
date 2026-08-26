@@ -1,5 +1,10 @@
 package com.campusconnect.bean;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
 public class Company {
 
     private int companyId;
@@ -10,70 +15,138 @@ public class Company {
     private String address;
     private String website;
     private String status;
+	public int getCompanyId() {
+		return companyId;
+	}
+	public void setCompanyId(int companyId) {
+		this.companyId = companyId;
+	}
+	public String getCompanyName() {
+		return companyName;
+	}
+	public void setCompanyName(String companyName) {
+		this.companyName = companyName;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	public String getPhone() {
+		return phone;
+	}
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
+	}
+	public String getAddress() {
+		return address;
+	}
+	public void setAddress(String address) {
+		this.address = address;
+	}
+	public String getWebsite() {
+		return website;
+	}
+	public void setWebsite(String website) {
+		this.website = website;
+	}
+	public String getStatus() {
+		return status;
+	}
+	public void setStatus(String status) {
+		this.status = status;
+	}
 
-    public Company() {}
+	
+	public boolean SelectMethod()
+	{
+	    try
+	    {
+	        Class.forName("oracle.jdbc.driver.OracleDriver");
 
-    public int getCompanyId() {
-        return companyId;
-    }
+	        Connection con = DriverManager.getConnection(
+	            "jdbc:oracle:thin:@localhost:1521:XE",
+	            "CAMPUSCONNECT",
+	            "campus123"
+	        );
 
-    public void setCompanyId(int companyId) {
-        this.companyId = companyId;
-    }
+	        Statement stmt = con.createStatement();
 
-    public String getCompanyName() {
-        return companyName;
-    }
+	        String q1 = "SELECT * FROM COMPANY " +
+	                    "WHERE COMPANY_ID = " + companyId;
 
-    public void setCompanyName(String companyName) {
-        this.companyName = companyName;
-    }
+	        ResultSet rs = stmt.executeQuery(q1);
 
-    public String getEmail() {
-        return email;
-    }
+	        if(rs.next())
+	        {
+	            companyName = rs.getString("COMPANY_NAME");
+	            email = rs.getString("EMAIL");
+	            phone = rs.getString("PHONE");
+	            address = rs.getString("ADDRESS");
+	            website = rs.getString("WEBSITE");
+	            status = rs.getString("STATUS");
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
+	            con.close();
 
-    public String getPhone() {
-        return phone;
-    }
+	            return true;
+	        }
+	        else
+	        {
+	            con.close();
 
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
+	            return false;
+	        }
+	    }
+	    catch(Exception e)
+	    {
+	        return false;
+	    }
+	}
+	
+	public boolean UpdateMethod()
+	{
+	    try
+	    {
+	        Class.forName("oracle.jdbc.driver.OracleDriver");
 
-    public String getPassword() {
-        return password;
-    }
+	        Connection con = DriverManager.getConnection(
+	            "jdbc:oracle:thin:@localhost:1521:XE",
+	            "CAMPUSCONNECT",
+	            "campus123"
+	        );
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+	        Statement stmt = con.createStatement();
 
-    public String getAddress() {
-        return address;
-    }
+	        String q1 = "UPDATE COMPANY SET " +
+	                    "COMPANY_NAME = '" + companyName + "', " +
+	                    "PHONE = '" + phone + "', " +
+	                    "ADDRESS = '" + address + "', " +
+	                    "WEBSITE = '" + website + "' " +
+	                    "WHERE COMPANY_ID = " + companyId;
 
-    public void setAddress(String address) {
-        this.address = address;
-    }
+	        int x = stmt.executeUpdate(q1);
 
-    public String getWebsite() {
-        return website;
-    }
+	        con.close();
 
-    public void setWebsite(String website) {
-        this.website = website;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
+	        if(x > 0)
+	        {
+	            return true;
+	        }
+	        else
+	        {
+	            return false;
+	        }
+	    }
+	    catch(Exception e)
+	    {
+	        return false;
+	    }
+	}
 }
