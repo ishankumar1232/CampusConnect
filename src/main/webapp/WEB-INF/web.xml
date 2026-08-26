@@ -1,78 +1,365 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="https://jakarta.ee/xml/ns/jakartaee" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd" version="6.0">
-  <servlet>
-    <description></description>
-    <display-name>NewStudentAdmissionRequest</display-name>
-    <servlet-name>NewStudentAdmissionRequest</servlet-name>
-    <servlet-class>com.campusconnect.controller.NewStudentAdmissionRequest</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>NewStudentAdmissionRequest</servlet-name>
-    <url-pattern>/NewStudentAdmissionRequest</url-pattern>
-  </servlet-mapping>
-  <display-name>CampusConnect</display-name>
-  <welcome-file-list>
-    <welcome-file>index.html</welcome-file>
-    <welcome-file>index.htm</welcome-file>
-    <welcome-file>index.jsp</welcome-file>
-    <welcome-file>default.html</welcome-file>
-    <welcome-file>default.htm</welcome-file>
-    <welcome-file>default.jsp</welcome-file>
-  </welcome-file-list>
-  <servlet>
-    <servlet-name>StudentProjectServlet</servlet-name>
-    <servlet-class>com.campusconnect.controller.StudentProjectServlet</servlet-class>
-  </servlet>
-  <servlet>
-    <servlet-name>StudentLogin</servlet-name>
-    <servlet-class>com.campusconnect.controller.StudentLogin</servlet-class>
-  </servlet>
-  <servlet>
-    <servlet-name>StudentSkillServlet</servlet-name>
-    <servlet-class>com.campusconnect.controller.StudentSkillServlet</servlet-class>
-  </servlet>
-  <servlet>
-    <servlet-name>StudentResumeServlet</servlet-name>
-    <servlet-class>com.campusconnect.controller.StudentResumeServlet</servlet-class>
-  </servlet>
-  <servlet>
-    <servlet-name>StudentAcademicServlet</servlet-name>
-    <servlet-class>com.campusconnect.controller.StudentAcademicServlet</servlet-class>
-  </servlet>
-  <servlet>
-    <servlet-name>StudentApplicationServlet</servlet-name>
-    <servlet-class>com.campusconnect.controller.StudentApplicationServlet</servlet-class>
-  </servlet>
-  <servlet>
-    <servlet-name>StudentRegister</servlet-name>
-    <servlet-class>com.campusconnect.controller.StudentRegister</servlet-class>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>StudentProjectServlet</servlet-name>
-    <url-pattern>/studentProject</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>StudentLogin</servlet-name>
-    <url-pattern>/studentLogin</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>StudentSkillServlet</servlet-name>
-    <url-pattern>/studentSkill</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>StudentResumeServlet</servlet-name>
-    <url-pattern>/studentResume</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>StudentAcademicServlet</servlet-name>
-    <url-pattern>/studentAcademic</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>StudentApplicationServlet</servlet-name>
-    <url-pattern>/studentApply</url-pattern>
-  </servlet-mapping>
-  <servlet-mapping>
-    <servlet-name>StudentRegister</servlet-name>
-    <url-pattern>/studentRegister</url-pattern>
-  </servlet-mapping>
+
+<web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+         https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
+         version="6.0">
+
+    <display-name>CampusConnect</display-name>
+
+    <!-- ================= WELCOME PAGE ================= -->
+
+    <welcome-file-list>
+        <welcome-file>index.html</welcome-file>
+        <welcome-file>index.htm</welcome-file>
+        <welcome-file>index.jsp</welcome-file>
+        <welcome-file>default.html</welcome-file>
+        <welcome-file>default.htm</welcome-file>
+        <welcome-file>default.jsp</welcome-file>
+    </welcome-file-list>
+
+
+    <!-- ================================================= -->
+    <!--                SUPER ADMIN MODULE                -->
+    <!-- ================================================= -->
+
+    <!-- ================= LOGIN ================= -->
+
+    <servlet>
+        <servlet-name>SuperAdminLoginServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.SuperAdminLoginServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>SuperAdminLoginServlet</servlet-name>
+        <url-pattern>/SuperAdminLoginServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- ================= DASHBOARD ================= -->
+
+    <servlet>
+        <servlet-name>DashboardServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.DashboardServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>DashboardServlet</servlet-name>
+        <url-pattern>/DashboardServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- ================= COLLEGE MANAGEMENT ================= -->
+
+    <servlet>
+        <servlet-name>CollegeManagementServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.CollegeManagementServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CollegeManagementServlet</servlet-name>
+        <url-pattern>/CollegeManagementServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <servlet>
+        <servlet-name>ApproveCollegeServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.ApproveCollegeServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ApproveCollegeServlet</servlet-name>
+        <url-pattern>/ApproveCollegeServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <servlet>
+        <servlet-name>RejectCollegeServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.RejectCollegeServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>RejectCollegeServlet</servlet-name>
+        <url-pattern>/RejectCollegeServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- ================= COMPANY MANAGEMENT ================= -->
+
+    <servlet>
+        <servlet-name>CompanyManagementServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.CompanyManagementServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CompanyManagementServlet</servlet-name>
+        <url-pattern>/CompanyManagementServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <servlet>
+        <servlet-name>ApproveCompanyServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.ApproveCompanyServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ApproveCompanyServlet</servlet-name>
+        <url-pattern>/ApproveCompanyServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <servlet>
+        <servlet-name>RejectCompanyServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.RejectCompanyServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>RejectCompanyServlet</servlet-name>
+        <url-pattern>/RejectCompanyServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- ================= USER MANAGEMENT ================= -->
+
+    <servlet>
+        <servlet-name>UserManagementServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.UserManagementServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>UserManagementServlet</servlet-name>
+        <url-pattern>/UserManagementServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- ================= LOGOUT ================= -->
+
+    <servlet>
+        <servlet-name>LogoutServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.LogoutServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>LogoutServlet</servlet-name>
+        <url-pattern>/LogoutServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- ================= ACTIVATE USER ================= -->
+
+    <servlet>
+        <servlet-name>ActivateUserServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.ActivateUserServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ActivateUserServlet</servlet-name>
+        <url-pattern>/ActivateUserServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- ================= DEACTIVATE USER ================= -->
+
+    <servlet>
+        <servlet-name>DeactivateUserServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.DeactivateUserServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>DeactivateUserServlet</servlet-name>
+        <url-pattern>/DeactivateUserServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- ================= STUDENT MANAGEMENT ================= -->
+
+    <servlet>
+        <servlet-name>StudentManagementServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.StudentManagementServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>StudentManagementServlet</servlet-name>
+        <url-pattern>/StudentManagementServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- ================= ACTIVATE STUDENT ================= -->
+
+    <servlet>
+        <servlet-name>ActivateStudentServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.ActivateStudentServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>ActivateStudentServlet</servlet-name>
+        <url-pattern>/ActivateStudentServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- ================= DEACTIVATE STUDENT ================= -->
+
+    <servlet>
+        <servlet-name>DeactivateStudentServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.DeactivateStudentServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>DeactivateStudentServlet</servlet-name>
+        <url-pattern>/DeactivateStudentServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- ================= STUDENT DETAILS ================= -->
+
+    <servlet>
+        <servlet-name>StudentDetailsServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.StudentDetailsServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>StudentDetailsServlet</servlet-name>
+        <url-pattern>/StudentDetailsServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- ================= MONITOR RECRUITMENT ================= -->
+
+    <servlet>
+        <servlet-name>MonitorRecruitmentServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.MonitorRecruitmentServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>MonitorRecruitmentServlet</servlet-name>
+        <url-pattern>/MonitorRecruitmentServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- ================= SYSTEM REPORT ================= -->
+
+    <servlet>
+        <servlet-name>SystemReportsServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.SystemReportsServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>SystemReportsServlet</servlet-name>
+        <url-pattern>/SystemReportsServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- ================================================= -->
+    <!--                  EXISTING TEAM CODE               -->
+    <!-- ================================================= -->
+
+    <!-- ================= NEW STUDENT ADMISSION ================= -->
+
+    <servlet>
+        <description></description>
+        <display-name>NewStudentAdmissionRequest</display-name>
+        <servlet-name>NewStudentAdmissionRequest</servlet-name>
+        <servlet-class>com.campusconnect.controller.NewStudentAdmissionRequest</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>NewStudentAdmissionRequest</servlet-name>
+        <url-pattern>/NewStudentAdmissionRequest</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- ================= STUDENT PROJECT ================= -->
+
+    <servlet>
+        <servlet-name>StudentProjectServlet</servlet-name>
+        <servlet-class>com.campusconnect.controller.StudentProjectServlet</servlet-class>
+    </servlet>
+
+
+    <!-- ================= STUDENT LOGIN ================= -->
+
+    <servlet>
+        <servlet-name>StudentLogin</servlet-name>
+        <servlet-class>com.campusconnect.controller.StudentLogin</servlet-class>
+    </servlet>
+
+
+    <!-- ================= STUDENT SKILL ================= -->
+
+    <servlet>
+        <servlet-name>StudentSkillServlet</servlet-name>
+        <servlet-class>com.campusconnect.controller.StudentSkillServlet</servlet-class>
+    </servlet>
+
+
+    <!-- ================= STUDENT RESUME ================= -->
+
+    <servlet>
+        <servlet-name>StudentResumeServlet</servlet-name>
+        <servlet-class>com.campusconnect.controller.StudentResumeServlet</servlet-class>
+    </servlet>
+
+
+    <!-- ================= STUDENT ACADEMIC ================= -->
+
+    <servlet>
+        <servlet-name>StudentAcademicServlet</servlet-name>
+        <servlet-class>com.campusconnect.controller.StudentAcademicServlet</servlet-class>
+    </servlet>
+
+
+    <!-- ================= STUDENT APPLICATION ================= -->
+
+    <servlet>
+        <servlet-name>StudentApplicationServlet</servlet-name>
+        <servlet-class>com.campusconnect.controller.StudentApplicationServlet</servlet-class>
+    </servlet>
+
+
+    <!-- ================= STUDENT REGISTER ================= -->
+
+    <servlet>
+        <servlet-name>StudentRegister</servlet-name>
+        <servlet-class>com.campusconnect.controller.StudentRegister</servlet-class>
+    </servlet>
+
+
+    <!-- ================= EXISTING TEAM MAPPINGS ================= -->
+
+    <servlet-mapping>
+        <servlet-name>StudentProjectServlet</servlet-name>
+        <url-pattern>/studentProject</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>StudentLogin</servlet-name>
+        <url-pattern>/studentLogin</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>StudentSkillServlet</servlet-name>
+        <url-pattern>/studentSkill</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>StudentResumeServlet</servlet-name>
+        <url-pattern>/studentResume</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>StudentAcademicServlet</servlet-name>
+        <url-pattern>/studentAcademic</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>StudentApplicationServlet</servlet-name>
+        <url-pattern>/studentApply</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>StudentRegister</servlet-name>
+        <url-pattern>/studentRegister</url-pattern>
+    </servlet-mapping>
+
 </web-app>
