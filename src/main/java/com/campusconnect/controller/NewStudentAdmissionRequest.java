@@ -4,67 +4,139 @@ import java.io.*;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.WebServlet;
-
+ 
 import com.campusconnect.bean.Admission;
 
- public class NewStudentAdmissionRequest extends HttpServlet
+
+ 
+public class NewStudentAdmissionRequest
+        extends HttpServlet
 {
-    public void doPost(HttpServletRequest req, HttpServletResponse res)
-            throws IOException, ServletException
+    public void doPost(
+        HttpServletRequest req,
+        HttpServletResponse res)
+        throws IOException, ServletException
     {
         res.setContentType("text/html");
 
-        PrintWriter pw = res.getWriter();
+        PrintWriter pw =
+            res.getWriter();
 
-        String collegeId = req.getParameter("collegeId");
-        String name = req.getParameter("name");
-        String email = req.getParameter("email");
-        String phone = req.getParameter("phone");
-        String courseId = req.getParameter("courseId");
+
+        String collegeId =
+            req.getParameter("collegeId");
+
+        String name =
+            req.getParameter("name");
+
+        String email =
+            req.getParameter("email");
+
+        String phone =
+            req.getParameter("phone");
+
+        String courseId =
+            req.getParameter("courseId");
+
 
         try
         {
-            Admission a = new Admission();
+            Admission a =
+                new Admission();
 
-            a.setCollegeId(Integer.parseInt(collegeId));
+
+            a.setCollegeId(
+                Integer.parseInt(collegeId)
+            );
+
             a.setApplicantName(name);
-            a.setApplicantEmail(email);
-            a.setApplicantPhone(phone);
-            a.setApplicantCourseId(Integer.parseInt(courseId));
 
-            boolean x = a.InsertMethod();
+            a.setApplicantEmail(email);
+
+            a.setApplicantPhone(phone);
+
+            a.setApplicantCourseId(
+                Integer.parseInt(courseId)
+            );
+
+
+            boolean x =
+                a.InsertMethod();
+
 
             if(x)
             {
-                pw.println("<html><body>");
+                int admissionId =
+                    a.getAdmissionId();
 
-                pw.println("<h2>Admission Request Submitted Successfully</h2>");
 
-                pw.println("<p>Your admission request has been sent to the college.</p>");
+                /*
+                 * Send generated Admission ID
+                 * to success page
+                 */
 
-                pw.println("<p>Status: PENDING</p>");
+                req.setAttribute(
+                    "admissionId",
+                    admissionId
+                );
 
-                pw.println("</body></html>");
+                req.setAttribute(
+                    "name",
+                    name
+                );
+
+                req.setAttribute(
+                    "email",
+                    email
+                );
+
+                req.setAttribute(
+                    "collegeId",
+                    collegeId
+                );
+
+
+                RequestDispatcher rd =
+                    req.getRequestDispatcher(
+                        "new_student_admission_success.jsp"
+                    );
+
+                rd.forward(req, res);
             }
             else
             {
-                pw.println("<html><body>");
+                pw.println(
+                    "<html><body>"
+                );
 
-                pw.println("<h2>Admission Request Failed</h2>");
+                pw.println(
+                    "<h2>" +
+                    "Admission Request Failed" +
+                    "</h2>"
+                );
 
-                pw.println("</body></html>");
+                pw.println(
+                    "</body></html>"
+                );
             }
         }
         catch(Exception e)
         {
-            pw.println("<html><body>");
+            pw.println(
+                "<html><body>"
+            );
 
-            pw.println("<h2>Admission Request Error</h2>");
+            pw.println(
+                "<h2>Admission Request Error</h2>"
+            );
 
-            pw.println("<p>" + e + "</p>");
+            pw.println(
+                "<p>" + e + "</p>"
+            );
 
-            pw.println("</body></html>");
+            pw.println(
+                "</body></html>"
+            );
         }
     }
 }

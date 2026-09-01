@@ -361,5 +361,16 @@
         <servlet-name>StudentRegister</servlet-name>
         <url-pattern>/studentRegister</url-pattern>
     </servlet-mapping>
+    <servlet>
+    <servlet-name>FeePaymentServlet</servlet-name>
+    <servlet-class>com.campusconnect.controller.FeePaymentServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>FeePaymentServlet</servlet-name>
+    <url-pattern>/FeePaymentServlet</url-pattern>
+</servlet-mapping>
 
 </web-app>
+
+ 
