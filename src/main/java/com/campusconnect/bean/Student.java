@@ -1,25 +1,37 @@
 package com.campusconnect.bean;
 
+import java.sql.*;
+
 public class Student {
+
     private int studentId;
-    private String name;
-    private String email;
-    private String password;
-    private String phone;
+
     private int collegeId;
     private int departmentId;
     private int courseId;
     private int year;
     private double cgpa;
+
+    private String name;
+    private String email;
+    private String phone;
+    private String password;
+
+    private Date dob;
+    private String gender;
+    private String address;
+    private Date admissionDate;
+
     private String status;
 
-    // Default Constructor
-    public Student() {}
+    public Student() {
+    }
 
     // Parameterized Constructor
-    public Student(String name, String email, String password, String phone, 
-                  int collegeId, int departmentId, int courseId, 
-                  int year, double cgpa, String status) {
+    public Student(String name, String email, String password, String phone,
+                   int collegeId, int departmentId, int courseId,
+                   int year, double cgpa, String status) {
+
         this.name = name;
         this.email = email;
         this.password = password;
@@ -33,41 +45,246 @@ public class Student {
     }
 
     // Getters and Setters
-    public int getStudentId() { return studentId; }
-    public void setStudentId(int studentId) { this.studentId = studentId; }
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public int getStudentId() {
+        return studentId;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public void setStudentId(int studentId) {
+        this.studentId = studentId;
+    }
 
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
+    public int getCollegeId() {
+        return collegeId;
+    }
 
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
+    public void setCollegeId(int collegeId) {
+        this.collegeId = collegeId;
+    }
 
-    public int getCollegeId() { return collegeId; }
-    public void setCollegeId(int collegeId) { this.collegeId = collegeId; }
+    public int getDepartmentId() {
+        return departmentId;
+    }
 
-    public int getDepartmentId() { return departmentId; }
-    public void setDepartmentId(int departmentId) { this.departmentId = departmentId; }
+    public void setDepartmentId(int departmentId) {
+        this.departmentId = departmentId;
+    }
 
-    public int getCourseId() { return courseId; }
-    public void setCourseId(int courseId) { this.courseId = courseId; }
+    public int getCourseId() {
+        return courseId;
+    }
 
-    public int getYear() { return year; }
-    public void setYear(int year) { this.year = year; }
+    public void setCourseId(int courseId) {
+        this.courseId = courseId;
+    }
 
-    public double getCgpa() { return cgpa; }
-    public void setCgpa(double cgpa) { this.cgpa = cgpa; }
+    public int getYear() {
+        return year;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public double getCgpa() {
+        return cgpa;
+    }
+
+    public void setCgpa(double cgpa) {
+        this.cgpa = cgpa;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public Date getDob() {
+        return dob;
+    }
+
+    public void setDob(Date dob) {
+        this.dob = dob;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public Date getAdmissionDate() {
+        return admissionDate;
+    }
+
+    public void setAdmissionDate(Date admissionDate) {
+        this.admissionDate = admissionDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+
+    // Insert Student Record
+
+    public boolean InsertMethod() {
+
+        try {
+
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+
+            Connection con = DriverManager.getConnection(
+                "jdbc:oracle:thin:@localhost:1521:XE",
+                "CAMPUSCONNECT",
+                "campus123"
+            );
+
+            Statement stmt = con.createStatement();
+
+            // Generate Student ID
+
+            String qid =
+                "SELECT NVL(MAX(STUDENT_ID),0)+1 FROM STUDENT";
+
+            ResultSet rs = stmt.executeQuery(qid);
+
+            int id = 1;
+
+            if (rs.next()) {
+                id = rs.getInt(1);
+            }
+
+            rs.close();
+
+            // Insert Query
+
+            String q1 =
+                "INSERT INTO STUDENT "
+                + "(STUDENT_ID, COLLEGE_ID, COURSE_ID, NAME, EMAIL, "
+                + "PHONE, PASSWORD, DOB, GENDER, ADDRESS, "
+                + "ADMISSION_DATE, STATUS) "
+                + "VALUES ("
+                + id + ", "
+                + collegeId + ", "
+                + courseId + ", '"
+                + name + "', '"
+                + email + "', '"
+                + phone + "', '"
+                + password + "', "
+                + "TO_DATE('" + dob + "','YYYY-MM-DD'), '"
+                + gender + "', '"
+                + address + "', "
+                + "SYSDATE, "
+                + "'ACTIVE')";
+
+            int x = stmt.executeUpdate(q1);
+
+            if (x > 0) {
+                con.close();
+                return true;
+            } else {
+                con.close();
+                return false;
+            }
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+
+    // Student Login
+
+    public boolean LoginMethod() {
+
+        boolean result = false;
+
+        try {
+
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+
+            Connection con = DriverManager.getConnection(
+                "jdbc:oracle:thin:@localhost:1521:XE",
+                "CAMPUSCONNECT",
+                "campus123"
+            );
+
+            Statement stmt = con.createStatement();
+
+            String q1 =
+                "SELECT STUDENT_ID FROM STUDENT "
+                + "WHERE EMAIL='" + email + "' "
+                + "AND PASSWORD='" + password + "' "
+                + "AND STATUS='ACTIVE'";
+
+            ResultSet rs = stmt.executeQuery(q1);
+
+            if (rs.next()) {
+
+                studentId = rs.getInt("STUDENT_ID");
+                result = true;
+            }
+
+            rs.close();
+            stmt.close();
+            con.close();
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+
 
     @Override
     public String toString() {
+
         return "Student{" +
                 "studentId=" + studentId +
                 ", name='" + name + '\'' +

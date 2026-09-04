@@ -1,7 +1,7 @@
 package com.campusconnect.bean;
 
 public class College {
-    
+
     private int collegeId;
     private String collegeName;
     private String address;
@@ -30,6 +30,9 @@ public class College {
     }
 
     // Getters and Setters
+    public College() {
+    }
+
     public int getCollegeId() {
         return collegeId;
     }
