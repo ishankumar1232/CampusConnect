@@ -1,4 +1,5 @@
 package com.campusconnect.bean;
+
 import java.sql.*;
 import java.sql.Date;
 
@@ -127,25 +128,38 @@ public class Admission
     {
         this.approvedDate = approvedDate;
     }
+
+
     public boolean InsertMethod()
     {
         boolean x = false;
 
+        Connection con = null;
+        Statement stmt = null;
+        ResultSet rs = null;
+
         try
         {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
+            Class.forName(
+                "oracle.jdbc.driver.OracleDriver"
+            );
 
-            Connection con = DriverManager.getConnection(
+            con = DriverManager.getConnection(
                 "jdbc:oracle:thin:@localhost:1521:XE",
                 "CAMPUSCONNECT",
                 "campus123"
             );
 
-            Statement stmt = con.createStatement();
+            stmt = con.createStatement();
+
+
+            /* =========================
+               GENERATE NEW ADMISSION ID
+               ========================= */
 
             int newId = 1;
 
-            ResultSet rs = stmt.executeQuery(
+            rs = stmt.executeQuery(
                 "SELECT MAX(ADMISSION_ID) FROM ADMISSION"
             );
 
@@ -153,29 +167,50 @@ public class Admission
             {
                 if(rs.getObject(1) != null)
                 {
-                    newId = rs.getInt(1) + 1;
+                    newId =
+                        rs.getInt(1) + 1;
                 }
             }
+
+
+            /*
+             * IMPORTANT:
+             * Store generated ID inside bean
+             */
+
+            this.admissionId = newId;
+
+
+            /* =========================
+               INSERT ADMISSION
+               ========================= */
 
             String q =
                 "INSERT INTO ADMISSION " +
                 "(ADMISSION_ID, STUDENT_ID, COLLEGE_ID, " +
-                "APPLICANT_NAME, APPLICANT_EMAIL, APPLICANT_PHONE, " +
-                "APPLICANT_COURSE_ID, ADMISSION_DATE, STATUS) " +
+                "APPLICANT_NAME, APPLICANT_EMAIL, " +
+                "APPLICANT_PHONE, APPLICANT_COURSE_ID, " +
+                "ADMISSION_DATE, STATUS) " +
+
                 "VALUES (" +
                 newId + ", NULL, " +
                 collegeId + ", '" +
                 applicantName + "', '" +
                 applicantEmail + "', '" +
                 applicantPhone + "', " +
-                applicantCourseId + ", SYSDATE, 'PENDING')";
+                applicantCourseId +
+                ", SYSDATE, 'PENDING')";
 
-            int i = stmt.executeUpdate(q);
+
+            int i =
+                stmt.executeUpdate(q);
+
 
             if(i > 0)
             {
                 x = true;
             }
+
 
             rs.close();
             stmt.close();
