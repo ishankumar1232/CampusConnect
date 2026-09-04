@@ -11,6 +11,25 @@ public class College {
     private String phone;
     private String status;
 
+    // Default Constructor
+    public College() {
+    }
+
+    // Parameterized Constructor
+    public College(String collegeName, String address, 
+                   String city, String state, 
+                   String email, String phone, 
+                   String status) {
+        this.collegeName = collegeName;
+        this.address = address;
+        this.city = city;
+        this.state = state;
+        this.email = email;
+        this.phone = phone;
+        this.status = status;
+    }
+
+    // Getters and Setters
     public College() {
     }
 
@@ -76,5 +95,16 @@ public class College {
 
     public void setStatus(String status) {
         this.status = status;
+    }
+
+    @Override
+    public String toString() {
+        return "College{" +
+                "collegeId=" + collegeId +
+                ", collegeName='" + collegeName + '\'' +
+                ", city='" + city + '\'' +
+                ", state='" + state + '\'' +
+                ", status='" + status + '\'' +
+                '}';
     }
 }

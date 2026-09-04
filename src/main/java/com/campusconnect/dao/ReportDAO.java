@@ -8,25 +8,24 @@ import com.campusconnect.util.DBConnection;
 
 public class ReportDAO
 {
-
     public int getCount(String sql)
     {
-        int count=0;
+        int count = 0;
 
         try
         {
-            Connection con=
-            DBConnection.getConnection();
+            Connection con =
+                DBConnection.getConnection();
 
-            PreparedStatement ps=
-            con.prepareStatement(sql);
+            PreparedStatement ps =
+                con.prepareStatement(sql);
 
-            ResultSet rs=
-            ps.executeQuery();
+            ResultSet rs =
+                ps.executeQuery();
 
             if(rs.next())
             {
-                count=rs.getInt(1);
+                count = rs.getInt(1);
             }
 
             rs.close();
@@ -41,5 +40,4 @@ public class ReportDAO
 
         return count;
     }
-
 }

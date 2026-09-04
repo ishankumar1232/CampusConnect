@@ -46,11 +46,13 @@ public class StudentDAO {
             con.close();
 
         } catch (Exception e) {
+
             e.printStackTrace();
         }
 
         return list;
     }
+
 
     // Activate Student
     public boolean activateStudent(int id) {
@@ -76,11 +78,13 @@ public class StudentDAO {
             con.close();
 
         } catch (Exception e) {
+
             e.printStackTrace();
         }
 
         return status;
     }
+
 
     // Deactivate Student
     public boolean deactivateStudent(int id) {
@@ -106,11 +110,13 @@ public class StudentDAO {
             con.close();
 
         } catch (Exception e) {
+
             e.printStackTrace();
         }
 
         return status;
     }
+
 
     // Get Student By ID
     public Student getStudentById(int id) {
@@ -149,9 +155,11 @@ public class StudentDAO {
             con.close();
 
         } catch (Exception e) {
+
             e.printStackTrace();
         }
 
         return s;
     }
+
 }

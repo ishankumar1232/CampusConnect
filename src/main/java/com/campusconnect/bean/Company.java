@@ -1,152 +1,71 @@
 package com.campusconnect.bean;
 
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.Timestamp;
 
 public class Company {
-
     private int companyId;
     private String companyName;
+    private String industry;
+    private String website;
     private String email;
     private String phone;
-    private String password;
     private String address;
-    private String website;
+    private String description;
+    private String contactPerson;
+    private int totalEmployees;
+    private String headquarter;
     private String status;
-	public int getCompanyId() {
-		return companyId;
-	}
-	public void setCompanyId(int companyId) {
-		this.companyId = companyId;
-	}
-	public String getCompanyName() {
-		return companyName;
-	}
-	public void setCompanyName(String companyName) {
-		this.companyName = companyName;
-	}
-	public String getEmail() {
-		return email;
-	}
-	public void setEmail(String email) {
-		this.email = email;
-	}
-	public String getPhone() {
-		return phone;
-	}
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
-	public String getPassword() {
-		return password;
-	}
-	public void setPassword(String password) {
-		this.password = password;
-	}
-	public String getAddress() {
-		return address;
-	}
-	public void setAddress(String address) {
-		this.address = address;
-	}
-	public String getWebsite() {
-		return website;
-	}
-	public void setWebsite(String website) {
-		this.website = website;
-	}
-	public String getStatus() {
-		return status;
-	}
-	public void setStatus(String status) {
-		this.status = status;
-	}
+    private Timestamp createdDate;
 
-	
-	public boolean SelectMethod()
-	{
-	    try
-	    {
-	        Class.forName("oracle.jdbc.driver.OracleDriver");
+    // Default Constructor
+    public Company() {}
 
-	        Connection con = DriverManager.getConnection(
-	            "jdbc:oracle:thin:@localhost:1521:XE",
-	            "CAMPUSCONNECT",
-	            "campus123"
-	        );
+    // Getters and Setters
+    public int getCompanyId() { return companyId; }
+    public void setCompanyId(int companyId) { this.companyId = companyId; }
 
-	        Statement stmt = con.createStatement();
+    public String getCompanyName() { return companyName; }
+    public void setCompanyName(String companyName) { this.companyName = companyName; }
 
-	        String q1 = "SELECT * FROM COMPANY " +
-	                    "WHERE COMPANY_ID = " + companyId;
+    public String getIndustry() { return industry; }
+    public void setIndustry(String industry) { this.industry = industry; }
 
-	        ResultSet rs = stmt.executeQuery(q1);
+    public String getWebsite() { return website; }
+    public void setWebsite(String website) { this.website = website; }
 
-	        if(rs.next())
-	        {
-	            companyName = rs.getString("COMPANY_NAME");
-	            email = rs.getString("EMAIL");
-	            phone = rs.getString("PHONE");
-	            address = rs.getString("ADDRESS");
-	            website = rs.getString("WEBSITE");
-	            status = rs.getString("STATUS");
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-	            con.close();
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
 
-	            return true;
-	        }
-	        else
-	        {
-	            con.close();
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-	            return false;
-	        }
-	    }
-	    catch(Exception e)
-	    {
-	        return false;
-	    }
-	}
-	
-	public boolean UpdateMethod()
-	{
-	    try
-	    {
-	        Class.forName("oracle.jdbc.driver.OracleDriver");
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
 
-	        Connection con = DriverManager.getConnection(
-	            "jdbc:oracle:thin:@localhost:1521:XE",
-	            "CAMPUSCONNECT",
-	            "campus123"
-	        );
+    public String getContactPerson() { return contactPerson; }
+    public void setContactPerson(String contactPerson) { this.contactPerson = contactPerson; }
 
-	        Statement stmt = con.createStatement();
+    public int getTotalEmployees() { return totalEmployees; }
+    public void setTotalEmployees(int totalEmployees) { this.totalEmployees = totalEmployees; }
 
-	        String q1 = "UPDATE COMPANY SET " +
-	                    "COMPANY_NAME = '" + companyName + "', " +
-	                    "PHONE = '" + phone + "', " +
-	                    "ADDRESS = '" + address + "', " +
-	                    "WEBSITE = '" + website + "' " +
-	                    "WHERE COMPANY_ID = " + companyId;
+    public String getHeadquarter() { return headquarter; }
+    public void setHeadquarter(String headquarter) { this.headquarter = headquarter; }
 
-	        int x = stmt.executeUpdate(q1);
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-	        con.close();
+    public Timestamp getCreatedDate() { return createdDate; }
+    public void setCreatedDate(Timestamp createdDate) { this.createdDate = createdDate; }
 
-	        if(x > 0)
-	        {
-	            return true;
-	        }
-	        else
-	        {
-	            return false;
-	        }
-	    }
-	    catch(Exception e)
-	    {
-	        return false;
-	    }
-	}
+    @Override
+    public String toString() {
+        return "Company{" +
+                "companyId=" + companyId +
+                ", companyName='" + companyName + '\'' +
+                ", industry='" + industry + '\'' +
+                '}';
+    }
 }

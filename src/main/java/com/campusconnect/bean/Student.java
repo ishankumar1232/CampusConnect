@@ -5,21 +5,46 @@ import java.sql.*;
 public class Student {
 
     private int studentId;
+
     private int collegeId;
+    private int departmentId;
     private int courseId;
+    private int year;
+    private double cgpa;
 
     private String name;
     private String email;
     private String phone;
     private String password;
+
     private Date dob;
     private String gender;
     private String address;
     private Date admissionDate;
+
     private String status;
 
     public Student() {
     }
+
+    // Parameterized Constructor
+    public Student(String name, String email, String password, String phone,
+                   int collegeId, int departmentId, int courseId,
+                   int year, double cgpa, String status) {
+
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.phone = phone;
+        this.collegeId = collegeId;
+        this.departmentId = departmentId;
+        this.courseId = courseId;
+        this.year = year;
+        this.cgpa = cgpa;
+        this.status = status;
+    }
+
+    // Getters and Setters
 
     public int getStudentId() {
         return studentId;
@@ -37,12 +62,36 @@ public class Student {
         this.collegeId = collegeId;
     }
 
+    public int getDepartmentId() {
+        return departmentId;
+    }
+
+    public void setDepartmentId(int departmentId) {
+        this.departmentId = departmentId;
+    }
+
     public int getCourseId() {
         return courseId;
     }
 
     public void setCourseId(int courseId) {
         this.courseId = courseId;
+    }
+
+    public int getYear() {
+        return year;
+    }
+
+    public void setYear(int year) {
+        this.year = year;
+    }
+
+    public double getCgpa() {
+        return cgpa;
+    }
+
+    public void setCgpa(double cgpa) {
+        this.cgpa = cgpa;
     }
 
     public String getName() {
@@ -120,10 +169,10 @@ public class Student {
 
     // Insert Student Record
 
-    public boolean InsertMethod()
-    {
-        try
-        {
+    public boolean InsertMethod() {
+
+        try {
+
             Class.forName("oracle.jdbc.driver.OracleDriver");
 
             Connection con = DriverManager.getConnection(
@@ -134,7 +183,6 @@ public class Student {
 
             Statement stmt = con.createStatement();
 
-
             // Generate Student ID
 
             String qid =
@@ -144,13 +192,11 @@ public class Student {
 
             int id = 1;
 
-            if(rs.next())
-            {
+            if (rs.next()) {
                 id = rs.getInt(1);
             }
 
             rs.close();
-
 
             // Insert Query
 
@@ -173,33 +219,32 @@ public class Student {
                 + "SYSDATE, "
                 + "'ACTIVE')";
 
-
             int x = stmt.executeUpdate(q1);
 
-
-            if(x > 0)
-            {
+            if (x > 0) {
                 con.close();
                 return true;
-            }
-            else
-            {
+            } else {
                 con.close();
                 return false;
             }
-        }
-        catch(Exception e)
-        {
+
+        } catch (Exception e) {
+
             e.printStackTrace();
             return false;
         }
     }
-    public boolean LoginMethod()
-    {
+
+
+    // Student Login
+
+    public boolean LoginMethod() {
+
         boolean result = false;
 
-        try
-        {
+        try {
+
             Class.forName("oracle.jdbc.driver.OracleDriver");
 
             Connection con = DriverManager.getConnection(
@@ -210,15 +255,16 @@ public class Student {
 
             Statement stmt = con.createStatement();
 
-            String q1 = "SELECT STUDENT_ID FROM STUDENT "
-                      + "WHERE EMAIL='" + email + "' "
-                      + "AND PASSWORD='" + password + "' "
-                      + "AND STATUS='ACTIVE'";
+            String q1 =
+                "SELECT STUDENT_ID FROM STUDENT "
+                + "WHERE EMAIL='" + email + "' "
+                + "AND PASSWORD='" + password + "' "
+                + "AND STATUS='ACTIVE'";
 
             ResultSet rs = stmt.executeQuery(q1);
 
-            if(rs.next())
-            {
+            if (rs.next()) {
+
                 studentId = rs.getInt("STUDENT_ID");
                 result = true;
             }
@@ -226,12 +272,23 @@ public class Student {
             rs.close();
             stmt.close();
             con.close();
-        }
-        catch(Exception e)
-        {
+
+        } catch (Exception e) {
+
             e.printStackTrace();
         }
 
         return result;
+    }
+
+
+    @Override
+    public String toString() {
+
+        return "Student{" +
+                "studentId=" + studentId +
+                ", name='" + name + '\'' +
+                ", email='" + email + '\'' +
+                '}';
     }
 }
