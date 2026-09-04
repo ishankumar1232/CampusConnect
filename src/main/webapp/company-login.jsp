@@ -1,156 +1,232 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-<title>Company Login</title>
+    <title>Company Login | CampusConnect</title>
 
-<script>
+    <link rel="stylesheet"
+          href="css/company-login.css">
 
-function validateForm()
-{
-    var email = document.forms["myForm"]["email"].value;
-    var password = document.forms["myForm"]["password"].value;
+    <script>
 
+        function validateForm()
+        {
+            var email =
+                document.forms["myForm"]["email"].value;
 
-    // Check if all fields are blank
-
-    if ((email=="" || email==null) &&
-        (password=="" || password==null))
-    {
-        alert("Email and Password are required");
-
-        document.forms["myForm"]["email"].focus();
-
-        return false;
-    }
+            var password =
+                document.forms["myForm"]["password"].value;
 
 
-    // Email
+            /* Both fields empty */
 
-    if(email=="" || email==null)
-    {
-        alert("Email is required");
+            if ((email == "" || email == null) &&
+                (password == "" || password == null))
+            {
+                alert("Email and Password are required");
 
-        document.forms["myForm"]["email"].focus();
+                document.forms["myForm"]["email"].focus();
 
-        return false;
-    }
-
-
-    // Password
-
-    if(password=="" || password==null)
-    {
-        alert("Password is required");
-
-        document.forms["myForm"]["password"].focus();
-
-        return false;
-    }
-    
-    if(password.length<6)
-    {
-        alert("Password must be at least 6 characters");
-        document.forms["myForm"]["password"].focus();
-        return false;
-    }
+                return false;
+            }
 
 
-    return true;
-}
+            /* Email validation */
 
-</script>
+            if (email == "" || email == null)
+            {
+                alert("Email is required");
+
+                document.forms["myForm"]["email"].focus();
+
+                return false;
+            }
+
+
+            /* Password validation */
+
+            if (password == "" || password == null)
+            {
+                alert("Password is required");
+
+                document.forms["myForm"]["password"].focus();
+
+                return false;
+            }
+
+
+            /* Password length */
+
+            if (password.length < 6)
+            {
+                alert("Password must be at least 6 characters");
+
+                document.forms["myForm"]["password"].focus();
+
+                return false;
+            }
+
+
+            return true;
+        }
+
+    </script>
 
 </head>
 
 
 <body>
 
-<h2>Company Login</h2>
 
-<p><span style="color:red;">*</span> Indicates Mandatory Fields</p>
-
+    <div class="login-container">
 
 
-<form name="myForm"
-      method="post"
-      action="CompanyLoginServlet"
-      onsubmit="return validateForm();">
+        <!-- LEFT SIDE -->
+
+        <div class="login-brand">
+
+            <div class="logo">
+                CampusConnect
+            </div>
 
 
-<table border="0" cellpadding="8">
+            <div class="brand-content">
+
+                <h1>
+                    Company<br>
+                    Portal
+                </h1>
+
+                <p>
+                    Manage recruitment and connect
+                    with talented students.
+                </p>
+
+            </div>
+
+        </div>
 
 
-<tr>
+        <!-- RIGHT SIDE -->
 
-<td>
-Email ID
-<span style="color:red">*</span>
-</td>
-
-<td>
-
-<input type="email"
-       name="email">
-
-</td>
-
-</tr>
+        <div class="login-form-section">
 
 
-<tr>
-
-<td>
-Password
-<span style="color:red">*</span>
-</td>
-
-<td>
-
-<input type="password"
-       name="password">
-
-</td>
-
-</tr>
+            <div class="login-box">
 
 
-<tr>
-
-<td>
-
-<input type="submit"
-       value="Login">
-
-</td>
-
-<td>
-
-<input type="reset"
-       value="Reset">
-
-</td>
-
-</tr>
+                <h2>
+                    Welcome back
+                </h2>
 
 
-</table>
-
-</form>
-
-
-<br>
+                <p class="subtitle">
+                    Sign in to your company account
+                </p>
 
 
-<a href="company-registration.jsp">
-New Company? Register Here
-</a>
+                <form name="myForm"
+                      method="post"
+                      action="CompanyLoginServlet"
+                      onsubmit="return validateForm();">
+
+
+                    <!-- EMAIL -->
+
+                    <div class="form-group">
+
+                        <label for="email">
+
+                            Email ID
+
+                            <span class="required">*</span>
+
+                        </label>
+
+
+                        <input type="email"
+                               id="email"
+                               name="email"
+                               autocomplete="email">
+
+                    </div>
+
+
+                    <!-- PASSWORD -->
+
+                    <div class="form-group">
+
+                        <label for="password">
+
+                            Password
+
+                            <span class="required">*</span>
+
+                        </label>
+
+
+                        <input type="password"
+                               id="password"
+                               name="password"
+                               autocomplete="current-password">
+
+                    </div>
+
+
+                    <!-- LOGIN -->
+
+                    <button type="submit"
+                            class="login-button">
+
+                        Login
+
+                    </button>
+
+
+                    <!-- RESET -->
+
+                    <div class="form-actions">
+
+                        <button type="reset"
+                                class="reset-button">
+
+                            Reset
+
+                        </button>
+
+                    </div>
+
+
+                </form>
+
+
+                <!-- REGISTER -->
+
+                <div class="register-link">
+
+                    New Company?
+
+                    <a href="company-registration.jsp">
+                        Register Here
+                    </a>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+    </div>
 
 
 </body>

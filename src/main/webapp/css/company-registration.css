@@ -1,0 +1,448 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+
+body {
+    font-family: Arial, Helvetica, sans-serif;
+    background: #f4f7fb;
+    color: #102a4c;
+}
+
+
+/* ================================
+   MAIN PAGE
+================================ */
+
+.registration-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 35px;
+}
+
+
+/* ================================
+   LEFT BRAND SECTION
+================================ */
+
+.registration-brand {
+    width: 40%;
+    max-width: 480px;
+    min-height: 650px;
+
+    background: #17457f;
+    color: white;
+
+    padding: 55px 52px;
+
+    border-radius: 18px 0 0 18px;
+
+    display: flex;
+    flex-direction: column;
+}
+
+
+.brand-logo {
+    font-size: 25px;
+    font-weight: bold;
+}
+
+
+.brand-content {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+
+.brand-label {
+    display: inline-block;
+
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1.2px;
+
+    color: #8fc1ff;
+
+    margin-bottom: 18px;
+}
+
+
+.brand-content h1 {
+    font-size: 44px;
+    line-height: 1.12;
+
+    margin-bottom: 22px;
+}
+
+
+.brand-content p {
+    max-width: 350px;
+
+    font-size: 16px;
+    line-height: 1.7;
+
+    color: #dceaff;
+}
+
+
+/* ================================
+   RIGHT SECTION
+================================ */
+
+.registration-section {
+    width: 60%;
+    max-width: 720px;
+    min-height: 650px;
+
+    background: white;
+
+    padding: 45px 55px;
+
+    border-radius: 0 18px 18px 0;
+
+    box-shadow: 0 18px 45px rgba(25, 55, 90, 0.10);
+
+    overflow-y: auto;
+}
+
+
+.registration-box {
+    width: 100%;
+}
+
+
+.registration-box h2 {
+    font-size: 30px;
+    color: #102a4c;
+
+    margin-bottom: 8px;
+}
+
+
+.subtitle {
+    color: #6b7d93;
+
+    font-size: 15px;
+    line-height: 1.5;
+
+    margin-bottom: 18px;
+}
+
+
+.mandatory-note {
+    font-size: 13px;
+    color: #718096;
+
+    margin-bottom: 22px;
+}
+
+
+.mandatory-note span,
+.form-group label span {
+    color: #d93025;
+}
+
+
+/* ================================
+   FORM SECTIONS
+================================ */
+
+.form-section {
+    border-top: 1px solid #e5ebf2;
+
+    padding-top: 22px;
+    margin-top: 20px;
+}
+
+
+.form-section h3 {
+    font-size: 16px;
+    color: #183d69;
+
+    margin-bottom: 18px;
+}
+
+
+.form-row {
+    display: flex;
+    gap: 18px;
+}
+
+
+.form-group {
+    flex: 1;
+    margin-bottom: 17px;
+}
+
+
+.full-width {
+    width: 100%;
+}
+
+
+.form-group label {
+    display: block;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    color: #183d69;
+
+    margin-bottom: 7px;
+}
+
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+
+    border: 1px solid #d5dfeb;
+    border-radius: 8px;
+
+    padding: 12px 13px;
+
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 14px;
+
+    color: #183d69;
+    background: #fff;
+
+    outline: none;
+
+    transition: border-color 0.2s,
+                box-shadow 0.2s;
+}
+
+
+.form-group input {
+    height: 44px;
+}
+
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 85px;
+}
+
+
+.form-group input:focus,
+.form-group textarea:focus {
+    border-color: #2f73d9;
+
+    box-shadow: 0 0 0 3px rgba(47, 115, 217, 0.10);
+}
+
+
+.form-group input::placeholder,
+.form-group textarea::placeholder {
+    color: #9aa9ba;
+}
+
+
+.status-field {
+    max-width: 300px;
+}
+
+
+.status-field input {
+    background: #f5f8fc;
+    color: #60748b;
+}
+
+
+/* ================================
+   BUTTONS
+================================ */
+
+.form-buttons {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-top: 10px;
+}
+
+
+.submit-button {
+    flex: 1;
+
+    height: 46px;
+
+    border: none;
+    border-radius: 8px;
+
+    background: #17457f;
+    color: white;
+
+    font-size: 14px;
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: background 0.2s,
+                transform 0.2s;
+}
+
+
+.submit-button:hover {
+    background: #123966;
+}
+
+
+.submit-button:active {
+    transform: translateY(1px);
+}
+
+
+.reset-button {
+    width: 95px;
+    height: 46px;
+
+    border: 1px solid #d5dfeb;
+    border-radius: 8px;
+
+    background: white;
+    color: #63778e;
+
+    font-size: 14px;
+
+    cursor: pointer;
+}
+
+
+.reset-button:hover {
+    background: #f5f8fc;
+}
+
+
+/* ================================
+   LOGIN LINK
+================================ */
+
+.login-link {
+    text-align: center;
+
+    border-top: 1px solid #e8edf3;
+
+    margin-top: 25px;
+    padding-top: 20px;
+
+    color: #718096;
+
+    font-size: 14px;
+}
+
+
+.login-link a {
+    color: #17457f;
+
+    font-weight: bold;
+
+    text-decoration: none;
+}
+
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+
+/* ================================
+   RESPONSIVE
+================================ */
+
+@media (max-width: 900px) {
+
+    .registration-page {
+        padding: 20px;
+    }
+
+    .registration-brand {
+        width: 38%;
+        padding: 40px 30px;
+    }
+
+    .registration-section {
+        width: 62%;
+        padding: 35px 30px;
+    }
+
+    .brand-content h1 {
+        font-size: 36px;
+    }
+
+}
+
+
+@media (max-width: 700px) {
+
+    .registration-page {
+        display: block;
+        padding: 15px;
+    }
+
+    .registration-brand {
+        width: 100%;
+        max-width: none;
+        min-height: auto;
+
+        padding: 35px 30px;
+
+        border-radius: 15px 15px 0 0;
+    }
+
+    .brand-content {
+        margin-top: 45px;
+        margin-bottom: 10px;
+    }
+
+    .registration-section {
+        width: 100%;
+        max-width: none;
+        min-height: auto;
+
+        padding: 30px;
+
+        border-radius: 0 0 15px 15px;
+    }
+
+    .form-row {
+        flex-direction: column;
+        gap: 0;
+    }
+
+}
+
+
+@media (max-width: 450px) {
+
+    .registration-section {
+        padding: 25px 20px;
+    }
+
+    .registration-brand {
+        padding: 30px 25px;
+    }
+
+    .brand-content h1 {
+        font-size: 32px;
+    }
+
+    .registration-box h2 {
+        font-size: 26px;
+    }
+
+    .form-buttons {
+        flex-direction: column;
+    }
+
+    .submit-button,
+    .reset-button {
+        width: 100%;
+    }
+
+}
