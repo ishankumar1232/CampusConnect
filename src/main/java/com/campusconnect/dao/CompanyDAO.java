@@ -8,13 +8,9 @@ import com.campusconnect.util.DBConnection;
 
 public class CompanyDAO {
 
-    // =====================================================
-    // KRISHNA METHOD - COMPANY REGISTRATION
-    // =====================================================
+    // krishna METHOD
     public boolean insertCompany(Company c) {
-
         try {
-
             Connection con = DBConnection.getConnection();
             Statement stmt = con.createStatement();
 
@@ -30,29 +26,21 @@ public class CompanyDAO {
                         c.getStatus() + "')";
 
             int x = stmt.executeUpdate(q1);
-
             con.close();
 
             return x > 0;
 
         } catch (Exception e) {
-
             e.printStackTrace();
-
             return false;
         }
     }
 
-
-    // =====================================================
-    // KRISHNA METHOD - COMPANY LOGIN
-    // =====================================================
+    // krishna METHOD
     public Company loginCompany(String email, String password) {
-
         Company c = null;
 
         try {
-
             Connection con = DBConnection.getConnection();
             Statement stmt = con.createStatement();
 
@@ -63,7 +51,6 @@ public class CompanyDAO {
             ResultSet rs = stmt.executeQuery(q1);
 
             if (rs.next()) {
-
                 c = new Company();
 
                 c.setCompanyId(rs.getInt("COMPANY_ID"));
@@ -79,33 +66,24 @@ public class CompanyDAO {
             con.close();
 
         } catch (Exception e) {
-
             e.printStackTrace();
         }
 
         return c;
     }
 
-
-    // =====================================================
-    // SUPER ADMIN METHOD - GET ALL COMPANIES
-    // =====================================================
+    // SUPER ADMIN METHOD
     public ArrayList<Company> getAllCompanies() {
-
         ArrayList<Company> list = new ArrayList<>();
 
         try {
-
             Connection con = DBConnection.getConnection();
 
             String sql = "SELECT * FROM COMPANY";
-
             PreparedStatement ps = con.prepareStatement(sql);
-
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-
                 Company c = new Company();
 
                 c.setCompanyId(rs.getInt("COMPANY_ID"));
@@ -123,31 +101,21 @@ public class CompanyDAO {
             con.close();
 
         } catch (Exception e) {
-
             e.printStackTrace();
         }
 
         return list;
     }
 
-
-    // =====================================================
-    // SUPER ADMIN METHOD - APPROVE COMPANY
-    // =====================================================
+    // SUPER ADMIN METHOD
     public boolean approveCompany(int companyId) {
-
         boolean status = false;
 
         try {
-
             Connection con = DBConnection.getConnection();
 
-            String sql =
-                "UPDATE COMPANY SET STATUS='Approved' " +
-                "WHERE COMPANY_ID=?";
-
-            PreparedStatement ps =
-                con.prepareStatement(sql);
+            String sql = "UPDATE COMPANY SET STATUS='Approved' WHERE COMPANY_ID=?";
+            PreparedStatement ps = con.prepareStatement(sql);
 
             ps.setInt(1, companyId);
 
@@ -160,31 +128,21 @@ public class CompanyDAO {
             con.close();
 
         } catch (Exception e) {
-
             e.printStackTrace();
         }
 
         return status;
     }
 
-
-    // =====================================================
-    // SUPER ADMIN METHOD - REJECT COMPANY
-    // =====================================================
+    // SUPER ADMIN METHOD
     public boolean rejectCompany(int companyId) {
-
         boolean status = false;
 
         try {
-
             Connection con = DBConnection.getConnection();
 
-            String sql =
-                "UPDATE COMPANY SET STATUS='Rejected' " +
-                "WHERE COMPANY_ID=?";
-
-            PreparedStatement ps =
-                con.prepareStatement(sql);
+            String sql = "UPDATE COMPANY SET STATUS='Rejected' WHERE COMPANY_ID=?";
+            PreparedStatement ps = con.prepareStatement(sql);
 
             ps.setInt(1, companyId);
 
@@ -197,11 +155,9 @@ public class CompanyDAO {
             con.close();
 
         } catch (Exception e) {
-
             e.printStackTrace();
         }
 
         return status;
     }
-
 }
