@@ -4,28 +4,26 @@ import java.io.*;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.WebServlet;
 
 import com.campusconnect.bean.StudentProject;
 
- 
+
 public class StudentProjectServlet extends HttpServlet
 {
-    public void doPost(HttpServletRequest req, HttpServletResponse res)
-            throws IOException, ServletException
+    public void doPost(HttpServletRequest req,
+                       HttpServletResponse res)
+                       throws IOException, ServletException
     {
         res.setContentType("text/html");
 
         PrintWriter pw = res.getWriter();
 
-        String projectName = req.getParameter("projectName");
-        String description = req.getParameter("description");
-        String technologies = req.getParameter("technologies");
-        String projectUrl = req.getParameter("projectUrl");
-
         try
         {
-            HttpSession session = req.getSession(false);
+            // ================= LOGIN CHECK =================
+
+            HttpSession session =
+                req.getSession(false);
 
             if(session == null ||
                session.getAttribute("studentId") == null)
@@ -34,61 +32,196 @@ public class StudentProjectServlet extends HttpServlet
                 return;
             }
 
+
             int studentId =
                 (Integer)session.getAttribute("studentId");
+
+
+            String action =
+                req.getParameter("action");
 
 
             StudentProject project =
                 new StudentProject();
 
             project.setStudentId(studentId);
-            project.setProjectName(projectName);
-            project.setDescription(description);
-            project.setTechnologies(technologies);
-            project.setProjectUrl(projectUrl);
 
 
-            boolean x = project.InsertMethod();
+            // ================= DELETE =================
 
-
-            if(x)
+            if("delete".equals(action))
             {
-                pw.println("<html><body>");
+                String id =
+                    req.getParameter("projectId");
 
-                pw.println("<h2>Project Added Successfully</h2>");
+                int projectId =
+                    Integer.parseInt(id);
 
-                pw.println("<br>");
+                project.setProjectId(projectId);
 
-                pw.println("<a href='student_project.jsp'>");
-                pw.println("Add Another Project");
-                pw.println("</a>");
 
-                pw.println("<br><br>");
+                boolean x =
+                    project.DeleteMethod();
 
-                pw.println("<a href='student_dashboard.jsp'>");
-                pw.println("Back to Dashboard");
-                pw.println("</a>");
 
-                pw.println("</body></html>");
+                if(x)
+                {
+                    res.sendRedirect(
+                        "student_project_view.jsp"
+                    );
+                }
+                else
+                {
+                    pw.println("<html>");
+                    pw.println("<body>");
+
+                    pw.println(
+                        "<h2>Project Delete Failed</h2>"
+                    );
+
+                    pw.println(
+                        "<br><a href='student_project_view.jsp'>" +
+                        "Back" +
+                        "</a>"
+                    );
+
+                    pw.println("</body>");
+                    pw.println("</html>");
+                }
+
+                return;
             }
+
+
+            // ================= FORM DATA =================
+
+            String projectId =
+                req.getParameter("projectId");
+
+            String projectName =
+                req.getParameter("projectName");
+
+            String description =
+                req.getParameter("description");
+
+            String technologies =
+                req.getParameter("technologies");
+
+            String projectUrl =
+                req.getParameter("projectUrl");
+
+
+            project.setProjectName(
+                projectName
+            );
+
+            project.setDescription(
+                description
+            );
+
+            project.setTechnologies(
+                technologies
+            );
+
+            project.setProjectUrl(
+                projectUrl
+            );
+
+
+            // ================= UPDATE =================
+
+            if(projectId != null &&
+               !projectId.equals(""))
+            {
+                project.setProjectId(
+                    Integer.parseInt(projectId)
+                );
+
+
+                boolean x =
+                    project.UpdateMethod();
+
+
+                if(x)
+                {
+                    res.sendRedirect(
+                        "student_project_view.jsp"
+                    );
+                }
+                else
+                {
+                    pw.println("<html>");
+                    pw.println("<body>");
+
+                    pw.println(
+                        "<h2>Project Update Failed</h2>"
+                    );
+
+                    pw.println(
+                        "<br><a href='student_project_view.jsp'>" +
+                        "Back" +
+                        "</a>"
+                    );
+
+                    pw.println("</body>");
+                    pw.println("</html>");
+                }
+            }
+
+
+            // ================= ADD =================
+
             else
             {
-                pw.println("<html><body>");
+                boolean x =
+                    project.InsertMethod();
 
-                pw.println("<h2>Project Addition Failed</h2>");
 
-                pw.println("</body></html>");
+                if(x)
+                {
+                    res.sendRedirect(
+                        "student_project_view.jsp"
+                    );
+                }
+                else
+                {
+                    pw.println("<html>");
+                    pw.println("<body>");
+
+                    pw.println(
+                        "<h2>Project Addition Failed</h2>"
+                    );
+
+                    pw.println(
+                        "<br><a href='student_project.jsp'>" +
+                        "Back" +
+                        "</a>"
+                    );
+
+                    pw.println("</body>");
+                    pw.println("</html>");
+                }
             }
         }
         catch(Exception e)
         {
-            pw.println("<html><body>");
+            pw.println("<html>");
+            pw.println("<body>");
 
             pw.println("<h2>Error</h2>");
 
-            pw.println("<p>" + e + "</p>");
+            pw.println(
+                "<p>" + e.getMessage() + "</p>"
+            );
 
-            pw.println("</body></html>");
+            pw.println(
+                "<br><a href='student_dashboard.jsp'>" +
+                "Back to Dashboard" +
+                "</a>"
+            );
+
+            pw.println("</body>");
+            pw.println("</html>");
         }
     }
 }

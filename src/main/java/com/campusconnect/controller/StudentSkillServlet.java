@@ -4,25 +4,26 @@ import java.io.*;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.WebServlet;
 
 import com.campusconnect.bean.StudentSkill;
 
- 
+
 public class StudentSkillServlet extends HttpServlet
 {
-    public void doPost(HttpServletRequest req, HttpServletResponse res)
-            throws IOException, ServletException
+    public void doPost(HttpServletRequest req,
+                       HttpServletResponse res)
+                       throws IOException, ServletException
     {
         res.setContentType("text/html");
 
         PrintWriter pw = res.getWriter();
 
-        String skillName = req.getParameter("skillName");
-
         try
         {
-            HttpSession session = req.getSession(false);
+            // ================= LOGIN CHECK =================
+
+            HttpSession session =
+                req.getSession(false);
 
             if(session == null ||
                session.getAttribute("studentId") == null)
@@ -31,57 +32,173 @@ public class StudentSkillServlet extends HttpServlet
                 return;
             }
 
+
             int studentId =
                 (Integer)session.getAttribute("studentId");
 
 
-            StudentSkill skill = new StudentSkill();
+            String action =
+                req.getParameter("action");
+
+
+            StudentSkill skill =
+                new StudentSkill();
 
             skill.setStudentId(studentId);
+
+
+            // ================= DELETE =================
+
+            if("delete".equals(action))
+            {
+                String id =
+                    req.getParameter("skillId");
+
+                int skillId =
+                    Integer.parseInt(id);
+
+                skill.setSkillId(skillId);
+
+
+                boolean x =
+                    skill.DeleteMethod();
+
+
+                if(x)
+                {
+                    res.sendRedirect(
+                        "student_skill_view.jsp"
+                    );
+                }
+                else
+                {
+                    pw.println("<html>");
+                    pw.println("<body>");
+
+                    pw.println(
+                        "<h2>Skill Delete Failed</h2>"
+                    );
+
+                    pw.println(
+                        "<br><a href='student_skill_view.jsp'>" +
+                        "Back" +
+                        "</a>"
+                    );
+
+                    pw.println("</body>");
+                    pw.println("</html>");
+                }
+
+                return;
+            }
+
+
+            // ================= FORM DATA =================
+
+            String skillId =
+                req.getParameter("skillId");
+
+            String skillName =
+                req.getParameter("skillName");
+
+
             skill.setSkillName(skillName);
 
 
-            boolean x = skill.InsertMethod();
+            // ================= UPDATE =================
 
-
-            if(x)
+            if(skillId != null &&
+               !skillId.equals(""))
             {
-                pw.println("<html><body>");
+                skill.setSkillId(
+                    Integer.parseInt(skillId)
+                );
 
-                pw.println("<h2>Skill Added Successfully</h2>");
 
-                pw.println("<br>");
+                boolean x =
+                    skill.UpdateMethod();
 
-                pw.println("<a href='student_skill.jsp'>");
-                pw.println("Add Another Skill");
-                pw.println("</a>");
 
-                pw.println("<br><br>");
+                if(x)
+                {
+                    res.sendRedirect(
+                        "student_skill_view.jsp"
+                    );
+                }
+                else
+                {
+                    pw.println("<html>");
+                    pw.println("<body>");
 
-                pw.println("<a href='student_dashboard.jsp'>");
-                pw.println("Back to Dashboard");
-                pw.println("</a>");
+                    pw.println(
+                        "<h2>Skill Update Failed</h2>"
+                    );
 
-                pw.println("</body></html>");
+                    pw.println(
+                        "<br><a href='student_skill_view.jsp'>" +
+                        "Back" +
+                        "</a>"
+                    );
+
+                    pw.println("</body>");
+                    pw.println("</html>");
+                }
             }
+
+
+            // ================= ADD =================
+
             else
             {
-                pw.println("<html><body>");
+                boolean x =
+                    skill.InsertMethod();
 
-                pw.println("<h2>Skill Addition Failed</h2>");
 
-                pw.println("</body></html>");
+                if(x)
+                {
+                    res.sendRedirect(
+                        "student_skill_view.jsp"
+                    );
+                }
+                else
+                {
+                    pw.println("<html>");
+                    pw.println("<body>");
+
+                    pw.println(
+                        "<h2>Skill Addition Failed</h2>"
+                    );
+
+                    pw.println(
+                        "<br><a href='student_skill.jsp'>" +
+                        "Back" +
+                        "</a>"
+                    );
+
+                    pw.println("</body>");
+                    pw.println("</html>");
+                }
             }
         }
         catch(Exception e)
         {
-            pw.println("<html><body>");
+            pw.println("<html>");
+            pw.println("<body>");
 
             pw.println("<h2>Error</h2>");
 
-            pw.println("<p>" + e + "</p>");
+            pw.println(
+                "<p>" + e.getMessage() + "</p>"
+            );
 
-            pw.println("</body></html>");
+            pw.println(
+                "<br><a href='student_dashboard.jsp'>" +
+                "Back to Dashboard" +
+                "</a>"
+            );
+
+            pw.println("</body>");
+            pw.println("</html>");
         }
     }
 }
