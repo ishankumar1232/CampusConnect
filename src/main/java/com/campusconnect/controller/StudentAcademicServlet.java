@@ -4,29 +4,25 @@ import java.io.*;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
- 
+
 import com.campusconnect.bean.StudentAcademic;
 
- 
 public class StudentAcademicServlet extends HttpServlet
 {
-    public void doPost(HttpServletRequest req, HttpServletResponse res)
-            throws IOException, ServletException
+    public void doPost(HttpServletRequest req,
+                       HttpServletResponse res)
+                       throws IOException, ServletException
     {
         res.setContentType("text/html");
 
         PrintWriter pw = res.getWriter();
 
-        String qualification = req.getParameter("qualification");
-        String year = req.getParameter("year");
-        String percentage = req.getParameter("percentage");
-        String cgpa = req.getParameter("cgpa");
-        String backlogs = req.getParameter("backlogs");
-
-
         try
         {
-            HttpSession session = req.getSession(false);
+            HttpSession session =
+                req.getSession(false);
+
+            // ================= LOGIN CHECK =================
 
             if(session == null ||
                session.getAttribute("studentId") == null)
@@ -35,20 +31,87 @@ public class StudentAcademicServlet extends HttpServlet
                 return;
             }
 
-
             int studentId =
                 (Integer)session.getAttribute("studentId");
+
+
+            String action =
+                req.getParameter("action");
 
 
             StudentAcademic academic =
                 new StudentAcademic();
 
-
             academic.setStudentId(studentId);
 
-            academic.setQualification(qualification);
 
-            academic.setYear(Integer.parseInt(year));
+            // ================= DELETE =================
+
+            if("delete".equals(action))
+            {
+                String id =
+                    req.getParameter("academicId");
+
+                int academicId =
+                    Integer.parseInt(id);
+
+                academic.setAcademicId(academicId);
+
+                boolean x =
+                    academic.DeleteMethod();
+
+                if(x)
+                {
+                    res.sendRedirect(
+                        "student_academic_view.jsp"
+                    );
+                }
+                else
+                {
+                    pw.println("<html>");
+                    pw.println("<body>");
+                    pw.println("<h2>Delete Failed</h2>");
+                    pw.println(
+                        "<a href='student_academic_view.jsp'>" +
+                        "Back" +
+                        "</a>"
+                    );
+                    pw.println("</body>");
+                    pw.println("</html>");
+                }
+
+                return;
+            }
+
+
+            // ================= FORM DATA =================
+
+            String academicId =
+                req.getParameter("academicId");
+
+            String qualification =
+                req.getParameter("qualification");
+
+            String year =
+                req.getParameter("year");
+
+            String percentage =
+                req.getParameter("percentage");
+
+            String cgpa =
+                req.getParameter("cgpa");
+
+            String backlogs =
+                req.getParameter("backlogs");
+
+
+            academic.setQualification(
+                qualification
+            );
+
+            academic.setYear(
+                Integer.parseInt(year)
+            );
 
             academic.setPercentage(
                 Double.parseDouble(percentage)
@@ -63,41 +126,91 @@ public class StudentAcademicServlet extends HttpServlet
             );
 
 
-            boolean x = academic.InsertMethod();
+            // ================= UPDATE =================
 
-
-            if(x)
+            if(academicId != null &&
+               !academicId.equals(""))
             {
-                pw.println("<html><body>");
+                academic.setAcademicId(
+                    Integer.parseInt(academicId)
+                );
 
-                pw.println("<h2>Academic Details Added Successfully</h2>");
+                boolean x =
+                    academic.UpdateMethod();
 
-                pw.println("<br>");
-
-                pw.println("<a href='student_dashboard.jsp'>");
-                pw.println("Back to Dashboard");
-                pw.println("</a>");
-
-                pw.println("</body></html>");
+                if(x)
+                {
+                    res.sendRedirect(
+                        "student_academic_view.jsp"
+                    );
+                }
+                else
+                {
+                    pw.println("<html>");
+                    pw.println("<body>");
+                    pw.println(
+                        "<h2>Academic Details Update Failed</h2>"
+                    );
+                    pw.println(
+                        "<a href='student_academic_view.jsp'>" +
+                        "Back" +
+                        "</a>"
+                    );
+                    pw.println("</body>");
+                    pw.println("</html>");
+                }
             }
+
+
+            // ================= ADD =================
+
             else
             {
-                pw.println("<html><body>");
+                boolean x =
+                    academic.InsertMethod();
 
-                pw.println("<h2>Academic Details Failed</h2>");
-
-                pw.println("</body></html>");
+                if(x)
+                {
+                    res.sendRedirect(
+                        "student_academic_view.jsp"
+                    );
+                }
+                else
+                {
+                    pw.println("<html>");
+                    pw.println("<body>");
+                    pw.println(
+                        "<h2>Academic Details Add Failed</h2>"
+                    );
+                    pw.println(
+                        "<a href='student_academic.jsp'>" +
+                        "Back" +
+                        "</a>"
+                    );
+                    pw.println("</body>");
+                    pw.println("</html>");
+                }
             }
         }
         catch(Exception e)
         {
-            pw.println("<html><body>");
+            pw.println("<html>");
+            pw.println("<body>");
 
             pw.println("<h2>Error</h2>");
 
-            pw.println("<p>" + e + "</p>");
+            pw.println(
+                "<p>" + e.getMessage() + "</p>"
+            );
 
-            pw.println("</body></html>");
+            pw.println(
+                "<a href='student_dashboard.jsp'>" +
+                "Back to Dashboard" +
+                "</a>"
+            );
+
+            pw.println("</body>");
+            pw.println("</html>");
         }
     }
 }

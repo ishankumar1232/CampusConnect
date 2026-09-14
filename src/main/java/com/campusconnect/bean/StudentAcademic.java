@@ -12,11 +12,9 @@ public class StudentAcademic
     private double cgpa;
     private int backlogs;
 
-
     public StudentAcademic()
     {
     }
-
 
     public int getAcademicId()
     {
@@ -28,7 +26,6 @@ public class StudentAcademic
         this.academicId = academicId;
     }
 
-
     public int getStudentId()
     {
         return studentId;
@@ -38,7 +35,6 @@ public class StudentAcademic
     {
         this.studentId = studentId;
     }
-
 
     public String getQualification()
     {
@@ -50,7 +46,6 @@ public class StudentAcademic
         this.qualification = qualification;
     }
 
-
     public int getYear()
     {
         return year;
@@ -60,7 +55,6 @@ public class StudentAcademic
     {
         this.year = year;
     }
-
 
     public double getPercentage()
     {
@@ -72,7 +66,6 @@ public class StudentAcademic
         this.percentage = percentage;
     }
 
-
     public double getCgpa()
     {
         return cgpa;
@@ -82,7 +75,6 @@ public class StudentAcademic
     {
         this.cgpa = cgpa;
     }
-
 
     public int getBacklogs()
     {
@@ -95,93 +87,213 @@ public class StudentAcademic
     }
 
 
+    // ================= ADD =================
+
     public boolean InsertMethod()
     {
+        Connection con = null;
+        Statement stmt = null;
+
         try
         {
             Class.forName("oracle.jdbc.driver.OracleDriver");
 
-            Connection con = DriverManager.getConnection(
+            con = DriverManager.getConnection(
                 "jdbc:oracle:thin:@localhost:1521:XE",
                 "CAMPUSCONNECT",
                 "campus123"
             );
 
-            Statement stmt = con.createStatement();
-
+            stmt = con.createStatement();
 
             String qid =
-                "SELECT NVL(MAX(ACADEMIC_ID),0)+1 "
-                + "FROM STUDENT_ACADEMIC";
+                "SELECT NVL(MAX(ACADEMIC_ID),0)+1 " +
+                "FROM STUDENT_ACADEMIC";
 
             ResultSet rs = stmt.executeQuery(qid);
 
-            int id = 1;
-
             if(rs.next())
             {
-                id = rs.getInt(1);
+                academicId = rs.getInt(1);
             }
 
             rs.close();
 
-
             String q1 =
-                "INSERT INTO STUDENT_ACADEMIC "
-                + "(ACADEMIC_ID, STUDENT_ID, QUALIFICATION, YEAR, "
-                + "PERCENTAGE, CGPA, BACKLOGS) "
-                + "VALUES ("
-                + id + ", "
-                + studentId + ", '"
-                + qualification + "', "
-                + year + ", "
-                + percentage + ", "
-                + cgpa + ", "
-                + backlogs + ")";
-
+                "INSERT INTO STUDENT_ACADEMIC " +
+                "(ACADEMIC_ID, STUDENT_ID, QUALIFICATION, YEAR, " +
+                "PERCENTAGE, CGPA, BACKLOGS) VALUES (" +
+                academicId + "," +
+                studentId + ",'" +
+                qualification + "'," +
+                year + "," +
+                percentage + "," +
+                cgpa + "," +
+                backlogs + ")";
 
             int x = stmt.executeUpdate(q1);
 
-
-            if(x > 0)
-            {
-                con.close();
-                return true;
-            }
-            else
-            {
-                con.close();
-                return false;
-            }
+            return x > 0;
         }
         catch(Exception e)
         {
             e.printStackTrace();
             return false;
         }
+        finally
+        {
+            try
+            {
+                if(stmt != null)
+                    stmt.close();
+
+                if(con != null)
+                    con.close();
+            }
+            catch(Exception e)
+            {
+            }
+        }
     }
+
+
+    // ================= UPDATE =================
+
+    public boolean UpdateMethod()
+    {
+        Connection con = null;
+        PreparedStatement ps = null;
+
+        try
+        {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+
+            con = DriverManager.getConnection(
+                "jdbc:oracle:thin:@localhost:1521:XE",
+                "CAMPUSCONNECT",
+                "campus123"
+            );
+
+            String sql =
+                "UPDATE STUDENT_ACADEMIC SET " +
+                "QUALIFICATION=?, " +
+                "YEAR=?, " +
+                "PERCENTAGE=?, " +
+                "CGPA=?, " +
+                "BACKLOGS=? " +
+                "WHERE ACADEMIC_ID=? " +
+                "AND STUDENT_ID=?";
+
+            ps = con.prepareStatement(sql);
+
+            ps.setString(1, qualification);
+            ps.setInt(2, year);
+            ps.setDouble(3, percentage);
+            ps.setDouble(4, cgpa);
+            ps.setInt(5, backlogs);
+            ps.setInt(6, academicId);
+            ps.setInt(7, studentId);
+
+            int x = ps.executeUpdate();
+
+            return x > 0;
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        finally
+        {
+            try
+            {
+                if(ps != null)
+                    ps.close();
+
+                if(con != null)
+                    con.close();
+            }
+            catch(Exception e)
+            {
+            }
+        }
+    }
+
+
+    // ================= DELETE =================
+
+    public boolean DeleteMethod()
+    {
+        Connection con = null;
+        PreparedStatement ps = null;
+
+        try
+        {
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+
+            con = DriverManager.getConnection(
+                "jdbc:oracle:thin:@localhost:1521:XE",
+                "CAMPUSCONNECT",
+                "campus123"
+            );
+
+            String sql =
+                "DELETE FROM STUDENT_ACADEMIC " +
+                "WHERE ACADEMIC_ID=? " +
+                "AND STUDENT_ID=?";
+
+            ps = con.prepareStatement(sql);
+
+            ps.setInt(1, academicId);
+            ps.setInt(2, studentId);
+
+            int x = ps.executeUpdate();
+
+            return x > 0;
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        finally
+        {
+            try
+            {
+                if(ps != null)
+                    ps.close();
+
+                if(con != null)
+                    con.close();
+            }
+            catch(Exception e)
+            {
+            }
+        }
+    }
+
+
+    // ================= VIEW =================
+
     public ResultSet ViewMethod(Connection con)
     {
-        ResultSet rs = null;
-
         try
         {
             Statement stmt = con.createStatement();
 
             String q1 =
-                "SELECT ACADEMIC_ID, QUALIFICATION, YEAR, "
-              + "PERCENTAGE, CGPA, BACKLOGS "
-              + "FROM STUDENT_ACADEMIC "
-              + "WHERE STUDENT_ID = " + studentId
-              + " ORDER BY YEAR DESC";
+                "SELECT ACADEMIC_ID, QUALIFICATION, YEAR, " +
+                "PERCENTAGE, CGPA, BACKLOGS " +
+                "FROM STUDENT_ACADEMIC " +
+                "WHERE STUDENT_ID = " + studentId +
+                " ORDER BY YEAR DESC";
 
-            rs = stmt.executeQuery(q1);
+            return stmt.executeQuery(q1);
         }
         catch(Exception e)
         {
             e.printStackTrace();
+            return null;
         }
-
-        return rs;
     }
 }

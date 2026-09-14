@@ -1,14 +1,17 @@
+<%@ page import="java.sql.*" %>
+
 <!DOCTYPE html>
-<html lang="en">
+
+<html>
 
 <head>
 
-<meta charset="UTF-8">
+    <meta charset="UTF-8">
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
 
-<title>Academic Details</title>
+    <title>Academic Details</title>
 
 
 <script>
@@ -31,37 +34,34 @@ function validateForm()
         document.forms["academicForm"]["backlogs"].value;
 
 
-    /* Qualification */
-
-    if(qualification=="" || qualification==null)
+    if(qualification == "" || qualification == null)
     {
         alert("Qualification is required");
 
-        document.forms["academicForm"]["qualification"].focus();
+        document.forms["academicForm"]
+        ["qualification"].focus();
 
         return false;
     }
 
 
-    /* Year */
-
-    if(year=="" || year==null)
+    if(year == "" || year == null)
     {
         alert("Year is required");
 
-        document.forms["academicForm"]["year"].focus();
+        document.forms["academicForm"]
+        ["year"].focus();
 
         return false;
     }
 
 
-    /* Percentage */
-
-    if(percentage=="" || percentage==null)
+    if(percentage == "" || percentage == null)
     {
         alert("Percentage is required");
 
-        document.forms["academicForm"]["percentage"].focus();
+        document.forms["academicForm"]
+        ["percentage"].focus();
 
         return false;
     }
@@ -71,19 +71,19 @@ function validateForm()
     {
         alert("Percentage must be between 0 and 100");
 
-        document.forms["academicForm"]["percentage"].focus();
+        document.forms["academicForm"]
+        ["percentage"].focus();
 
         return false;
     }
 
 
-    /* CGPA */
-
-    if(cgpa=="" || cgpa==null)
+    if(cgpa == "" || cgpa == null)
     {
         alert("CGPA is required");
 
-        document.forms["academicForm"]["cgpa"].focus();
+        document.forms["academicForm"]
+        ["cgpa"].focus();
 
         return false;
     }
@@ -93,19 +93,19 @@ function validateForm()
     {
         alert("CGPA must be between 0 and 10");
 
-        document.forms["academicForm"]["cgpa"].focus();
+        document.forms["academicForm"]
+        ["cgpa"].focus();
 
         return false;
     }
 
 
-    /* Backlogs */
-
-    if(backlogs=="" || backlogs==null)
+    if(backlogs == "" || backlogs == null)
     {
         alert("Backlogs is required");
 
-        document.forms["academicForm"]["backlogs"].focus();
+        document.forms["academicForm"]
+        ["backlogs"].focus();
 
         return false;
     }
@@ -115,7 +115,8 @@ function validateForm()
     {
         alert("Backlogs cannot be negative");
 
-        document.forms["academicForm"]["backlogs"].focus();
+        document.forms["academicForm"]
+        ["backlogs"].focus();
 
         return false;
     }
@@ -131,11 +132,150 @@ function validateForm()
 
 <body>
 
+<%
+
+String editId =
+    request.getParameter("editId");
+
+
+String qualificationValue = "";
+String yearValue = "";
+String percentageValue = "";
+String cgpaValue = "";
+String backlogsValue = "";
+
+
+if(editId != null &&
+   !editId.equals(""))
+{
+    Connection con = null;
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+
+    try
+    {
+        HttpSession session1 =
+            request.getSession(false);
+
+
+        if(session1 == null ||
+           session1.getAttribute("studentId") == null)
+        {
+            response.sendRedirect(
+                "student_login.jsp"
+            );
+
+            return;
+        }
+
+
+        int studentId =
+            (Integer)session1.getAttribute(
+                "studentId"
+            );
+
+
+        Class.forName(
+            "oracle.jdbc.driver.OracleDriver"
+        );
+
+
+        con = DriverManager.getConnection(
+            "jdbc:oracle:thin:@localhost:1521:XE",
+            "CAMPUSCONNECT",
+            "campus123"
+        );
+
+
+        String sql =
+            "SELECT QUALIFICATION, YEAR, " +
+            "PERCENTAGE, CGPA, BACKLOGS " +
+            "FROM STUDENT_ACADEMIC " +
+            "WHERE ACADEMIC_ID=? " +
+            "AND STUDENT_ID=?";
+
+
+        ps = con.prepareStatement(sql);
+
+
+        ps.setInt(
+            1,
+            Integer.parseInt(editId)
+        );
+
+
+        ps.setInt(
+            2,
+            studentId
+        );
+
+
+        rs = ps.executeQuery();
+
+
+        if(rs.next())
+        {
+            qualificationValue =
+                rs.getString("QUALIFICATION");
+
+            yearValue =
+                String.valueOf(
+                    rs.getInt("YEAR")
+                );
+
+            percentageValue =
+                String.valueOf(
+                    rs.getDouble("PERCENTAGE")
+                );
+
+            cgpaValue =
+                String.valueOf(
+                    rs.getDouble("CGPA")
+                );
+
+            backlogsValue =
+                String.valueOf(
+                    rs.getInt("BACKLOGS")
+                );
+        }
+    }
+    catch(Exception e)
+    {
+        out.println(
+            "Error: " + e.getMessage()
+        );
+    }
+    finally
+    {
+        try
+        {
+            if(rs != null)
+                rs.close();
+
+            if(ps != null)
+                ps.close();
+
+            if(con != null)
+                con.close();
+        }
+        catch(Exception e)
+        {
+        }
+    }
+}
+
+%>
+
+
 <h2>Academic Details</h2>
 
+
 <p>
-<span style="color:red;">*</span>
+
+<span style="color:red">*</span>
+
 Indicates Mandatory Fields
+
 </p>
 
 
@@ -145,7 +285,13 @@ Indicates Mandatory Fields
       onsubmit="return validateForm();">
 
 
-<table border="0" cellpadding="8">
+<input type="hidden"
+       name="academicId"
+       value="<%=editId == null ? "" : editId%>">
+
+
+<table border="0"
+       cellpadding="8">
 
 
 <!-- QUALIFICATION -->
@@ -153,13 +299,18 @@ Indicates Mandatory Fields
 <tr>
 
 <td>
-Qualification <span style="color:red">*</span>
+
+Qualification
+
+<span style="color:red">*</span>
+
 </td>
 
 <td>
 
 <input type="text"
        name="qualification"
+       value="<%=qualificationValue%>"
        placeholder="Example: B.Tech">
 
 </td>
@@ -172,13 +323,18 @@ Qualification <span style="color:red">*</span>
 <tr>
 
 <td>
-Year <span style="color:red">*</span>
+
+Year
+
+<span style="color:red">*</span>
+
 </td>
 
 <td>
 
 <input type="number"
        name="year"
+       value="<%=yearValue%>"
        placeholder="Example: 2026">
 
 </td>
@@ -191,13 +347,18 @@ Year <span style="color:red">*</span>
 <tr>
 
 <td>
-Percentage <span style="color:red">*</span>
+
+Percentage
+
+<span style="color:red">*</span>
+
 </td>
 
 <td>
 
 <input type="number"
        name="percentage"
+       value="<%=percentageValue%>"
        step="0.01"
        placeholder="Example: 85.50">
 
@@ -211,13 +372,18 @@ Percentage <span style="color:red">*</span>
 <tr>
 
 <td>
-CGPA <span style="color:red">*</span>
+
+CGPA
+
+<span style="color:red">*</span>
+
 </td>
 
 <td>
 
 <input type="number"
        name="cgpa"
+       value="<%=cgpaValue%>"
        step="0.01"
        placeholder="Example: 8.50">
 
@@ -231,13 +397,18 @@ CGPA <span style="color:red">*</span>
 <tr>
 
 <td>
-Backlogs <span style="color:red">*</span>
+
+Backlogs
+
+<span style="color:red">*</span>
+
 </td>
 
 <td>
 
 <input type="number"
        name="backlogs"
+       value="<%=backlogsValue%>"
        min="0"
        placeholder="Example: 0">
 
@@ -246,16 +417,17 @@ Backlogs <span style="color:red">*</span>
 </tr>
 
 
-<!-- BUTTONS -->
+<!-- BUTTON -->
 
 <tr>
 
 <td>
 
 <input type="submit"
-       value="Submit">
+       value="<%=editId == null ? "Submit" : "Update"%>">
 
 </td>
+
 
 <td>
 
@@ -274,8 +446,22 @@ Backlogs <span style="color:red">*</span>
 
 <br>
 
+
+<a href="student_academic_view.jsp">
+
+View Academic Details
+
+</a>
+
+
+<br>
+<br>
+
+
 <a href="student_dashboard.jsp">
+
 Back to Dashboard
+
 </a>
 
 

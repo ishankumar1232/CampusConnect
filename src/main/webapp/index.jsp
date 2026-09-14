@@ -1034,7 +1034,7 @@
 
             <!-- Replace # when college login is ready -->
 
-            <a href="#"
+            <a href="collegeAdminLogin.jsp"
                class="portal-link college-link">
 
                 College Admin Login

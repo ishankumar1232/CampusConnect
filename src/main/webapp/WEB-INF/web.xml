@@ -370,7 +370,140 @@
     <servlet-name>FeePaymentServlet</servlet-name>
     <url-pattern>/FeePaymentServlet</url-pattern>
 </servlet-mapping>
+<servlet>
+    <servlet-name>CollegeAdminController</servlet-name>
+    <servlet-class>com.campusconnect.controller.CollegeAdminController</servlet-class>
+</servlet>
 
+<servlet-mapping>
+    <servlet-name>CollegeAdminController</servlet-name>
+    <url-pattern>/CollegeAdminController</url-pattern>
+</servlet-mapping>
+<servlet>
+    <servlet-name>CollegeAdminLogin</servlet-name>
+    <servlet-class>com.campusconnect.controller.CollegeAdminLogin</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>CollegeAdminLogin</servlet-name>
+    <url-pattern>/CollegeAdminLogin</url-pattern>
+</servlet-mapping>
+<servlet>
+
+    <servlet-name>AdmissionStatusController</servlet-name>
+
+    <servlet-class>
+        com.campusconnect.controller.AdmissionStatusController
+    </servlet-class>
+
+</servlet>
+
+<servlet-mapping>
+
+    <servlet-name>AdmissionStatusController</servlet-name>
+
+    <url-pattern>/AdmissionStatusController</url-pattern>
+
+</servlet-mapping>
+<servlet>
+    <servlet-name>ApplicationShortlistController</servlet-name>
+    <servlet-class>
+        com.campusconnect.controller.ApplicationShortlistController
+    </servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>ApplicationShortlistController</servlet-name>
+    <url-pattern>/ApplicationShortlistController</url-pattern>
+</servlet-mapping>
+<servlet>
+    <servlet-name>InterviewController</servlet-name>
+    <servlet-class>
+        com.campusconnect.controller.InterviewController
+    </servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>InterviewController</servlet-name>
+    <url-pattern>/InterviewController</url-pattern>
+</servlet-mapping>
+<servlet>
+    <servlet-name>SelectionController</servlet-name>
+    <servlet-class>
+        com.campusconnect.controller.SelectionController
+    </servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>SelectionController</servlet-name>
+    <url-pattern>/SelectionController</url-pattern>
+</servlet-mapping>
+<servlet>
+    <servlet-name>FacultyController</servlet-name>
+    <servlet-class>
+        com.campusconnect.controller.FacultyController
+    </servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>FacultyController</servlet-name>
+    <url-pattern>/FacultyController</url-pattern>
+</servlet-mapping>
+<servlet>
+    <servlet-name>DepartmentController</servlet-name>
+    <servlet-class>
+        com.campusconnect.controller.DepartmentController
+    </servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>DepartmentController</servlet-name>
+    <url-pattern>/DepartmentController</url-pattern>
+</servlet-mapping>
+<servlet>
+    <servlet-name>CourseController</servlet-name>
+    <servlet-class>
+        com.campusconnect.controller.CourseController
+    </servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>CourseController</servlet-name>
+    <url-pattern>/CourseController</url-pattern>
+</servlet-mapping>
+<servlet>
+    <servlet-name>CollegeProfileController</servlet-name>
+    <servlet-class>
+        com.campusconnect.controller.CollegeProfileController
+    </servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>CollegeProfileController</servlet-name>
+    <url-pattern>/CollegeProfileController</url-pattern>
+</servlet-mapping>
+<servlet>
+    <servlet-name>NoticeController</servlet-name>
+    <servlet-class>
+        com.campusconnect.controller.NoticeController
+    </servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>NoticeController</servlet-name>
+    <url-pattern>/NoticeController</url-pattern>
+</servlet-mapping>
+<servlet>
+    <servlet-name>StudentProfileServlet</servlet-name>
+    <servlet-class>
+        com.campusconnect.controller.StudentProfileServlet
+    </servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>StudentProfileServlet</servlet-name>
+    <url-pattern>/StudentProfileServlet</url-pattern>
+</servlet-mapping>
 </web-app>
 
  

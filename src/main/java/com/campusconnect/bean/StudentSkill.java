@@ -47,26 +47,36 @@ public class StudentSkill
     }
 
 
+    // ================= ADD =================
+
     public boolean InsertMethod()
     {
+        Connection con = null;
+        Statement stmt = null;
+
         try
         {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
+            Class.forName(
+                "oracle.jdbc.driver.OracleDriver"
+            );
 
-            Connection con = DriverManager.getConnection(
+            con = DriverManager.getConnection(
                 "jdbc:oracle:thin:@localhost:1521:XE",
                 "CAMPUSCONNECT",
                 "campus123"
             );
 
-            Statement stmt = con.createStatement();
+            stmt = con.createStatement();
 
 
             String qid =
-                "SELECT NVL(MAX(SKILL_ID),0)+1 "
-                + "FROM STUDENT_SKILL";
+                "SELECT NVL(MAX(SKILL_ID),0)+1 " +
+                "FROM STUDENT_SKILL";
 
-            ResultSet rs = stmt.executeQuery(qid);
+
+            ResultSet rs =
+                stmt.executeQuery(qid);
+
 
             int id = 1;
 
@@ -79,49 +89,188 @@ public class StudentSkill
 
 
             String q1 =
-                "INSERT INTO STUDENT_SKILL "
-                + "(SKILL_ID, STUDENT_ID, SKILL_NAME) "
-                + "VALUES ("
-                + id + ", "
-                + studentId + ", '"
-                + skillName + "')";
+                "INSERT INTO STUDENT_SKILL " +
+                "(SKILL_ID, STUDENT_ID, SKILL_NAME) " +
+                "VALUES (" +
+                id + ", " +
+                studentId + ", '" +
+                skillName + "')";
 
 
-            int x = stmt.executeUpdate(q1);
+            int x =
+                stmt.executeUpdate(q1);
 
 
-            if(x > 0)
-            {
-                con.close();
-                return true;
-            }
-            else
-            {
-                con.close();
-                return false;
-            }
+            return x > 0;
         }
         catch(Exception e)
         {
             e.printStackTrace();
             return false;
         }
+        finally
+        {
+            try
+            {
+                if(stmt != null)
+                    stmt.close();
+
+                if(con != null)
+                    con.close();
+            }
+            catch(Exception e)
+            {
+            }
+        }
     }
+
+
+    // ================= UPDATE =================
+
+    public boolean UpdateMethod()
+    {
+        Connection con = null;
+        PreparedStatement ps = null;
+
+        try
+        {
+            Class.forName(
+                "oracle.jdbc.driver.OracleDriver"
+            );
+
+            con = DriverManager.getConnection(
+                "jdbc:oracle:thin:@localhost:1521:XE",
+                "CAMPUSCONNECT",
+                "campus123"
+            );
+
+
+            String sql =
+                "UPDATE STUDENT_SKILL " +
+                "SET SKILL_NAME=? " +
+                "WHERE SKILL_ID=? " +
+                "AND STUDENT_ID=?";
+
+
+            ps = con.prepareStatement(sql);
+
+
+            ps.setString(1, skillName);
+            ps.setInt(2, skillId);
+            ps.setInt(3, studentId);
+
+
+            int x =
+                ps.executeUpdate();
+
+
+            return x > 0;
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        finally
+        {
+            try
+            {
+                if(ps != null)
+                    ps.close();
+
+                if(con != null)
+                    con.close();
+            }
+            catch(Exception e)
+            {
+            }
+        }
+    }
+
+
+    // ================= DELETE =================
+
+    public boolean DeleteMethod()
+    {
+        Connection con = null;
+        PreparedStatement ps = null;
+
+        try
+        {
+            Class.forName(
+                "oracle.jdbc.driver.OracleDriver"
+            );
+
+            con = DriverManager.getConnection(
+                "jdbc:oracle:thin:@localhost:1521:XE",
+                "CAMPUSCONNECT",
+                "campus123"
+            );
+
+
+            String sql =
+                "DELETE FROM STUDENT_SKILL " +
+                "WHERE SKILL_ID=? " +
+                "AND STUDENT_ID=?";
+
+
+            ps = con.prepareStatement(sql);
+
+
+            ps.setInt(1, skillId);
+            ps.setInt(2, studentId);
+
+
+            int x =
+                ps.executeUpdate();
+
+
+            return x > 0;
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+            return false;
+        }
+        finally
+        {
+            try
+            {
+                if(ps != null)
+                    ps.close();
+
+                if(con != null)
+                    con.close();
+            }
+            catch(Exception e)
+            {
+            }
+        }
+    }
+
+
+    // ================= VIEW =================
+
     public ResultSet ViewMethod(Connection con)
     {
         ResultSet rs = null;
 
         try
         {
-            Statement stmt = con.createStatement();
+            Statement stmt =
+                con.createStatement();
+
 
             String q1 =
-                "SELECT SKILL_ID, SKILL_NAME "
-              + "FROM STUDENT_SKILL "
-              + "WHERE STUDENT_ID = " + studentId
-              + " ORDER BY SKILL_ID";
+                "SELECT SKILL_ID, SKILL_NAME " +
+                "FROM STUDENT_SKILL " +
+                "WHERE STUDENT_ID = " +
+                studentId +
+                " ORDER BY SKILL_ID";
 
-            rs = stmt.executeQuery(q1);
+
+            rs =
+                stmt.executeQuery(q1);
         }
         catch(Exception e)
         {
@@ -129,5 +278,5 @@ public class StudentSkill
         }
 
         return rs;
-    } 
+    }
 }

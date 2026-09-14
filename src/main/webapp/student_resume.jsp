@@ -1,76 +1,199 @@
+<%@ page import="java.sql.*" %>
+
+<%
+    HttpSession session1 =
+        request.getSession(false);
+
+    if(session1 == null ||
+       session1.getAttribute("studentId") == null)
+    {
+        response.sendRedirect("student_login.jsp");
+        return;
+    }
+
+    int studentId =
+        (Integer)session1.getAttribute("studentId");
+
+
+    String editId =
+        request.getParameter("editId");
+
+    boolean editMode =
+        editId != null &&
+        !editId.trim().equals("");
+
+    String oldFile = "";
+
+
+    if(editMode)
+    {
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
+        try
+        {
+            Class.forName(
+                "oracle.jdbc.driver.OracleDriver"
+            );
+
+            con =
+                DriverManager.getConnection(
+                    "jdbc:oracle:thin:@localhost:1521:XE",
+                    "CAMPUSCONNECT",
+                    "campus123"
+                );
+
+            String sql =
+                "SELECT RESUME_FILE FROM RESUME " +
+                "WHERE RESUME_ID=? AND STUDENT_ID=?";
+
+            ps = con.prepareStatement(sql);
+
+            ps.setInt(
+                1,
+                Integer.parseInt(editId)
+            );
+
+            ps.setInt(2, studentId);
+
+            rs = ps.executeQuery();
+
+            if(rs.next())
+            {
+                oldFile =
+                    rs.getString("RESUME_FILE");
+            }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+        finally
+        {
+            try
+            {
+                if(rs != null) rs.close();
+                if(ps != null) ps.close();
+                if(con != null) con.close();
+            }
+            catch(Exception e)
+            {
+            }
+        }
+    }
+%>
+
+
 <!DOCTYPE html>
-<html lang="en">
+
+<html>
 
 <head>
 
 <meta charset="UTF-8">
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
-
 <title>Student Resume</title>
-
-
-<script>
-
-function validateForm()
-{
-    var resumeFile =
-        document.forms["resumeForm"]["resumeFile"].value;
-
-
-    if(resumeFile=="" || resumeFile==null)
-    {
-        alert("Resume File Name is required");
-
-        document.forms["resumeForm"]["resumeFile"].focus();
-
-        return false;
-    }
-
-
-    return true;
-}
-
-</script>
 
 </head>
 
 
 <body>
 
-<h2>Upload Resume</h2>
+<h2>
+
+<%
+    if(editMode)
+    {
+        out.print("Edit Resume");
+    }
+    else
+    {
+        out.print("Upload Resume");
+    }
+%>
+
+</h2>
+
 
 <p>
+
 <span style="color:red;">*</span>
 Indicates Mandatory Fields
+
 </p>
 
 
 <form name="resumeForm"
       method="post"
       action="studentResume"
-      onsubmit="return validateForm();">
+      enctype="multipart/form-data">
 
 
-<table border="0" cellpadding="8">
+<%
+    if(editMode)
+    {
+%>
+
+<input type="hidden"
+       name="resumeId"
+       value="<%=editId%>">
+
+<%
+    }
+%>
+
+
+<table border="0"
+       cellpadding="8">
 
 
 <tr>
 
 <td>
-Resume File Name <span style="color:red">*</span>
+
+Resume File
+<span style="color:red;">*</span>
+
 </td>
+
 
 <td>
 
-<input type="text"
+<input type="file"
        name="resumeFile"
-       placeholder="Example: Rahul_Resume.pdf">
+       accept=".pdf,.doc,.docx"
+       required>
 
 </td>
 
 </tr>
+
+
+<%
+    if(editMode)
+    {
+%>
+
+<tr>
+
+<td>
+
+Current Resume
+
+</td>
+
+<td>
+
+<%=oldFile%>
+
+</td>
+
+</tr>
+
+<%
+    }
+%>
 
 
 <tr>
@@ -78,9 +201,19 @@ Resume File Name <span style="color:red">*</span>
 <td>
 
 <input type="submit"
-       value="Upload Resume">
+       value="<%
+       if(editMode)
+       {
+           out.print("Update Resume");
+       }
+       else
+       {
+           out.print("Upload Resume");
+       }
+       %>">
 
 </td>
+
 
 <td>
 
@@ -99,8 +232,21 @@ Resume File Name <span style="color:red">*</span>
 
 <br>
 
+
+<a href="student_resume_view.jsp">
+
+View Resumes
+
+</a>
+
+
+<br><br>
+
+
 <a href="student_dashboard.jsp">
+
 Back to Dashboard
+
 </a>
 
 

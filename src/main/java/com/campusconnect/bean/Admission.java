@@ -223,4 +223,110 @@ public class Admission
 
         return x;
     }
+ // Count Pending Admission Requests
+
+    public int getPendingAdmissionCount(int collegeId)
+
+    {
+
+        int count = 0;
+
+        try
+
+        {
+
+            Class.forName(
+                "oracle.jdbc.driver.OracleDriver"
+            );
+
+            Connection con = DriverManager.getConnection(
+
+                "jdbc:oracle:thin:@localhost:1521:XE",
+
+                "CAMPUSCONNECT",
+
+                "campus123"
+
+            );
+
+            String sql =
+                "SELECT COUNT(*) FROM ADMISSION " +
+                "WHERE COLLEGE_ID=? AND STATUS='PENDING'";
+
+            PreparedStatement ps =
+                con.prepareStatement(sql);
+
+            ps.setInt(1, collegeId);
+
+            ResultSet rs =
+                ps.executeQuery();
+
+            if(rs.next())
+
+            {
+
+                count = rs.getInt(1);
+
+            }
+
+            rs.close();
+
+            ps.close();
+
+            con.close();
+
+        }
+
+        catch(Exception e)
+
+        {
+
+            e.printStackTrace();
+
+        }
+
+        return count;
+
+    }
+    public boolean updateAdmissionStatus(int admissionId, String status) {
+
+        boolean x = false;
+
+        try {
+
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+
+            Connection con = DriverManager.getConnection(
+                "jdbc:oracle:thin:@localhost:1521:XE",
+                "CAMPUSCONNECT",
+                "campus123"
+            );
+
+            String sql =
+                "UPDATE ADMISSION " +
+                "SET STATUS=?, APPROVED_DATE=SYSDATE " +
+                "WHERE ADMISSION_ID=?";
+
+            PreparedStatement ps = con.prepareStatement(sql);
+
+            ps.setString(1, status);
+            ps.setInt(2, admissionId);
+
+            int i = ps.executeUpdate();
+
+            if(i > 0) {
+                x = true;
+            }
+
+            ps.close();
+            con.close();
+
+        } catch(Exception e) {
+
+            e.printStackTrace();
+
+        }
+
+        return x;
+    }
 }

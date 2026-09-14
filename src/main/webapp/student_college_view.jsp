@@ -1,26 +1,17 @@
 <%@ page import="java.sql.*" %>
 
 <!DOCTYPE html>
-
 <html>
 
 <head>
 
-    <meta charset="UTF-8">
-
-    <title>Available Colleges</title>
+    <title>Academic Details</title>
 
 </head>
 
 <body>
 
-<h1>Available Colleges</h1>
-
-<hr>
-
-<p>
-Select a college to view its details and continue with the admission process.
-</p>
+<h2>Academic Details</h2>
 
 <%
     Connection con = null;
@@ -29,6 +20,18 @@ Select a college to view its details and continue with the admission process.
 
     try
     {
+        HttpSession session1 = request.getSession(false);
+
+        if(session1 == null ||
+           session1.getAttribute("studentId") == null)
+        {
+            response.sendRedirect("student_login.jsp");
+            return;
+        }
+
+        int studentId =
+            (Integer)session1.getAttribute("studentId");
+
         Class.forName("oracle.jdbc.driver.OracleDriver");
 
         con = DriverManager.getConnection(
@@ -38,37 +41,32 @@ Select a college to view its details and continue with the admission process.
         );
 
         String sql =
-            "SELECT COLLEGE_ID, " +
-            "COLLEGE_NAME, " +
-            "ADDRESS, " +
-            "CITY, " +
-            "STATE, " +
-            "EMAIL, " +
-            "PHONE " +
-            "FROM COLLEGE " +
-            "WHERE STATUS = 'ACTIVE' " +
-            "ORDER BY COLLEGE_NAME";
+            "SELECT ACADEMIC_ID, QUALIFICATION, YEAR, " +
+            "PERCENTAGE, CGPA, BACKLOGS " +
+            "FROM STUDENT_ACADEMIC " +
+            "WHERE STUDENT_ID=? " +
+            "ORDER BY YEAR DESC";
 
         ps = con.prepareStatement(sql);
+
+        ps.setInt(1, studentId);
 
         rs = ps.executeQuery();
 
         boolean found = false;
 %>
 
-<table border="1" cellpadding="10" cellspacing="0">
+<table border="1" cellpadding="10">
 
 <tr>
-
-    <th>College ID</th>
-    <th>College Name</th>
-    <th>Address</th>
-    <th>City</th>
-    <th>State</th>
-    <th>Email</th>
-    <th>Phone</th>
-    <th>Action</th>
-
+    <th>Academic ID</th>
+    <th>Qualification</th>
+    <th>Year</th>
+    <th>Percentage</th>
+    <th>CGPA</th>
+    <th>Backlogs</th>
+    <th>Edit</th>
+    <th>Delete</th>
 </tr>
 
 <%
@@ -80,38 +78,53 @@ Select a college to view its details and continue with the admission process.
 <tr>
 
     <td>
-        <%=rs.getInt("COLLEGE_ID")%>
+        <%=rs.getInt("ACADEMIC_ID")%>
     </td>
 
     <td>
-        <%=rs.getString("COLLEGE_NAME")%>
+        <%=rs.getString("QUALIFICATION")%>
     </td>
 
     <td>
-        <%=rs.getString("ADDRESS")%>
+        <%=rs.getInt("YEAR")%>
     </td>
 
     <td>
-        <%=rs.getString("CITY")%>
+        <%=rs.getDouble("PERCENTAGE")%>
     </td>
 
     <td>
-        <%=rs.getString("STATE")%>
+        <%=rs.getDouble("CGPA")%>
     </td>
 
     <td>
-        <%=rs.getString("EMAIL")%>
+        <%=rs.getInt("BACKLOGS")%>
     </td>
 
     <td>
-        <%=rs.getString("PHONE")%>
-    </td>
-
-    <td>
-
-        <a href="new_student_college_compare.jsp?collegeId=<%=rs.getInt("COLLEGE_ID")%>">
-            Compare
+        <a href="student_academic.jsp?editId=<%=rs.getInt("ACADEMIC_ID")%>">
+            Edit
         </a>
+    </td>
+
+    <td>
+
+        <form method="post"
+              action="studentAcademic"
+              onsubmit="return confirm('Delete this academic record?');">
+
+            <input type="hidden"
+                   name="action"
+                   value="delete">
+
+            <input type="hidden"
+                   name="academicId"
+                   value="<%=rs.getInt("ACADEMIC_ID")%>">
+
+            <input type="submit"
+                   value="Delete">
+
+        </form>
 
     </td>
 
@@ -125,11 +138,9 @@ Select a college to view its details and continue with the admission process.
 %>
 
 <tr>
-
     <td colspan="8">
-        No Active Colleges Found
+        No Academic Details Found
     </td>
-
 </tr>
 
 <%
@@ -140,11 +151,9 @@ Select a college to view its details and continue with the admission process.
 %>
 
 <tr>
-
     <td colspan="8">
-        Error: <%=e%>
+        Error: <%=e.getMessage()%>
     </td>
-
 </tr>
 
 <%
@@ -153,14 +162,9 @@ Select a college to view its details and continue with the admission process.
     {
         try
         {
-            if(rs != null)
-                rs.close();
-
-            if(ps != null)
-                ps.close();
-
-            if(con != null)
-                con.close();
+            if(rs != null) rs.close();
+            if(ps != null) ps.close();
+            if(con != null) con.close();
         }
         catch(Exception e)
         {
@@ -172,8 +176,14 @@ Select a college to view its details and continue with the admission process.
 
 <br>
 
-<a href="student_register.jsp">
-    Student Registration
+<a href="student_academic.jsp">
+Add Academic Details
+</a>
+
+<br><br>
+
+<a href="student_dashboard.jsp">
+Back to Dashboard
 </a>
 
 </body>
