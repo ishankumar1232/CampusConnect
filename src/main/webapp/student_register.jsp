@@ -1,183 +1,898 @@
+<%@ page language="java"
+    contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+
 <%@ page import="java.sql.*" %>
+
+<%
+    String admissionId =
+        request.getParameter("admissionId");
+
+    if(admissionId == null ||
+       admissionId.trim().equals(""))
+    {
+        response.sendRedirect("new_student_colleges.jsp");
+        return;
+    }
+
+
+    String name = "";
+    String email = "";
+    String phone = "";
+    String collegeName = "";
+    String courseName = "";
+
+
+    Connection con = null;
+    PreparedStatement ps = null;
+    ResultSet rs = null;
+
+
+    try
+    {
+        Class.forName(
+            "oracle.jdbc.driver.OracleDriver"
+        );
+
+
+        con = DriverManager.getConnection(
+            "jdbc:oracle:thin:@localhost:1521:XE",
+            "CAMPUSCONNECT",
+            "campus123"
+        );
+
+
+        String sql =
+            "SELECT A.APPLICANT_NAME, " +
+            "A.APPLICANT_EMAIL, " +
+            "A.APPLICANT_PHONE, " +
+            "C.COLLEGE_NAME, " +
+            "CR.COURSE_NAME " +
+            "FROM ADMISSION A " +
+            "LEFT JOIN COLLEGE C " +
+            "ON A.COLLEGE_ID = C.COLLEGE_ID " +
+            "LEFT JOIN COURSE CR " +
+            "ON A.APPLICANT_COURSE_ID = CR.COURSE_ID " +
+            "WHERE A.ADMISSION_ID=? " +
+            "AND A.STATUS='CONFIRMED' " +
+            "AND A.STUDENT_ID IS NULL";
+
+
+        ps = con.prepareStatement(sql);
+
+        ps.setInt(
+            1,
+            Integer.parseInt(admissionId)
+        );
+
+
+        rs = ps.executeQuery();
+
+
+        if(rs.next())
+        {
+            name =
+                rs.getString("APPLICANT_NAME");
+
+            email =
+                rs.getString("APPLICANT_EMAIL");
+
+            phone =
+                rs.getString("APPLICANT_PHONE");
+
+            collegeName =
+                rs.getString("COLLEGE_NAME");
+
+            courseName =
+                rs.getString("COURSE_NAME");
+        }
+        else
+        {
+            rs.close();
+            ps.close();
+            con.close();
+
+            out.println(
+                "<h2>Registration Not Available</h2>"
+            );
+
+            out.println(
+                "<p>Admission is not confirmed or registration is already completed.</p>"
+            );
+
+            return;
+        }
+
+    }
+    catch(Exception e)
+    {
+        out.println(
+            "<h2>Error</h2>"
+        );
+
+        out.println(
+            "<p>" + e.getMessage() + "</p>"
+        );
+
+        return;
+    }
+    finally
+    {
+        try
+        {
+            if(rs != null)
+                rs.close();
+
+            if(ps != null)
+                ps.close();
+
+            if(con != null)
+                con.close();
+
+        }
+        catch(Exception e)
+        {
+        }
+    }
+%>
+
+
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0">
 
-<title>Student Registration</title>
+<title>
+    Student Registration | CampusConnect
+</title>
+
+
+<style>
+
+/* =====================================
+   GLOBAL
+===================================== */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif;
+}
+
+body {
+
+    min-height: 100vh;
+
+    background:
+        radial-gradient(
+            circle at 8% 5%,
+            rgba(37,99,235,0.09),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 92% 12%,
+            rgba(14,165,233,0.08),
+            transparent 26%
+        ),
+        #f5f8fc;
+
+    color: #26364f;
+}
+
+
+/* =====================================
+   HEADER
+===================================== */
+
+.header {
+
+    background:
+        linear-gradient(
+            135deg,
+            #091b3d,
+            #123c88,
+            #1769e0
+        );
+
+    color: white;
+
+    padding: 17px 7%;
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    box-shadow:
+        0 8px 30px
+        rgba(5,20,50,0.18);
+}
+
+.logo {
+
+    font-size: 27px;
+
+    font-weight: bold;
+
+    letter-spacing: -0.5px;
+}
+
+.logo span {
+    color: #a9d0ff;
+}
+
+.back-btn {
+
+    color: white;
+
+    text-decoration: none;
+
+    border:
+        1px solid
+        rgba(255,255,255,0.65);
+
+    padding: 10px 17px;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+
+    background:
+        rgba(255,255,255,0.06);
+
+    transition: 0.25s;
+}
+
+.back-btn:hover {
+
+    background: white;
+
+    color: #123c88;
+
+    transform: translateY(-1px);
+}
+
+
+/* =====================================
+   MAIN
+===================================== */
+
+.container {
+
+    width: 90%;
+
+    max-width: 900px;
+
+    margin: 42px auto 70px;
+}
+
+
+/* =====================================
+   PAGE TITLE
+===================================== */
+
+.page-title {
+
+    text-align: center;
+
+    margin-bottom: 30px;
+}
+
+.page-title h1 {
+
+    color: #173c76;
+
+    font-size: 40px;
+
+    margin-bottom: 10px;
+
+    letter-spacing: -1px;
+}
+
+.page-title p {
+
+    color: #718096;
+
+    font-size: 15px;
+}
+
+
+/* =====================================
+   CARD
+===================================== */
+
+.card {
+
+    background: white;
+
+    border-radius: 20px;
+
+    border:
+        1px solid
+        rgba(148,163,184,0.22);
+
+    box-shadow:
+        0 16px 45px
+        rgba(15,45,90,0.09);
+
+    padding: 30px;
+
+    margin-bottom: 22px;
+
+    position: relative;
+
+    overflow: hidden;
+}
+
+.card::before {
+
+    content: "";
+
+    position: absolute;
+
+    top: 0;
+
+    left: 0;
+
+    right: 0;
+
+    height: 4px;
+
+    background:
+        linear-gradient(
+            90deg,
+            #1769e0,
+            #49a5ff
+        );
+}
+
+
+/* =====================================
+   SECTION TITLE
+===================================== */
+
+.section-title {
+
+    color: #173c76;
+
+    font-size: 21px;
+
+    margin-bottom: 20px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+}
+
+.section-title::before {
+
+    content: "";
+
+    width: 4px;
+
+    height: 22px;
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #1769e0,
+            #49a5ff
+        );
+}
+
+
+/* =====================================
+   ADMISSION INFO
+===================================== */
+
+.info-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        1fr 1fr;
+
+    gap: 14px;
+}
+
+.info-box {
+
+    background:
+        linear-gradient(
+            135deg,
+            #f8fbff,
+            #f3f7fd
+        );
+
+    border:
+        1px solid #e2e9f3;
+
+    padding: 16px;
+
+    border-radius: 11px;
+
+    transition: 0.22s;
+}
+
+.info-box:hover {
+
+    border-color: #b9d3f7;
+
+    background: #f1f6ff;
+
+    transform: translateY(-2px);
+}
+
+.info-label {
+
+    display: block;
+
+    color: #8995a7;
+
+    font-size: 12px;
+
+    margin-bottom: 7px;
+}
+
+.info-value {
+
+    color: #344b68;
+
+    font-size: 14px;
+
+    font-weight: bold;
+
+    word-break: break-word;
+}
+
+
+/* =====================================
+   FORM
+===================================== */
+
+.form-description {
+
+    color: #718096;
+
+    font-size: 14px;
+
+    line-height: 1.6;
+
+    margin-bottom: 20px;
+}
+
+.form-group {
+
+    margin-top: 18px;
+}
+
+.form-group label {
+
+    display: block;
+
+    color: #344b68;
+
+    font-size: 13px;
+
+    font-weight: bold;
+
+    margin-bottom: 8px;
+}
+
+.required {
+
+    color: #e53935;
+}
+
+input[type="password"],
+input[type="date"],
+textarea {
+
+    width: 100%;
+
+    padding: 13px 14px;
+
+    border:
+        1px solid #d6dfeb;
+
+    border-radius: 9px;
+
+    outline: none;
+
+    font-size: 14px;
+
+    background: #fbfdff;
+
+    color: #344b68;
+
+    transition: 0.22s;
+}
+
+input[type="password"]:hover,
+input[type="date"]:hover,
+textarea:hover {
+
+    border-color: #b9cce4;
+}
+
+input[type="password"]:focus,
+input[type="date"]:focus,
+textarea:focus {
+
+    border-color: #1769e0;
+
+    background: white;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(23,105,224,0.10);
+}
+
+textarea {
+
+    resize: vertical;
+
+    min-height: 110px;
+}
+
+
+/* =====================================
+   GENDER
+===================================== */
+
+.gender {
+
+    display: flex;
+
+    gap: 25px;
+
+    margin-top: 8px;
+}
+
+.gender label {
+
+    margin: 0;
+
+    font-weight: normal;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    cursor: pointer;
+}
+
+.gender input {
+
+    accent-color: #1769e0;
+
+}
+
+
+/* =====================================
+   NOTE
+===================================== */
+
+.note {
+
+    margin-top: 22px;
+
+    padding: 15px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #f0f6ff,
+            #f7faff
+        );
+
+    border:
+        1px solid #d7e5f8;
+
+    border-left:
+        4px solid #1769e0;
+
+    border-radius: 8px;
+
+    font-size: 13px;
+
+    color: #536984;
+
+    line-height: 1.6;
+}
+
+.note b {
+
+    color: #173c76;
+}
+
+
+/* =====================================
+   BUTTONS
+===================================== */
+
+.buttons {
+
+    display: flex;
+
+    gap: 12px;
+
+    margin-top: 26px;
+}
+
+button {
+
+    border: none;
+
+    border-radius: 9px;
+
+    padding: 14px;
+
+    font-size: 14px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    transition: 0.22s;
+}
+
+.register-btn {
+
+    flex: 1;
+
+    background:
+        linear-gradient(
+            135deg,
+            #1769e0,
+            #1258c4
+        );
+
+    color: white;
+
+    box-shadow:
+        0 8px 20px
+        rgba(23,105,224,0.22);
+}
+
+.register-btn:hover {
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 12px 25px
+        rgba(23,105,224,0.28);
+}
+
+.reset-btn {
+
+    width: 130px;
+
+    background: white;
+
+    color: #1769e0;
+
+    border:
+        1px solid #1769e0;
+}
+
+.reset-btn:hover {
+
+    background: #f0f6ff;
+
+    transform: translateY(-2px);
+}
+
+
+/* =====================================
+   FOOTER
+===================================== */
+
+.footer {
+
+    margin-top: 60px;
+
+    background: #091b3d;
+
+    color: #dceaff;
+
+    text-align: center;
+
+    padding: 24px;
+
+    font-size: 13px;
+}
+
+
+/* =====================================
+   RESPONSIVE
+===================================== */
+
+@media(max-width: 700px) {
+
+    .header {
+
+        padding: 14px 5%;
+    }
+
+    .logo {
+
+        font-size: 23px;
+    }
+
+    .back-btn {
+
+        padding: 8px 11px;
+
+        font-size: 12px;
+    }
+
+    .container {
+
+        width: 92%;
+
+        margin-top: 28px;
+    }
+
+    .page-title h1 {
+
+        font-size: 30px;
+    }
+
+    .card {
+
+        padding: 24px 20px;
+    }
+
+    .info-grid {
+
+        grid-template-columns: 1fr;
+    }
+
+    .buttons {
+
+        flex-direction: column;
+    }
+
+    .reset-btn {
+
+        width: 100%;
+    }
+
+}
+
+</style>
+
 
 <script>
 
 function validateForm()
 {
-    var name = document.forms["studentForm"]["name"].value;
-    var email = document.forms["studentForm"]["email"].value;
-    var password = document.forms["studentForm"]["password"].value;
-    var cpassword = document.forms["studentForm"]["cpassword"].value;
-    var phone = document.forms["studentForm"]["phone"].value;
-    var dob = document.forms["studentForm"]["dob"].value;
-    var address = document.forms["studentForm"]["address"].value;
-    var college = document.forms["studentForm"]["college"].value;
-    var course = document.forms["studentForm"]["course"].value;
-    var gender = document.forms["studentForm"]["gender"];
 
-    /* Check if all mandatory fields are blank */
+    var form =
+        document.forms["studentForm"];
 
-    if ((name=="" || name==null) &&
-        (email=="" || email==null) &&
-        (password=="" || password==null) &&
-        (cpassword=="" || cpassword==null) &&
-        (phone=="" || phone==null) &&
-        (college=="" || college==null) &&
-        (course=="" || course==null))
-    {
-        alert("All mandatory fields are blank");
-        document.forms["studentForm"]["name"].focus();
-        return false;
-    }
 
-    /* Name */
+    var password =
+        form["password"].value;
 
-    if(name=="" || name==null)
-    {
-        alert("Name is required");
-        document.forms["studentForm"]["name"].focus();
-        return false;
-    }
+    var cpassword =
+        form["cpassword"].value;
 
-    var letters=/^[A-Za-z ]+$/;
+    var dob =
+        form["dob"].value;
 
-    if(!letters.test(name))
-    {
-        alert("Name should contain letters only");
-        document.forms["studentForm"]["name"].focus();
-        return false;
-    }
+    var gender =
+        form["gender"];
 
-    /* Email */
+    var address =
+        form["address"].value;
 
-    if(email=="" || email==null)
-    {
-        alert("Email is required");
-        document.forms["studentForm"]["email"].focus();
-        return false;
-    }
 
-    var emailPattern=/^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    /* PASSWORD */
 
-    if(!emailPattern.test(email))
-    {
-        alert("Enter a valid Email ID");
-        document.forms["studentForm"]["email"].focus();
-        return false;
-    }
-
-    /* Password */
-
-    if(password=="" || password==null)
+    if(password == "")
     {
         alert("Password is required");
-        document.forms["studentForm"]["password"].focus();
+
+        form["password"].focus();
+
         return false;
     }
 
-    if(password.length<6)
+
+    if(password.length < 6)
     {
-        alert("Password must be at least 6 characters");
-        document.forms["studentForm"]["password"].focus();
+        alert(
+            "Password must be at least 6 characters"
+        );
+
+        form["password"].focus();
+
         return false;
     }
 
-    /* Confirm Password */
 
-    if(cpassword=="" || cpassword==null)
+    /* CONFIRM PASSWORD */
+
+    if(cpassword == "")
     {
-        alert("Confirm Password is required");
-        document.forms["studentForm"]["cpassword"].focus();
+        alert(
+            "Confirm Password is required"
+        );
+
+        form["cpassword"].focus();
+
         return false;
     }
 
-    if(password!=cpassword)
+
+    if(password != cpassword)
     {
-        alert("Passwords do not match");
-        document.forms["studentForm"]["cpassword"].focus();
+        alert(
+            "Passwords do not match"
+        );
+
+        form["cpassword"].focus();
+
         return false;
     }
 
-    /* Phone */
 
-    if(phone=="" || phone==null)
+    /* DOB */
+
+    if(dob == "")
     {
-        alert("Phone Number is required");
-        document.forms["studentForm"]["phone"].focus();
+        alert(
+            "Date of Birth is required"
+        );
+
+        form["dob"].focus();
+
         return false;
     }
 
-    var numbers=/^[0-9]+$/;
 
-    if(!numbers.test(phone))
+    /* GENDER */
+
+    if(!gender[0].checked &&
+       !gender[1].checked)
     {
-        alert("Phone Number should contain numbers only");
-        document.forms["studentForm"]["phone"].focus();
+        alert(
+            "Please select Gender"
+        );
+
         return false;
     }
 
-    if(phone.length!=10)
+
+    /* ADDRESS */
+
+    if(address.trim() == "")
     {
-        alert("Phone Number must be 10 digits");
-        document.forms["studentForm"]["phone"].focus();
+        alert(
+            "Address is required"
+        );
+
+        form["address"].focus();
+
         return false;
     }
 
-    /* Date of Birth */
-
-    if(dob=="" || dob==null)
-    {
-        alert("Date of Birth is required");
-        document.forms["studentForm"]["dob"].focus();
-        return false;
-    }
-
-    /* Gender */
-
-    if(!gender[0].checked && !gender[1].checked)
-    {
-        alert("Please select Gender");
-        return false;
-    }
-
-    /* Address */
-
-    if(address=="" || address==null)
-    {
-        alert("Address is required");
-        document.forms["studentForm"]["address"].focus();
-        return false;
-    }
-
-    /* College */
-
-    if(college=="" || college==null)
-    {
-        alert("Please select College");
-        document.forms["studentForm"]["college"].focus();
-        return false;
-    }
-
-    /* Course */
-
-    if(course=="" || course==null)
-    {
-        alert("Please select Course");
-        document.forms["studentForm"]["course"].focus();
-        return false;
-    }
-
-    alert("Registration Form Submitted Successfully");
 
     return true;
 }
@@ -189,311 +904,419 @@ function validateForm()
 
 <body>
 
-<h2>Student Registration</h2>
 
-<p>
-<span style="color:red;">*</span>
-Indicates Mandatory Fields
-</p>
+<!-- =====================================
+     HEADER
+===================================== -->
 
+<div class="header">
 
-<form name="studentForm"
-      method="post"
-      action="studentRegister"
-      onsubmit="return validateForm();">
+    <div class="logo">
 
+        Campus<span>Connect</span>
 
-<table border="0" cellpadding="8">
+    </div>
 
 
-<tr>
+    <a
+        href="new_student_colleges.jsp"
+        class="back-btn">
 
-<td>
-Name <span style="color:red">*</span>
-</td>
+        Back to Colleges
 
-<td>
+    </a>
 
-<input type="text"
-       name="name"
-       placeholder="Enter Name"
-       onkeypress="return ((event.charCode>=65 && event.charCode<=90)||(event.charCode>=97 && event.charCode<=122)||event.charCode==32)">
+</div>
 
-</td>
 
-</tr>
 
+<!-- =====================================
+     MAIN
+===================================== -->
 
-<tr>
+<div class="container">
 
-<td>
-Email ID <span style="color:red">*</span>
-</td>
 
-<td>
+    <!-- TITLE -->
 
-<input type="email"
-       name="email"
-       placeholder="Enter Email">
+    <div class="page-title">
 
-</td>
+        <h1>
+            Student Registration
+        </h1>
 
-</tr>
+        <p>
+            Complete your registration to create
+            your CampusConnect student account.
+        </p>
 
+    </div>
 
-<tr>
 
-<td>
-Password <span style="color:red">*</span>
-</td>
 
-<td>
+    <!-- =================================
+         ADMISSION INFORMATION
+    ================================== -->
 
-<input type="password"
-       name="password"
-       placeholder="Enter Password">
+    <div class="card">
 
-</td>
+        <h2 class="section-title">
 
-</tr>
+            Admission Details
 
+        </h2>
 
-<tr>
 
-<td>
-Confirm Password <span style="color:red">*</span>
-</td>
+        <div class="info-grid">
 
-<td>
 
-<input type="password"
-       name="cpassword"
-       placeholder="Confirm Password">
+            <!-- ADMISSION ID -->
 
-</td>
+            <div class="info-box">
 
-</tr>
+                <span class="info-label">
+                    Admission ID
+                </span>
 
+                <span class="info-value">
+                    <%= admissionId %>
+                </span>
 
-<tr>
+            </div>
 
-<td>
-Phone Number <span style="color:red">*</span>
-</td>
 
-<td>
 
-<input type="text"
-       name="phone"
-       maxlength="10"
-       placeholder="Enter 10 digit number"
-       onkeypress="return(event.charCode>=48 && event.charCode<=57)">
+            <!-- NAME -->
 
-</td>
+            <div class="info-box">
 
-</tr>
+                <span class="info-label">
+                    Name
+                </span>
 
+                <span class="info-value">
+                    <%= name %>
+                </span>
 
-<tr>
+            </div>
 
-<td>
-Date of Birth <span style="color:red">*</span>
-</td>
 
-<td>
 
-<input type="date"
-       name="dob">
+            <!-- EMAIL -->
 
-</td>
+            <div class="info-box">
 
-</tr>
+                <span class="info-label">
+                    Email
+                </span>
 
+                <span class="info-value">
+                    <%= email %>
+                </span>
 
-<tr>
+            </div>
 
-<td>
-Gender <span style="color:red">*</span>
-</td>
 
-<td>
 
-<input type="radio"
-       name="gender"
-       value="Male">
+            <!-- PHONE -->
 
-Male
+            <div class="info-box">
 
-<input type="radio"
-       name="gender"
-       value="Female">
+                <span class="info-label">
+                    Phone
+                </span>
 
-Female
+                <span class="info-value">
+                    <%= phone %>
+                </span>
 
-</td>
+            </div>
 
-</tr>
 
 
-<tr>
+            <!-- COLLEGE -->
 
-<td>
-Address <span style="color:red">*</span>
-</td>
+            <div class="info-box">
 
-<td>
+                <span class="info-label">
+                    College
+                </span>
 
-<textarea name="address"
-          rows="3"
-          cols="25"
-          placeholder="Enter Address"></textarea>
+                <span class="info-value">
+                    <%= collegeName %>
+                </span>
 
-</td>
+            </div>
 
-</tr>
 
 
-<tr>
+            <!-- COURSE -->
 
-<td>
-College <span style="color:red">*</span>
-</td>
+            <div class="info-box">
 
-<td>
+                <span class="info-label">
+                    Course
+                </span>
 
-<select name="college">
+                <span class="info-value">
+                    <%= courseName %>
+                </span>
 
-    <option value="">Select College</option>
+            </div>
 
-    <%
-        try
-        {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
 
-            Connection con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
+        </div>
 
-            Statement stmt = con.createStatement();
+    </div>
 
-            String q = "SELECT COLLEGE_ID, COLLEGE_NAME " +
-                       "FROM COLLEGE " +
-                       "WHERE STATUS='ACTIVE' " +
-                       "ORDER BY COLLEGE_NAME";
 
-            ResultSet rs = stmt.executeQuery(q);
 
-            while(rs.next())
-            {
-    %>
+    <!-- =================================
+         REGISTRATION FORM
+    ================================== -->
 
-                <option value="<%=rs.getInt("COLLEGE_ID")%>">
-                    <%=rs.getString("COLLEGE_NAME")%>
-                </option>
+    <div class="card">
 
-    <%
-            }
+        <h2 class="section-title">
 
-            rs.close();
-            stmt.close();
-            con.close();
-        }
-        catch(Exception e)
-        {
-            out.println(e);
-        }
-    %>
+            Create Your Account
 
-</select>
+        </h2>
 
-</td>
 
-</tr>
+        <p class="form-description">
 
+            Your admission information is already
+            verified. Complete the remaining details
+            below to create your student account.
 
-<tr>
+        </p>
 
-<td>
-Course <span style="color:red">*</span>
-</td>
 
-<td>
+        <form
+            name="studentForm"
+            method="post"
+            action="studentRegister"
+            onsubmit="return validateForm();">
 
-<select name="course">
 
-    <option value="">Select Course</option>
+            <!-- ADMISSION ID -->
 
-    <%
-        try
-        {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
+            <input
+                type="hidden"
+                name="admissionId"
+                value="<%= admissionId %>">
 
-            Connection con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
 
-            Statement stmt = con.createStatement();
 
-            String q = "SELECT COURSE_ID, COURSE_NAME " +
-                       "FROM COURSE " +
-                       "ORDER BY COURSE_NAME";
+            <!-- PASSWORD -->
 
-            ResultSet rs = stmt.executeQuery(q);
+            <div class="form-group">
 
-            while(rs.next())
-            {
-    %>
+                <label>
 
-                <option value="<%=rs.getInt("COURSE_ID")%>">
-                    <%=rs.getString("COURSE_NAME")%>
-                </option>
+                    Password
 
-    <%
-            }
+                    <span class="required">
+                        *
+                    </span>
 
-            rs.close();
-            stmt.close();
-            con.close();
-        }
-        catch(Exception e)
-        {
-            out.println(e);
-        }
-    %>
+                </label>
 
-</select>
 
-</td>
+                <input
+                    type="password"
+                    name="password"
+                    placeholder="Create a password"
+                    maxlength="100"
+                    autocomplete="new-password"
+                    required>
 
-</tr>
+            </div>
 
 
-<tr>
 
-<td>
+            <!-- CONFIRM PASSWORD -->
 
-<input type="submit"
-       value="Register">
+            <div class="form-group">
 
-</td>
+                <label>
 
-<td>
+                    Confirm Password
 
-<input type="reset"
-       value="Reset">
+                    <span class="required">
+                        *
+                    </span>
 
-</td>
+                </label>
 
-</tr>
 
+                <input
+                    type="password"
+                    name="cpassword"
+                    placeholder="Confirm your password"
+                    maxlength="100"
+                    autocomplete="new-password"
+                    required>
 
-</table>
+            </div>
 
-</form>
+
+
+            <!-- DOB -->
+
+            <div class="form-group">
+
+                <label>
+
+                    Date of Birth
+
+                    <span class="required">
+                        *
+                    </span>
+
+                </label>
+
+
+                <input
+                    type="date"
+                    name="dob"
+                    required>
+
+            </div>
+
+
+
+            <!-- GENDER -->
+
+            <div class="form-group">
+
+                <label>
+
+                    Gender
+
+                    <span class="required">
+                        *
+                    </span>
+
+                </label>
+
+
+                <div class="gender">
+
+                    <label>
+
+                        <input
+                            type="radio"
+                            name="gender"
+                            value="Male">
+
+                        Male
+
+                    </label>
+
+
+                    <label>
+
+                        <input
+                            type="radio"
+                            name="gender"
+                            value="Female">
+
+                        Female
+
+                    </label>
+
+                </div>
+
+            </div>
+
+
+
+            <!-- ADDRESS -->
+
+            <div class="form-group">
+
+                <label>
+
+                    Address
+
+                    <span class="required">
+                        *
+                    </span>
+
+                </label>
+
+
+                <textarea
+                    name="address"
+                    rows="4"
+                    maxlength="200"
+                    placeholder="Enter your complete address"
+                    required></textarea>
+
+            </div>
+
+
+
+            <!-- NOTE -->
+
+            <div class="note">
+
+                <b>Note:</b>
+
+                Your Name, Email, Phone, College and
+                Course are taken automatically from your
+                confirmed admission request.
+
+            </div>
+
+
+
+            <!-- BUTTONS -->
+
+            <div class="buttons">
+
+                <button
+                    type="submit"
+                    class="register-btn">
+
+                    Complete Registration
+
+                </button>
+
+
+                <button
+                    type="reset"
+                    class="reset-btn">
+
+                    Reset
+
+                </button>
+
+            </div>
+
+
+        </form>
+
+    </div>
+
+
+</div>
+
+
+
+<!-- =====================================
+     FOOTER
+===================================== -->
+
+<div class="footer">
+
+    CampusConnect |
+    Campus Recruitment Management System
+
+</div>
+
 
 </body>
 
