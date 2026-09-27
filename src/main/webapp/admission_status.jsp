@@ -1,32 +1,81 @@
+<%@ page language="java"
+    contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+
 <%@ page import="java.sql.*" %>
 
+
 <%
-    String admissionId = request.getParameter("admissionId");
+
+    String admissionId =
+        request.getParameter("admissionId");
+
+    String email =
+        request.getParameter("email");
+
 
     String status = "";
+
     String studentName = "";
+
     String collegeName = "";
+
     String courseName = "";
+
     String admissionDate = "";
 
     boolean found = false;
 
+
+    // Payment details
+
+    String paymentStatus = "";
+
+    String paymentAmount = "";
+
+    String paymentDate = "";
+
+    String paymentMethod = "";
+
+    String transactionId = "";
+
+
     if(admissionId != null &&
        !admissionId.trim().equals(""))
     {
+
         Connection con = null;
+
         PreparedStatement ps = null;
+
         ResultSet rs = null;
+
 
         try
         {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
+
+            Class.forName(
+                "oracle.jdbc.driver.OracleDriver"
+            );
+
 
             con = DriverManager.getConnection(
+
                 "jdbc:oracle:thin:@localhost:1521:XE",
+
                 "CAMPUSCONNECT",
+
                 "campus123"
+
             );
+
+
+            /*
+             * Get admission details
+             *
+             * If email is provided,
+             * verify Admission ID + Email.
+             */
 
             String sql =
                 "SELECT A.ADMISSION_ID, " +
@@ -40,61 +89,219 @@
                 "ON A.COLLEGE_ID = C.COLLEGE_ID " +
                 "JOIN COURSE CO " +
                 "ON A.APPLICANT_COURSE_ID = CO.COURSE_ID " +
-                "WHERE A.ADMISSION_ID = ?";
+                "WHERE A.ADMISSION_ID=?";
+
+
+            if(email != null &&
+               !email.trim().equals(""))
+            {
+
+                sql =
+                    "SELECT A.ADMISSION_ID, " +
+                    "A.APPLICANT_NAME, " +
+                    "A.ADMISSION_DATE, " +
+                    "A.STATUS, " +
+                    "C.COLLEGE_NAME, " +
+                    "CO.COURSE_NAME " +
+                    "FROM ADMISSION A " +
+                    "JOIN COLLEGE C " +
+                    "ON A.COLLEGE_ID = C.COLLEGE_ID " +
+                    "JOIN COURSE CO " +
+                    "ON A.APPLICANT_COURSE_ID = CO.COURSE_ID " +
+                    "WHERE A.ADMISSION_ID=? " +
+                    "AND LOWER(A.APPLICANT_EMAIL)=LOWER(?)";
+
+            }
+
 
             ps = con.prepareStatement(sql);
+
 
             ps.setInt(
                 1,
                 Integer.parseInt(admissionId)
             );
 
+
+            if(email != null &&
+               !email.trim().equals(""))
+            {
+                ps.setString(
+                    2,
+                    email.trim()
+                );
+            }
+
+
             rs = ps.executeQuery();
+
 
             if(rs.next())
             {
+
                 found = true;
+
 
                 studentName =
                     rs.getString("APPLICANT_NAME");
 
+
                 collegeName =
                     rs.getString("COLLEGE_NAME");
+
 
                 courseName =
                     rs.getString("COURSE_NAME");
 
+
                 status =
                     rs.getString("STATUS");
 
+
                 if(rs.getDate("ADMISSION_DATE") != null)
                 {
+
                     admissionDate =
                         rs.getDate("ADMISSION_DATE").toString();
+
                 }
+
+
             }
+
+
+            rs.close();
+
+            ps.close();
+
+
+            /*
+             * Get payment details
+             *
+             * Only if payment exists.
+             */
+
+            if(found)
+            {
+
+                String paymentSql =
+                    "SELECT AMOUNT, " +
+                    "PAYMENT_DATE, " +
+                    "PAYMENT_METHOD, " +
+                    "TRANSACTION_ID, " +
+                    "PAYMENT_STATUS " +
+                    "FROM FEE_PAYMENT " +
+                    "WHERE ADMISSION_ID=? " +
+                    "ORDER BY PAYMENT_ID DESC";
+
+
+                PreparedStatement paymentPs =
+                    con.prepareStatement(paymentSql);
+
+
+                paymentPs.setInt(
+                    1,
+                    Integer.parseInt(admissionId)
+                );
+
+
+                ResultSet paymentRs =
+                    paymentPs.executeQuery();
+
+
+                if(paymentRs.next())
+                {
+
+                    paymentAmount =
+                        String.valueOf(
+                            paymentRs.getDouble("AMOUNT")
+                        );
+
+
+                    if(paymentRs.getDate("PAYMENT_DATE") != null)
+                    {
+
+                        paymentDate =
+                            paymentRs.getDate(
+                                "PAYMENT_DATE"
+                            ).toString();
+
+                    }
+
+
+                    paymentMethod =
+                        paymentRs.getString(
+                            "PAYMENT_METHOD"
+                        );
+
+
+                    transactionId =
+                        paymentRs.getString(
+                            "TRANSACTION_ID"
+                        );
+
+
+                    paymentStatus =
+                        paymentRs.getString(
+                            "PAYMENT_STATUS"
+                        );
+
+                }
+
+
+                paymentRs.close();
+
+                paymentPs.close();
+
+            }
+
         }
         catch(Exception e)
         {
+
             out.println(
-                "<p>Error: " + e + "</p>"
+                "<p>Error: "
+                + e.getMessage()
+                + "</p>"
             );
+
         }
         finally
         {
+
             try
             {
-                if(rs != null) rs.close();
-
-                if(ps != null) ps.close();
-
-                if(con != null) con.close();
+                if(rs != null)
+                    rs.close();
             }
             catch(Exception e)
             {
             }
+
+
+            try
+            {
+                if(ps != null)
+                    ps.close();
+            }
+            catch(Exception e)
+            {
+            }
+
+
+            try
+            {
+                if(con != null)
+                    con.close();
+            }
+            catch(Exception e)
+            {
+            }
+
         }
+
     }
+
 %>
 
 
@@ -102,12 +309,15 @@
 
 <html lang="en">
 
+
 <head>
 
 <meta charset="UTF-8">
 
+
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0">
+
 
 <title>
     Track Admission | CampusConnect
@@ -116,418 +326,595 @@
 
 <style>
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
+
+*{
+
+    margin:0;
+
+    padding:0;
+
+    box-sizing:border-box;
+
+    font-family:Arial,sans-serif;
+
 }
 
-body {
-    background: #f4f7fb;
-    color: #26364f;
+
+body{
+
+    background:#f4f7fb;
+
+    color:#26364f;
+
 }
 
 
 /* HEADER */
 
-.header {
-    background: linear-gradient(
+.header{
+
+    background:
+    linear-gradient(
         135deg,
         #123c88,
         #1769e0
     );
 
-    color: white;
+    color:white;
 
-    padding: 20px 7%;
+    padding:20px 7%;
 
-    display: flex;
+    display:flex;
 
-    justify-content: space-between;
+    justify-content:space-between;
 
-    align-items: center;
+    align-items:center;
+
 }
 
-.logo {
-    font-size: 27px;
-    font-weight: bold;
+
+.logo{
+
+    font-size:27px;
+
+    font-weight:bold;
+
 }
 
-.logo span {
-    color: #a9d0ff;
+
+.logo span{
+
+    color:#a9d0ff;
+
 }
 
-.home-btn {
-    color: white;
 
-    text-decoration: none;
+.home-btn{
 
-    border: 1px solid rgba(255,255,255,0.7);
+    color:white;
 
-    padding: 9px 16px;
+    text-decoration:none;
 
-    border-radius: 7px;
+    border:1px solid rgba(255,255,255,0.7);
 
-    font-size: 14px;
+    padding:9px 16px;
+
+    border-radius:7px;
+
+    font-size:14px;
+
 }
 
-.home-btn:hover {
-    background: rgba(255,255,255,0.15);
+
+.home-btn:hover{
+
+    background:rgba(255,255,255,0.15);
+
 }
 
 
 /* MAIN */
 
-.container {
-    width: 90%;
+.container{
 
-    max-width: 850px;
+    width:90%;
 
-    margin: 55px auto;
+    max-width:850px;
+
+    margin:55px auto;
+
 }
 
 
 /* TITLE */
 
-.title {
-    text-align: center;
+.title{
 
-    margin-bottom: 30px;
+    text-align:center;
+
+    margin-bottom:30px;
+
 }
 
-.title h1 {
-    color: #173c76;
 
-    font-size: 34px;
+.title h1{
 
-    margin-bottom: 10px;
+    color:#173c76;
+
+    font-size:34px;
+
+    margin-bottom:10px;
+
 }
 
-.title p {
-    color: #718096;
 
-    font-size: 15px;
+.title p{
+
+    color:#718096;
+
+    font-size:15px;
+
 }
 
 
 /* SEARCH CARD */
 
-.search-card {
-    background: white;
+.search-card{
 
-    padding: 28px;
+    background:white;
 
-    border-radius: 15px;
+    padding:28px;
 
-    border: 1px solid #e2e8f0;
+    border-radius:15px;
 
-    box-shadow:
-        0 7px 25px rgba(30,60,100,0.08);
-
-    margin-bottom: 25px;
-}
-
-.search-card h2 {
-    color: #173c76;
-
-    font-size: 20px;
-
-    margin-bottom: 17px;
-}
-
-.search-form {
-    display: flex;
-
-    gap: 12px;
-}
-
-.search-form input {
-    flex: 1;
-
-    padding: 13px;
-
-    border: 1px solid #d6dfeb;
-
-    border-radius: 8px;
-
-    outline: none;
-
-    font-size: 14px;
-}
-
-.search-form input:focus {
-    border-color: #1769e0;
+    border:1px solid #e2e8f0;
 
     box-shadow:
-        0 0 0 3px rgba(23,105,224,0.10);
+        0 7px 25px
+        rgba(30,60,100,0.08);
+
+    margin-bottom:25px;
+
 }
 
-.search-form button {
-    padding: 13px 23px;
 
-    border: none;
+.search-card h2{
 
-    border-radius: 8px;
+    color:#173c76;
 
-    background: #1769e0;
+    font-size:20px;
 
-    color: white;
+    margin-bottom:17px;
 
-    font-weight: bold;
-
-    cursor: pointer;
 }
 
-.search-form button:hover {
-    background: #0d54bd;
+
+.search-form{
+
+    display:flex;
+
+    gap:12px;
+
+}
+
+
+.search-form input{
+
+    flex:1;
+
+    padding:13px;
+
+    border:1px solid #d6dfeb;
+
+    border-radius:8px;
+
+    outline:none;
+
+    font-size:14px;
+
+}
+
+
+.search-form input:focus{
+
+    border-color:#1769e0;
+
+    box-shadow:
+        0 0 0 3px
+        rgba(23,105,224,0.10);
+
+}
+
+
+.search-form button{
+
+    padding:13px 23px;
+
+    border:none;
+
+    border-radius:8px;
+
+    background:#1769e0;
+
+    color:white;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+}
+
+
+.search-form button:hover{
+
+    background:#0d54bd;
+
 }
 
 
 /* RESULT */
 
-.result-card {
-    background: white;
+.result-card{
 
-    border-radius: 16px;
+    background:white;
 
-    border: 1px solid #e2e8f0;
+    border-radius:16px;
+
+    border:1px solid #e2e8f0;
 
     box-shadow:
-        0 8px 25px rgba(30,60,100,0.08);
+        0 8px 25px
+        rgba(30,60,100,0.08);
 
-    padding: 30px;
+    padding:30px;
+
 }
 
 
 /* RESULT HEADER */
 
-.result-header {
-    display: flex;
+.result-header{
 
-    justify-content: space-between;
+    display:flex;
 
-    align-items: center;
+    justify-content:space-between;
 
-    margin-bottom: 22px;
+    align-items:center;
+
+    margin-bottom:22px;
+
 }
 
-.result-header h2 {
-    color: #173c76;
 
-    font-size: 21px;
+.result-header h2{
+
+    color:#173c76;
+
+    font-size:21px;
+
 }
 
 
 /* STATUS */
 
-.status {
-    padding: 7px 15px;
+.status{
 
-    border-radius: 20px;
+    padding:7px 15px;
 
-    font-size: 12px;
+    border-radius:20px;
 
-    font-weight: bold;
+    font-size:12px;
+
+    font-weight:bold;
+
 }
 
-.pending {
-    background: #fff5d6;
 
-    color: #a36b00;
+.pending{
+
+    background:#fff5d6;
+
+    color:#a36b00;
+
 }
 
-.approved {
-    background: #e6f7ed;
 
-    color: #21854b;
+.approved{
+
+    background:#e6f7ed;
+
+    color:#21854b;
+
 }
 
-.rejected {
-    background: #fdeaea;
 
-    color: #c62828;
+.rejected{
+
+    background:#fdeaea;
+
+    color:#c62828;
+
 }
 
-.confirmed {
-    background: #e6f7ed;
 
-    color: #21854b;
+.confirmed{
+
+    background:#e6f7ed;
+
+    color:#21854b;
+
 }
 
 
 /* DETAILS */
 
-.details {
-    background: #f7faff;
+.details{
 
-    border: 1px solid #e2e9f3;
+    background:#f7faff;
 
-    border-radius: 12px;
+    border:1px solid #e2e9f3;
 
-    padding: 20px;
+    border-radius:12px;
+
+    padding:20px;
+
 }
 
-.row {
-    display: flex;
 
-    justify-content: space-between;
+.row{
 
-    gap: 20px;
+    display:flex;
 
-    padding: 13px 5px;
+    justify-content:space-between;
 
-    border-bottom: 1px solid #e7edf5;
+    gap:20px;
+
+    padding:13px 5px;
+
+    border-bottom:1px solid #e7edf5;
+
 }
 
-.row:last-child {
-    border-bottom: none;
+
+.row:last-child{
+
+    border-bottom:none;
+
 }
 
-.label {
-    color: #8995a7;
 
-    font-size: 13px;
+.label{
+
+    color:#8995a7;
+
+    font-size:13px;
+
 }
 
-.value {
-    color: #344b68;
 
-    font-size: 14px;
+.value{
 
-    font-weight: bold;
+    color:#344b68;
 
-    text-align: right;
+    font-size:14px;
+
+    font-weight:bold;
+
+    text-align:right;
+
 }
 
 
 /* MESSAGE */
 
-.message {
-    margin-top: 22px;
+.message{
 
-    padding: 15px;
+    margin-top:22px;
 
-    border-radius: 9px;
+    padding:15px;
 
-    font-size: 13px;
+    border-radius:9px;
 
-    line-height: 1.5;
-}
+    font-size:13px;
 
-.message.pending-message {
-    background: #fff9e8;
+    line-height:1.5;
 
-    color: #806000;
-
-    border-left: 4px solid #e4ad22;
-}
-
-.message.approved-message {
-    background: #edf9f2;
-
-    color: #216d42;
-
-    border-left: 4px solid #2da65b;
-}
-
-.message.rejected-message {
-    background: #fff0f0;
-
-    color: #a62828;
-
-    border-left: 4px solid #d94343;
 }
 
 
-/* PAYMENT BUTTON */
+.pending-message{
 
-.pay-btn {
-    display: inline-block;
+    background:#fff9e8;
 
-    margin-top: 20px;
+    color:#806000;
 
-    padding: 13px 24px;
+    border-left:4px solid #e4ad22;
 
-    background: #1769e0;
-
-    color: white;
-
-    text-decoration: none;
-
-    border-radius: 8px;
-
-    font-size: 14px;
-
-    font-weight: bold;
 }
 
-.pay-btn:hover {
-    background: #0d54bd;
+
+.approved-message{
+
+    background:#edf9f2;
+
+    color:#216d42;
+
+    border-left:4px solid #2da65b;
+
+}
+
+
+.rejected-message{
+
+    background:#fff0f0;
+
+    color:#a62828;
+
+    border-left:4px solid #d94343;
+
+}
+
+
+/* BUTTON */
+
+.pay-btn{
+
+    display:inline-block;
+
+    margin-top:20px;
+
+    padding:13px 24px;
+
+    background:#1769e0;
+
+    color:white;
+
+    text-decoration:none;
+
+    border-radius:8px;
+
+    font-size:14px;
+
+    font-weight:bold;
+
+}
+
+
+.pay-btn:hover{
+
+    background:#0d54bd;
+
+}
+
+
+/* PAYMENT */
+
+.payment-box{
+
+    margin-top:25px;
+
+    background:#f7faff;
+
+    border:1px solid #dce7f5;
+
+    border-radius:12px;
+
+    padding:22px;
+
+}
+
+
+.payment-box h3{
+
+    color:#173c76;
+
+    margin-bottom:15px;
+
+    font-size:18px;
+
+}
+
+
+.payment-success{
+
+    background:#e8f8ee;
+
+    color:#18743e;
+
+    padding:10px 14px;
+
+    border-radius:7px;
+
+    display:inline-block;
+
+    font-weight:bold;
+
+    font-size:13px;
+
+    margin-bottom:15px;
+
 }
 
 
 /* NOT FOUND */
 
-.not-found {
-    background: #fff0f0;
+.not-found{
 
-    color: #a62828;
+    background:#fff0f0;
 
-    border-left: 4px solid #d94343;
+    color:#a62828;
 
-    padding: 15px;
+    border-left:4px solid #d94343;
 
-    border-radius: 8px;
+    padding:15px;
 
-    margin-top: 20px;
+    border-radius:8px;
 
-    font-size: 14px;
+    margin-top:20px;
+
+    font-size:14px;
+
 }
 
 
 /* FOOTER */
 
-.footer {
-    margin-top: 70px;
+.footer{
 
-    background: #123c88;
+    margin-top:70px;
 
-    color: #dceaff;
+    background:#123c88;
 
-    text-align: center;
+    color:#dceaff;
 
-    padding: 20px;
+    text-align:center;
 
-    font-size: 13px;
+    padding:20px;
+
+    font-size:13px;
+
 }
 
 
 /* RESPONSIVE */
 
 @media(max-width:650px)
+
 {
-    .search-form {
-        flex-direction: column;
+
+    .search-form{
+
+        flex-direction:column;
+
     }
 
-    .result-header {
-        flex-direction: column;
 
-        align-items: flex-start;
+    .result-header{
 
-        gap: 12px;
+        flex-direction:column;
+
+        align-items:flex-start;
+
+        gap:12px;
+
     }
 
-    .row {
-        flex-direction: column;
 
-        gap: 5px;
+    .row{
+
+        flex-direction:column;
+
+        gap:5px;
+
     }
 
-    .value {
-        text-align: left;
+
+    .value{
+
+        text-align:left;
+
     }
+
 }
 
 </style>
@@ -541,6 +928,7 @@ body {
 <!-- HEADER -->
 
 <div class="header">
+
 
     <div class="logo">
 
@@ -556,7 +944,9 @@ body {
 
     </a>
 
+
 </div>
+
 
 
 <!-- MAIN -->
@@ -579,12 +969,14 @@ body {
     </div>
 
 
+
     <!-- SEARCH -->
 
     <div class="search-card">
 
+
         <h2>
-            Enter Admission ID
+            Enter Your Admission Details
         </h2>
 
 
@@ -595,8 +987,15 @@ body {
 
             <input type="text"
                    name="admissionId"
-                   placeholder="Enter your Admission ID"
+                   placeholder="Admission ID"
                    value="<%= admissionId != null ? admissionId : "" %>"
+                   required>
+
+
+            <input type="email"
+                   name="email"
+                   placeholder="Email ID"
+                   value="<%= email != null ? email : "" %>"
                    required>
 
 
@@ -609,7 +1008,9 @@ body {
 
         </form>
 
+
     </div>
+
 
 
 <%
@@ -631,6 +1032,7 @@ body {
 
         <div class="result-header">
 
+
             <h2>
                 Admission Details
             </h2>
@@ -648,7 +1050,9 @@ body {
                 </span>
 
 <%
+
             }
+
             else if("APPROVED".equalsIgnoreCase(status))
             {
 
@@ -659,7 +1063,9 @@ body {
                 </span>
 
 <%
+
             }
+
             else if("REJECTED".equalsIgnoreCase(status))
             {
 
@@ -670,7 +1076,9 @@ body {
                 </span>
 
 <%
+
             }
+
             else if("CONFIRMED".equalsIgnoreCase(status))
             {
 
@@ -681,23 +1089,30 @@ body {
                 </span>
 
 <%
+
             }
+
             else
             {
 
 %>
 
                 <span class="status">
-                    <%=status%>
+                    <%= status %>
                 </span>
 
 <%
+
             }
 
 %>
 
+
         </div>
 
+
+
+        <!-- ADMISSION DETAILS -->
 
         <div class="details">
 
@@ -709,7 +1124,7 @@ body {
                 </span>
 
                 <span class="value">
-                    <%=admissionId%>
+                    <%= admissionId %>
                 </span>
 
             </div>
@@ -722,7 +1137,7 @@ body {
                 </span>
 
                 <span class="value">
-                    <%=studentName%>
+                    <%= studentName %>
                 </span>
 
             </div>
@@ -735,7 +1150,7 @@ body {
                 </span>
 
                 <span class="value">
-                    <%=collegeName%>
+                    <%= collegeName %>
                 </span>
 
             </div>
@@ -748,7 +1163,7 @@ body {
                 </span>
 
                 <span class="value">
-                    <%=courseName%>
+                    <%= courseName %>
                 </span>
 
             </div>
@@ -761,7 +1176,7 @@ body {
                 </span>
 
                 <span class="value">
-                    <%=admissionDate%>
+                    <%= admissionDate %>
                 </span>
 
             </div>
@@ -774,7 +1189,7 @@ body {
                 </span>
 
                 <span class="value">
-                    <%=status%>
+                    <%= status %>
                 </span>
 
             </div>
@@ -783,39 +1198,63 @@ body {
         </div>
 
 
+
 <%
+
+        /* PENDING */
 
         if("PENDING".equalsIgnoreCase(status))
         {
 
 %>
 
+
         <div class="message pending-message">
 
-            <b>Admission request is under review.</b>
+            <b>
+                Admission request is under review.
+            </b>
 
             <br>
 
             The college has not approved your request yet.
-            Please check again later.
+
+            <br>
+
+            Please wait for the College Admin to review
+            your application.
+
+            <br><br>
+
+            You do not need to submit the admission
+            request again.
 
         </div>
 
+
 <%
+
         }
+
+
+        /* APPROVED */
+
         else if("APPROVED".equalsIgnoreCase(status))
         {
 
 %>
 
+
         <div class="message approved-message">
 
-            <b>Congratulations! Your admission has been approved.</b>
+            <b>
+                Congratulations! Your admission has been approved.
+            </b>
 
             <br>
 
-            You can now complete your admission by paying
-            the required admission fee.
+            You can now complete your admission by
+            paying the required admission fee.
 
         </div>
 
@@ -827,33 +1266,56 @@ body {
 
         </a>
 
+
 <%
+
         }
+
+
+        /* REJECTED */
+
         else if("REJECTED".equalsIgnoreCase(status))
         {
 
 %>
 
+
         <div class="message rejected-message">
 
-            <b>Admission request rejected.</b>
+            <b>
+                Admission request rejected.
+            </b>
 
             <br>
 
-            Your admission request was not approved by the college.
+            Your admission request was not approved
+            by the college.
+
+            <br><br>
+
+            Please contact the college for more information.
 
         </div>
 
+
 <%
+
         }
+
+
+        /* CONFIRMED */
+
         else if("CONFIRMED".equalsIgnoreCase(status))
         {
 
 %>
 
+
         <div class="message approved-message">
 
-            <b>Admission Confirmed.</b>
+            <b>
+                Admission Confirmed.
+            </b>
 
             <br>
 
@@ -862,10 +1324,121 @@ body {
 
         </div>
 
+
+
 <%
+
+            /*
+             * Payment details
+             */
+
+            if(paymentStatus != null &&
+               !paymentStatus.trim().equals(""))
+            {
+
+%>
+
+
+        <div class="payment-box">
+
+
+            <h3>
+                Payment Details
+            </h3>
+
+
+            <div class="payment-success">
+
+                Payment Status:
+                <%= paymentStatus %>
+
+            </div>
+
+
+            <div class="details">
+
+
+                <div class="row">
+
+                    <span class="label">
+                        Amount Paid
+                    </span>
+
+                    <span class="value">
+                        ₹ <%= paymentAmount %>
+                    </span>
+
+                </div>
+
+
+                <div class="row">
+
+                    <span class="label">
+                        Payment Date
+                    </span>
+
+                    <span class="value">
+                        <%= paymentDate %>
+                    </span>
+
+                </div>
+
+
+                <div class="row">
+
+                    <span class="label">
+                        Payment Method
+                    </span>
+
+                    <span class="value">
+                        <%= paymentMethod %>
+                    </span>
+
+                </div>
+
+
+                <div class="row">
+
+                    <span class="label">
+                        Transaction ID
+                    </span>
+
+                    <span class="value">
+                        <%= transactionId %>
+                    </span>
+
+                </div>
+
+
+            </div>
+
+
+        </div>
+
+
+<%
+
+            }
+
+%>
+
+
+        <!-- REGISTRATION -->
+
+        <a href="student_register.jsp?admissionId=<%=admissionId%>"
+           class="pay-btn">
+
+            Complete Student Registration
+
+        </a>
+
+
+<%
+
         }
 
 %>
+
 
     </div>
 
@@ -873,18 +1446,24 @@ body {
 <%
 
         }
+
         else
         {
 
 %>
 
+
     <div class="not-found">
 
-        No admission request found for Admission ID:
+        No admission request found for the
+        given Admission ID and Email.
 
-        <b><%=admissionId%></b>
+        <br><br>
+
+        Please check your details and try again.
 
     </div>
+
 
 <%
 
@@ -896,6 +1475,7 @@ body {
 
 
 </div>
+
 
 
 <!-- FOOTER -->

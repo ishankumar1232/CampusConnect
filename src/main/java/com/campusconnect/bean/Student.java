@@ -375,5 +375,46 @@ public class Student {
 
         return false;
     }
+    public int InsertNewStudent(Connection con) throws Exception
+    {
+        int newId = 1;
 
+        PreparedStatement ps1 = con.prepareStatement(
+            "SELECT NVL(MAX(STUDENT_ID),0)+1 FROM STUDENT"
+        );
+
+        ResultSet rs = ps1.executeQuery();
+
+        if(rs.next())
+        {
+            newId = rs.getInt(1);
+        }
+
+        rs.close();
+        ps1.close();
+
+
+        PreparedStatement ps = con.prepareStatement(
+            "INSERT INTO STUDENT " +
+            "(STUDENT_ID, COLLEGE_ID, COURSE_ID, NAME, EMAIL, PHONE, PASSWORD, " +
+            "DOB, GENDER, ADDRESS, ADMISSION_DATE, STATUS) " +
+            "VALUES (?,?,?,?,?,?,?,?,?,?,SYSDATE,'ACTIVE')"
+        );
+
+        ps.setInt(1, newId);
+        ps.setInt(2, collegeId);
+        ps.setInt(3, courseId);
+        ps.setString(4, name);
+        ps.setString(5, email);
+        ps.setString(6, phone);
+        ps.setString(7, password);
+        ps.setDate(8, dob);
+        ps.setString(9, gender);
+        ps.setString(10, address);
+
+        ps.executeUpdate();
+        ps.close();
+
+        return newId;
+    }
 }
