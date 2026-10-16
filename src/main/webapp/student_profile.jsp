@@ -1,15 +1,19 @@
+<%@ page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %>
 <%@ page import="java.sql.*" %>
+<%@ page import="java.net.URLEncoder" %>
+<%@ page import="java.nio.charset.StandardCharsets" %>
 
 <%
     HttpSession session1 = request.getSession(false);
 
-    if(session1 == null || session1.getAttribute("studentId") == null)
-    {
+    if (session1 == null || session1.getAttribute("studentId") == null) {
         response.sendRedirect("student_login.jsp");
         return;
     }
 
-    int studentId = (Integer)session1.getAttribute("studentId");
+    int studentId = Integer.parseInt(
+        session1.getAttribute("studentId").toString()
+    );
 
     String name = "";
     String email = "";
@@ -23,232 +27,301 @@
     String status = "";
     String profileImage = "";
 
-    try
-    {
+    try {
         Class.forName("oracle.jdbc.driver.OracleDriver");
 
-        Connection con = DriverManager.getConnection(
-            "jdbc:oracle:thin:@localhost:1521:XE",
-            "CAMPUSCONNECT",
-            "campus123"
-        );
+        try (
+            Connection con = DriverManager.getConnection(
+                "jdbc:oracle:thin:@localhost:1521:XE",
+                "CAMPUSCONNECT",
+                "campus123"
+            );
+            PreparedStatement ps = con.prepareStatement(
+                "SELECT S.NAME, S.EMAIL, S.PHONE, S.DOB, " +
+                "S.GENDER, S.ADDRESS, S.ADMISSION_DATE, S.STATUS, " +
+                "S.PROFILE_IMAGE, C.COLLEGE_NAME, CR.COURSE_NAME " +
+                "FROM STUDENT S " +
+                "LEFT JOIN COLLEGE C ON S.COLLEGE_ID = C.COLLEGE_ID " +
+                "LEFT JOIN COURSE CR ON S.COURSE_ID = CR.COURSE_ID " +
+                "WHERE S.STUDENT_ID = ?"
+            )
+        ) {
+            ps.setInt(1, studentId);
 
-        String q =
-            "SELECT S.NAME, S.EMAIL, S.PHONE, S.DOB, " +
-            "S.GENDER, S.ADDRESS, S.ADMISSION_DATE, S.STATUS, " +
-            "S.PROFILE_IMAGE, " +
-            "C.COLLEGE_NAME, CR.COURSE_NAME " +
-            "FROM STUDENT S " +
-            "LEFT JOIN COLLEGE C " +
-            "ON S.COLLEGE_ID=C.COLLEGE_ID " +
-            "LEFT JOIN COURSE CR " +
-            "ON S.COURSE_ID=CR.COURSE_ID " +
-            "WHERE S.STUDENT_ID=?";
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    name = rs.getString("NAME");
+                    email = rs.getString("EMAIL");
+                    phone = rs.getString("PHONE");
+                    dob = rs.getDate("DOB") == null
+                        ? "" : rs.getDate("DOB").toString();
+                    gender = rs.getString("GENDER");
+                    address = rs.getString("ADDRESS");
+                    collegeName = rs.getString("COLLEGE_NAME");
+                    courseName = rs.getString("COURSE_NAME");
+                    admissionDate = rs.getDate("ADMISSION_DATE") == null
+                        ? "" : rs.getDate("ADMISSION_DATE").toString();
+                    status = rs.getString("STATUS");
+                    profileImage = rs.getString("PROFILE_IMAGE");
 
-        PreparedStatement ps = con.prepareStatement(q);
-
-        ps.setInt(1, studentId);
-
-        ResultSet rs = ps.executeQuery();
-
-        if(rs.next())
-        {
-            name = rs.getString("NAME");
-            email = rs.getString("EMAIL");
-            phone = rs.getString("PHONE");
-
-            if(rs.getDate("DOB") != null)
-            {
-                dob = rs.getDate("DOB").toString();
+                    if (name != null && !name.trim().isEmpty()) {
+                        session1.setAttribute("studentName", name);
+                    }
+                }
             }
-
-            gender = rs.getString("GENDER");
-            address = rs.getString("ADDRESS");
-
-            collegeName = rs.getString("COLLEGE_NAME");
-            courseName = rs.getString("COURSE_NAME");
-
-            if(rs.getDate("ADMISSION_DATE") != null)
-            {
-                admissionDate =
-                    rs.getDate("ADMISSION_DATE").toString();
-            }
-
-            status = rs.getString("STATUS");
-
-            profileImage =
-                rs.getString("PROFILE_IMAGE");
         }
+    } catch (Exception e) {
+        application.log("Error loading student profile", e);
+        out.println("<p class='server-error'>Unable to load profile information. Please check the server log.</p>");
+    }
 
-        rs.close();
-        ps.close();
-        con.close();
-    }
-    catch(Exception e)
-    {
-        out.println("<h3>Error: " + e + "</h3>");
-    }
+    if (name == null) name = "";
+    if (email == null) email = "";
+    if (phone == null) phone = "";
+    if (gender == null) gender = "";
+    if (address == null) address = "";
+    if (collegeName == null) collegeName = "";
+    if (courseName == null) courseName = "";
+    if (status == null) status = "";
+    if (profileImage == null) profileImage = "";
+
+    String firstLetter = name.trim().isEmpty()
+        ? "S" : name.trim().substring(0, 1).toUpperCase();
+
+    String success = request.getParameter("success");
+    String error = request.getParameter("error");
 %>
 
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en">
 <head>
-
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<meta name="viewport"
-      content="width=device-width, initial-scale=1.0">
-
-<title>Student Profile</title>
+<title>My Profile | CampusConnect</title>
 
 <style>
+:root {
+    --navy: #0b1835;
+    --navy-light: #173361;
+    --blue: #2878ef;
+    --text: #172c4b;
+    --muted: #7486a0;
+    --border: #e2eaf5;
+}
 
 * {
+    margin: 0;
+    padding: 0;
     box-sizing: border-box;
 }
 
 body {
-    margin: 0;
-    font-family: Arial, sans-serif;
-    background: #f4f7fb;
-    color: #333;
+    font-family: "Segoe UI", Arial, sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at 85% 5%, #dcecff, transparent 32%),
+        linear-gradient(135deg, #f4f7ff, #eaf3fd);
 }
 
-/* Header */
-
-.header {
-    background: #123c88;
-    color: white;
-    padding: 20px 40px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.logo {
-    font-size: 25px;
-    font-weight: bold;
-}
-
-.logo span {
-    color: #55aaff;
-}
-
-.header a {
-    color: white;
+a {
     text-decoration: none;
-    font-weight: bold;
+    color: inherit;
 }
 
-/* Container */
-
-.container {
-    max-width: 1100px;
-    margin: 35px auto;
-    padding: 0 20px;
-}
-
-/* Page Title */
-
-.page-title {
-    margin-bottom: 25px;
-}
-
-.page-title h1 {
-    color: #123c88;
-    margin-bottom: 8px;
-}
-
-.page-title p {
-    color: #777;
-}
-
-/* Profile Top */
-
-.profile-top {
-    background: white;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px #ddd;
+/* HEADER */
+.topbar {
+    height: 76px;
+    background: linear-gradient(110deg, #08142d, #142b52);
+    color: white;
     display: flex;
     align-items: center;
-    gap: 20px;
+    justify-content: space-between;
+    padding: 0 5%;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 5px 20px rgba(8,21,47,.16);
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 23px;
+    font-weight: 800;
+}
+
+.brand-mark {
+    width: 40px;
+    height: 40px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, #327ff4, #62b5ff);
+    border-radius: 12px;
+    font-size: 23px;
+}
+
+.brand span {
+    color: #79b7ff;
+}
+
+.dashboard-link {
+    padding: 10px 17px;
+    border: 1px solid #4c6b9b;
+    border-radius: 9px;
+    color: white;
+    font-size: 13px;
+    transition: .2s;
+}
+
+.dashboard-link:hover {
+    background: var(--blue);
+}
+
+/* PAGE */
+.container {
+    max-width: 1250px;
+    margin: 35px auto;
+    padding: 0 25px;
+}
+
+.page-heading {
     margin-bottom: 25px;
 }
 
-/* Profile Photo */
+.page-heading .eyebrow {
+    color: var(--blue);
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+}
+
+.page-heading h1 {
+    margin: 8px 0;
+    font-size: 31px;
+    color: #153463;
+}
+
+.page-heading p {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* MESSAGES */
+.message {
+    padding: 13px 16px;
+    border-radius: 10px;
+    margin-bottom: 20px;
+    font-size: 14px;
+}
+
+.success {
+    color: #17613c;
+    background: #e1f7e9;
+    border: 1px solid #bde8cd;
+}
+
+.error {
+    color: #9e2939;
+    background: #fff0f1;
+    border: 1px solid #f3c8ce;
+}
+
+/* PROFILE HERO */
+.profile-hero {
+    display: flex;
+    align-items: center;
+    gap: 25px;
+    padding: 28px;
+    border-radius: 19px;
+    color: white;
+    background:
+        radial-gradient(circle at 90% 140%, rgba(71,144,255,.25), transparent 38%),
+        linear-gradient(110deg, #101b37, #173361 72%, #1c477f);
+    box-shadow: 0 14px 30px rgba(18,43,86,.13);
+    margin-bottom: 25px;
+}
+
+.photo-wrap {
+    width: 112px;
+    height: 112px;
+    flex-shrink: 0;
+    border: 3px solid #8fc2ff;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #244775;
+}
 
 .profile-photo {
-    width: 100px;
-    height: 100px;
-    flex-shrink: 0;
-}
-
-.profile-photo img {
-    width: 100px;
-    height: 100px;
+    width: 100%;
+    height: 100%;
+    display: block;
     object-fit: cover;
-    border-radius: 50%;
-    border: 4px solid #1769e0;
 }
 
-.profile-circle {
-    width: 100px;
-    height: 100px;
-    background: #1769e0;
-    color: white;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 35px;
-    font-weight: bold;
-}
-
-/* Profile Information */
-
-.profile-info h2 {
-    margin: 0;
-    color: #123c88;
-}
-
-.profile-info p {
-    margin: 7px 0;
-    color: #666;
-}
-
-/* Cards */
-
-.grid {
+.profile-initial {
+    width: 100%;
+    height: 100%;
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 25px;
+    place-items: center;
+    color: white;
+    font-size: 39px;
+    font-weight: 800;
 }
 
-.card {
-    background: white;
+.profile-hero h2 {
+    font-size: 27px;
+    margin-bottom: 9px;
+}
+
+.profile-hero p {
+    font-size: 13px;
+    color: #d5e5ff;
+    margin: 5px 0;
+}
+
+.student-id {
+    display: inline-block;
+    margin-top: 5px;
+    padding: 5px 10px;
+    border-radius: 7px;
+    background: rgba(255,255,255,.12);
+    color: #e4efff;
+    font-size: 12px;
+}
+
+/* INFORMATION GRID */
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.panel {
+    background: rgba(255,255,255,.88);
+    border: 1px solid rgba(255,255,255,.95);
+    border-radius: 16px;
     padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px #ddd;
+    box-shadow: 0 8px 25px rgba(36,67,112,.07);
 }
 
-.card h2 {
-    color: #123c88;
-    margin-top: 0;
-    border-bottom: 1px solid #ddd;
-    padding-bottom: 12px;
+.panel h2 {
+    font-size: 20px;
+    color: #173b70;
+    padding-bottom: 15px;
+    margin-bottom: 10px;
+    border-bottom: 1px solid var(--border);
 }
-
-/* Details */
 
 .detail {
     display: flex;
+    align-items: flex-start;
     justify-content: space-between;
     gap: 20px;
-    padding: 13px 0;
-    border-bottom: 1px solid #eee;
+    padding: 14px 0;
+    border-bottom: 1px solid #edf1f7;
 }
 
 .detail:last-child {
@@ -256,694 +329,501 @@ body {
 }
 
 .label {
-    font-weight: bold;
-    color: #555;
+    font-weight: 650;
+    color: #52637b;
+    font-size: 13px;
+    flex-shrink: 0;
 }
 
 .value {
-    color: #333;
+    color: #172c4b;
+    font-size: 13px;
     text-align: right;
-    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
-/* Edit Button */
+.status {
+    display: inline-block;
+    padding: 5px 11px;
+    border-radius: 20px;
+    background: #d9f4e2;
+    color: #167444;
+    font-size: 11px;
+    font-weight: 800;
+}
 
-.edit-button {
-    margin-top: 20px;
-    padding: 12px 20px;
-    background: #1769e0;
-    color: white;
+/* BUTTONS */
+.actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.btn {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
     border: none;
-    border-radius: 6px;
+    border-radius: 9px;
+    padding: 12px 19px;
+    font-size: 13px;
+    font-weight: 700;
     cursor: pointer;
-    font-size: 15px;
+    transition: .2s;
 }
 
-.edit-button:hover {
-    background: #1258bd;
+.btn-primary {
+    background: linear-gradient(135deg, #1764d9, #348cf7);
+    color: white;
+    box-shadow: 0 5px 13px rgba(40,120,239,.18);
 }
 
-/* Edit Form */
+.btn-primary:hover {
+    transform: translateY(-2px);
+}
 
-.edit-form {
+.btn-secondary {
+    background: #edf3fb;
+    color: #24456f;
+}
+
+.btn-secondary:hover {
+    background: #dce9fb;
+}
+
+/* EDIT FORM */
+.edit-panel {
+    margin-top: 24px;
     display: none;
-    margin-top: 25px;
 }
 
-.edit-form.active {
+.edit-panel.active {
     display: block;
 }
 
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
 .form-group {
-    margin-bottom: 18px;
+    margin-bottom: 4px;
+}
+
+.form-group.full {
+    grid-column: 1 / -1;
 }
 
 .form-group label {
     display: block;
-    font-weight: bold;
-    margin-bottom: 7px;
+    margin-bottom: 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #52637b;
 }
 
 .form-group input,
 .form-group select,
 .form-group textarea {
     width: 100%;
-    padding: 11px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
+    padding: 12px 13px;
+    border: 1px solid #dbe4f0;
+    border-radius: 9px;
+    background: #fbfdff;
+    color: #172c4b;
+    font-family: inherit;
     font-size: 14px;
+    outline: none;
+    transition: border-color .2s, box-shadow .2s;
 }
 
 .form-group input:focus,
 .form-group select:focus,
 .form-group textarea:focus {
-    border-color: #1769e0;
-    outline: none;
+    border-color: #5a9bfa;
+    box-shadow: 0 0 0 3px rgba(40,120,239,.1);
 }
 
 .form-group textarea {
-    height: 90px;
+    min-height: 95px;
     resize: vertical;
 }
 
 .form-group small {
     display: block;
-    margin-top: 6px;
-    color: #777;
+    margin-top: 7px;
+    color: var(--muted);
+    font-size: 11px;
 }
 
-/* Save Button */
-
-.save-button {
-    padding: 12px 22px;
-    background: #27ae60;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 15px;
+/* FOOTER */
+.footer {
+    padding: 30px 10px 15px;
+    text-align: center;
+    color: #8292aa;
+    font-size: 11px;
 }
 
-.save-button:hover {
-    background: #219150;
-}
-
-/* Cancel Button */
-
-.cancel-button {
-    padding: 12px 22px;
-    background: #777;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-left: 8px;
-    font-size: 15px;
-}
-
-.cancel-button:hover {
-    background: #666;
-}
-
-/* Status */
-
-.status {
-    display: inline-block;
-    padding: 5px 12px;
-    background: #d4edda;
-    color: #155724;
-    border-radius: 15px;
-    font-size: 13px;
-    font-weight: bold;
-}
-
-/* Messages */
-
-.success {
-    background: #d4edda;
-    color: #155724;
-    padding: 12px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-}
-
-.error {
-    background: #f8d7da;
-    color: #721c24;
-    padding: 12px;
-    border-radius: 6px;
-    margin-bottom: 20px;
-}
-
-/* Back Button */
-
-.back {
-    display: inline-block;
-    margin-top: 25px;
-    color: #1769e0;
-    text-decoration: none;
-    font-weight: bold;
-}
-
-.back:hover {
-    text-decoration: underline;
-}
-
-/* Responsive */
-
-@media(max-width: 750px)
-{
-    .grid {
+/* RESPONSIVE */
+@media(max-width: 800px) {
+    .info-grid {
         grid-template-columns: 1fr;
     }
 
-    .profile-top {
-        flex-direction: column;
-        text-align: center;
+    .container {
+        margin-top: 25px;
+    }
+}
+
+@media(max-width: 520px) {
+    .topbar {
+        height: 65px;
+        padding: 0 13px;
     }
 
-    .header {
-        padding: 18px 20px;
+    .brand {
+        font-size: 17px;
+        gap: 7px;
+    }
+
+    .brand-mark {
+        width: 32px;
+        height: 32px;
+        font-size: 18px;
+    }
+
+    .dashboard-link {
+        padding: 9px 11px;
+        font-size: 11px;
     }
 
     .container {
-        margin-top: 20px;
+        padding: 0 13px;
+        margin-top: 23px;
+    }
+
+    .page-heading h1 {
+        font-size: 26px;
+    }
+
+    .profile-hero {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 22px;
+        gap: 16px;
+    }
+
+    .photo-wrap {
+        width: 94px;
+        height: 94px;
+    }
+
+    .profile-hero h2 {
+        font-size: 23px;
+    }
+
+    .panel {
+        padding: 19px;
+    }
+
+    .panel h2 {
+        font-size: 18px;
     }
 
     .detail {
-        flex-direction: column;
-        gap: 5px;
+        gap: 12px;
     }
 
-    .value {
-        text-align: left;
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full {
+        grid-column: auto;
+    }
+
+    .actions .btn {
+        width: 100%;
     }
 }
-
 </style>
 
 <script>
+function showEdit() {
+    document.getElementById("editForm").classList.add("active");
+    document.getElementById("editButton").style.display = "none";
 
-function showEdit()
-{
-    document.getElementById("editForm")
-            .classList.add("active");
-
-    document.getElementById("editButton")
-            .style.display = "none";
+    document.getElementById("editForm").scrollIntoView({
+        behavior: "smooth",
+        block: "start"
+    });
 }
 
-function hideEdit()
-{
-    document.getElementById("editForm")
-            .classList.remove("active");
-
-    document.getElementById("editButton")
-            .style.display = "inline-block";
+function hideEdit() {
+    document.getElementById("editForm").classList.remove("active");
+    document.getElementById("editButton").style.display = "inline-flex";
 }
 
+window.addEventListener("DOMContentLoaded", function () {
+    const params = new URLSearchParams(window.location.search);
+
+    if (params.get("edit") === "1") {
+        showEdit();
+    }
+});
 </script>
-
 </head>
 
 <body>
 
-<!-- Header -->
-
-<div class="header">
-
-    <div class="logo">
-        Campus<span>Connect</span>
-    </div>
-
-    <a href="student_dashboard.jsp">
-        Dashboard
+<header class="topbar">
+    <a href="student_dashboard.jsp" class="brand">
+        <div class="brand-mark">&#10022;</div>
+        <div>Campus<span>Connect</span></div>
     </a>
 
-</div>
+    <a href="student_dashboard.jsp" class="dashboard-link">
+        Dashboard
+    </a>
+</header>
 
+<main class="container">
 
-<!-- Main Container -->
-
-<div class="container">
-
-
-    <!-- Page Title -->
-
-    <div class="page-title">
-
-        <h1>My Profile &#128100;</h1>
-
-        <p>
-            View and manage your personal information
-        </p>
-
+    <div class="page-heading">
+        <div class="eyebrow">STUDENT ACCOUNT</div>
+        <h1>My Profile</h1>
+        <p>View and manage your personal information.</p>
     </div>
 
+    <% if ("1".equals(success)) { %>
+        <div class="message success">
+            Profile updated successfully.
+        </div>
+    <% } %>
 
-    <!-- Messages -->
+    <% if ("1".equals(error)) { %>
+        <div class="message error">
+            Unable to update profile. Please try again.
+        </div>
+    <% } else if ("2".equals(error)) { %>
+        <div class="message error">
+            Please select a valid JPG, JPEG or PNG image.
+        </div>
+    <% } else if ("3".equals(error)) { %>
+        <div class="message error">
+            Please enter a valid date of birth.
+        </div>
+    <% } %>
 
-<%
-    String success = request.getParameter("success");
-    String error = request.getParameter("error");
+    <!-- PROFILE HERO -->
+    <section class="profile-hero">
 
-    if("1".equals(success))
-    {
-%>
+        <div class="photo-wrap">
+            <% if (!profileImage.trim().isEmpty()) { %>
+                <img
+                    class="profile-photo"
+                    src="<%= request.getContextPath() %>/profile_images/<%= URLEncoder.encode(profileImage, StandardCharsets.UTF_8.name()) %>"
+                    alt="Student Profile Photo">
+            <% } else { %>
+                <div class="profile-initial"><%= firstLetter %></div>
+            <% } %>
+        </div>
 
-    <div class="success">
-        Profile updated successfully.
-    </div>
+        <div>
+            <h2><%= name.isEmpty() ? "Student" : name %></h2>
 
-<%
-    }
+            <p>
+                <%= courseName.isEmpty() ? "Course not available" : courseName %>
+            </p>
 
-    if("1".equals(error))
-    {
-%>
+            <p>
+                <%= collegeName.isEmpty() ? "College not available" : collegeName %>
+            </p>
 
-    <div class="error">
-        Unable to update profile. Please try again.
-    </div>
+            <span class="student-id">
+                Student ID: <%= studentId %>
+            </span>
 
-<%
-    }
-
-    if("2".equals(error))
-    {
-%>
-
-    <div class="error">
-        Please select a JPG, JPEG or PNG image.
-    </div>
-
-<%
-    }
-
-    if("3".equals(error))
-    {
-%>
-
-    <div class="error">
-        Please enter a valid date of birth.
-    </div>
-
-<%
-    }
-%>
-
-
-    <!-- Profile Header -->
-
-    <div class="profile-top">
-
-        <div class="profile-photo">
-
-<%
-            if(profileImage != null &&
-               !profileImage.equals(""))
-            {
-%>
-
-            <img src="profile_images/<%=profileImage%>"
-                 alt="Profile Photo">
-
-<%
-            }
-            else
-            {
-%>
-
-            <div class="profile-circle">
-
-                <%=name.length() > 0
-                    ? name.substring(0,1).toUpperCase()
-                    : "S"%>
-
+            <div class="actions">
+                <button type="button" id="editButton"
+                        class="btn btn-primary" onclick="showEdit()">
+                    Edit Profile
+                </button>
             </div>
-
-<%
-            }
-%>
-
         </div>
 
+    </section>
 
-        <div class="profile-info">
+    <!-- INFORMATION CARDS -->
+    <section class="info-grid">
 
-            <h2>
-                <%=name%>
-            </h2>
-
-            <p>
-                Student ID:
-                <strong><%=studentId%></strong>
-            </p>
-
-            <p>
-                <%=courseName%>
-            </p>
-
-        </div>
-
-    </div>
-
-
-    <!-- Information Cards -->
-
-    <div class="grid">
-
-
-        <!-- Personal Information -->
-
-        <div class="card">
-
+        <div class="panel">
             <h2>Personal Information</h2>
 
-
             <div class="detail">
-
-                <span class="label">
-                    Name
-                </span>
-
-                <span class="value">
-                    <%=name%>
-                </span>
-
+                <span class="label">Name</span>
+                <span class="value"><%= name.isEmpty() ? "Not provided" : name %></span>
             </div>
 
-
             <div class="detail">
-
-                <span class="label">
-                    Email
-                </span>
-
-                <span class="value">
-                    <%=email%>
-                </span>
-
+                <span class="label">Email</span>
+                <span class="value"><%= email.isEmpty() ? "Not provided" : email %></span>
             </div>
 
-
             <div class="detail">
-
-                <span class="label">
-                    Phone
-                </span>
-
-                <span class="value">
-                    <%=phone%>
-                </span>
-
+                <span class="label">Phone</span>
+                <span class="value"><%= phone.isEmpty() ? "Not provided" : phone %></span>
             </div>
 
-
             <div class="detail">
-
-                <span class="label">
-                    Date of Birth
-                </span>
-
-                <span class="value">
-                    <%=dob%>
-                </span>
-
+                <span class="label">Date of Birth</span>
+                <span class="value"><%= dob.isEmpty() ? "Not provided" : dob %></span>
             </div>
 
-
             <div class="detail">
-
-                <span class="label">
-                    Gender
-                </span>
-
-                <span class="value">
-                    <%=gender%>
-                </span>
-
+                <span class="label">Gender</span>
+                <span class="value"><%= gender.isEmpty() ? "Not provided" : gender %></span>
             </div>
 
-
             <div class="detail">
-
-                <span class="label">
-                    Address
-                </span>
-
-                <span class="value">
-                    <%=address%>
-                </span>
-
+                <span class="label">Address</span>
+                <span class="value"><%= address.isEmpty() ? "Not provided" : address %></span>
             </div>
-
-
-            <button id="editButton"
-                    class="edit-button"
-                    onclick="showEdit()">
-
-                Edit Profile
-
-            </button>
-
         </div>
 
-
-        <!-- Academic Information -->
-
-        <div class="card">
-
+        <div class="panel">
             <h2>Academic Information</h2>
 
-
             <div class="detail">
-
-                <span class="label">
-                    College
-                </span>
-
-                <span class="value">
-                    <%=collegeName%>
-                </span>
-
+                <span class="label">College</span>
+                <span class="value"><%= collegeName.isEmpty() ? "Not available" : collegeName %></span>
             </div>
 
-
             <div class="detail">
-
-                <span class="label">
-                    Course
-                </span>
-
-                <span class="value">
-                    <%=courseName%>
-                </span>
-
+                <span class="label">Course</span>
+                <span class="value"><%= courseName.isEmpty() ? "Not available" : courseName %></span>
             </div>
 
-
             <div class="detail">
-
-                <span class="label">
-                    Admission Date
-                </span>
-
-                <span class="value">
-                    <%=admissionDate%>
-                </span>
-
+                <span class="label">Admission Date</span>
+                <span class="value"><%= admissionDate.isEmpty() ? "Not available" : admissionDate %></span>
             </div>
 
-
             <div class="detail">
-
-                <span class="label">
-                    Student Status
-                </span>
-
+                <span class="label">Student Status</span>
                 <span class="value">
-
-                    <span class="status">
-                        <%=status%>
-                    </span>
-
+                    <span class="status"><%= status.isEmpty() ? "UNKNOWN" : status %></span>
                 </span>
-
             </div>
-
         </div>
 
-    </div>
+    </section>
 
-
-    <!-- Edit Profile Form -->
-
-    <div id="editForm"
-         class="card edit-form">
+    <!-- EDIT PROFILE FORM -->
+    <section id="editForm" class="panel edit-panel">
 
         <h2>Edit Personal Information</h2>
 
-
-        <form action="StudentProfileServlet"
+        <form action="<%= request.getContextPath() %>/StudentProfileServlet"
               method="post"
               enctype="multipart/form-data">
 
+            <div class="form-grid">
 
-            <!-- Profile Photo -->
+                <div class="form-group full">
+                    <label for="profileImage">Profile Photo</label>
+                    <input type="file"
+                           id="profileImage"
+                           name="profileImage"
+                           accept=".jpg,.jpeg,.png">
+                    <small>JPG, JPEG or PNG only. Follow the size limit enforced by your servlet.</small>
+                </div>
 
-            <div class="form-group">
+                <div class="form-group">
+                    <label for="name">Full Name</label>
+                    <input type="text"
+                           id="name"
+                           name="name"
+                           value="<%= name %>"
+                           required>
+                </div>
 
-                <label>
-                    Profile Photo &#128100;
-                </label>
+                <div class="form-group">
+                    <label for="phone">Phone Number</label>
+                    <input type="text"
+                           id="phone"
+                           name="phone"
+                           value="<%= phone %>"
+                           maxlength="10"
+                           pattern="[0-9]{10}"
+                           title="Enter a 10-digit phone number"
+                           required>
+                </div>
 
-                <input type="file"
-                       name="profileImage"
-                       accept=".jpg,.jpeg,.png">
+                <div class="form-group">
+                    <label for="dob">Date of Birth</label>
+                    <input type="date"
+                           id="dob"
+                           name="dob"
+                           value="<%= dob %>"
+                           required>
+                </div>
 
-                <small>
-                    JPG, JPEG or PNG only. Maximum size 5 MB.
-                </small>
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" name="gender" required>
+                        <option value="">Select Gender</option>
 
-            </div>
+                        <option value="Male"
+                            <%= "Male".equals(gender) ? "selected" : "" %>>
+                            Male
+                        </option>
 
+                        <option value="Female"
+                            <%= "Female".equals(gender) ? "selected" : "" %>>
+                            Female
+                        </option>
 
-            <!-- Name -->
+                        <option value="Other"
+                            <%= "Other".equals(gender) ? "selected" : "" %>>
+                            Other
+                        </option>
+                    </select>
+                </div>
 
-            <div class="form-group">
-
-                <label>
-                    Name
-                </label>
-
-                <input type="text"
-                       name="name"
-                       value="<%=name%>"
-                       required>
-
-            </div>
-
-
-            <!-- Phone -->
-
-            <div class="form-group">
-
-                <label>
-                    Phone
-                </label>
-
-                <input type="text"
-                       name="phone"
-                       value="<%=phone%>"
-                       maxlength="10"
-                       pattern="[0-9]{10}"
-                       required>
-
-            </div>
-
-
-            <!-- Date of Birth -->
-
-            <div class="form-group">
-
-                <label>
-                    Date of Birth
-                </label>
-
-                <input type="date"
-                       name="dob"
-                       value="<%=dob%>"
-                       required>
-
-            </div>
-
-
-            <!-- Gender -->
-
-            <div class="form-group">
-
-                <label>
-                    Gender
-                </label>
-
-                <select name="gender" required>
-
-                    <option value="">
-                        Select Gender
-                    </option>
-
-                    <option value="Male"
-                        <%= "Male".equals(gender)
-                            ? "selected" : "" %>>
-                        Male
-                    </option>
-
-                    <option value="Female"
-                        <%= "Female".equals(gender)
-                            ? "selected" : "" %>>
-                        Female
-                    </option>
-
-                    <option value="Other"
-                        <%= "Other".equals(gender)
-                            ? "selected" : "" %>>
-                        Other
-                    </option>
-
-                </select>
+                <div class="form-group full">
+                    <label for="address">Address</label>
+                    <textarea id="address"
+                              name="address"
+                              required><%= address %></textarea>
+                </div>
 
             </div>
 
+            <div class="actions">
+                <button type="submit" class="btn btn-primary">
+                    Save Changes
+                </button>
 
-            <!-- Address -->
-
-            <div class="form-group">
-
-                <label>
-                    Address
-                </label>
-
-                <textarea name="address"
-                          required><%=address%></textarea>
-
+                <button type="button"
+                        class="btn btn-secondary"
+                        onclick="hideEdit()">
+                    Cancel
+                </button>
             </div>
-
-
-            <!-- Buttons -->
-
-            <button type="submit"
-                    class="save-button">
-
-                Save Changes
-
-            </button>
-
-
-            <button type="button"
-                    class="cancel-button"
-                    onclick="hideEdit()">
-
-                Cancel
-
-            </button>
 
         </form>
+    </section>
 
-    </div>
+    <footer class="footer">
+        CampusConnect Student Portal
+        <br>
+        Campus Recruitment Management System
+    </footer>
 
-
-    <!-- Back -->
-
-    <a href="student_dashboard.jsp"
-       class="back">
-
-        Back to Dashboard
-
-    </a>
-
-</div>
+</main>
 
 </body>
-
 </html>
