@@ -1,24 +1,23 @@
+<%@ page language="java"
+    contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+
 <%
-    Object idObj = request.getAttribute("admissionId");
+    Object admissionIdObj = request.getAttribute("admissionId");
     Object nameObj = request.getAttribute("name");
     Object emailObj = request.getAttribute("email");
-    Object collegeIdObj = request.getAttribute("collegeId");
 
     String admissionId =
-        idObj != null ? idObj.toString() : "";
+        admissionIdObj != null ? admissionIdObj.toString() : "";
 
     String name =
         nameObj != null ? nameObj.toString() : "";
 
     String email =
         emailObj != null ? emailObj.toString() : "";
-
-    String collegeId =
-        collegeIdObj != null ? collegeIdObj.toString() : "";
 %>
 
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -28,552 +27,226 @@
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0">
 
-<title>
-    Admission Submitted | CampusConnect
-</title>
+<title>Admission Request Submitted</title>
 
 <style>
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
+*{
+    box-sizing:border-box;
 }
 
-body {
-    background: #f4f7fb;
-    color: #26364f;
+body{
+    margin:0;
+    font-family:Arial,sans-serif;
+    background:#f4f7fb;
 }
 
-
-/* HEADER */
-
-.header {
-    background: linear-gradient(
-        135deg,
-        #123c88,
-        #1769e0
-    );
-
-    color: white;
-
-    padding: 20px 7%;
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
+.header{
+    background:linear-gradient(135deg,#123c88,#1769e0);
+    color:white;
+    text-align:center;
+    padding:25px;
 }
 
-.logo {
-    font-size: 27px;
-    font-weight: bold;
+.header h1{
+    margin:0;
 }
 
-.logo span {
-    color: #a9d0ff;
+.container{
+    width:650px;
+    max-width:94%;
+    margin:50px auto;
 }
 
-.home-btn {
-    color: white;
-
-    text-decoration: none;
-
-    border: 1px solid rgba(255,255,255,0.7);
-
-    padding: 10px 17px;
-
-    border-radius: 7px;
-
-    font-size: 14px;
+.card{
+    background:white;
+    padding:35px;
+    border-radius:15px;
+    box-shadow:0 8px 25px rgba(30,60,100,0.10);
+    text-align:center;
 }
 
-.home-btn:hover {
-    background: rgba(255,255,255,0.15);
+.success-icon{
+    width:70px;
+    height:70px;
+    line-height:70px;
+    margin:0 auto 20px;
+    border-radius:50%;
+    background:#e6f7ed;
+    color:#21854b;
+    font-size:38px;
+    font-weight:bold;
 }
 
-
-/* MAIN */
-
-.container {
-    width: 90%;
-
-    max-width: 850px;
-
-    margin: 55px auto;
+h2{
+    color:#173c76;
 }
 
-
-/* SUCCESS CARD */
-
-.success-card {
-    background: white;
-
-    border-radius: 18px;
-
-    border: 1px solid #e2e8f0;
-
-    box-shadow:
-        0 10px 30px rgba(30,60,100,0.10);
-
-    padding: 45px 45px;
-
-    text-align: center;
+.message{
+    color:#667085;
+    line-height:1.6;
 }
 
-
-/* SUCCESS ICON */
-
-.success-icon {
-    width: 85px;
-    height: 85px;
-
-    margin: 0 auto 25px;
-
-    border-radius: 50%;
-
-    background: #e5f8ed;
-
-    color: #20a05a;
-
-    font-size: 55px;
-
-    font-weight: bold;
-
-    display: flex;
-
-    align-items: center;
-
-    justify-content: center;
+.request-box{
+    background:#f7faff;
+    border:1px solid #dfe8f5;
+    border-radius:10px;
+    padding:20px;
+    margin:25px 0;
+    text-align:left;
 }
 
-
-/* TITLE */
-
-.success-card h1 {
-    color: #173c76;
-
-    font-size: 34px;
-
-    margin-bottom: 12px;
+.row{
+    display:flex;
+    justify-content:space-between;
+    padding:12px 5px;
+    border-bottom:1px solid #e7edf5;
 }
 
-.subtitle {
-    color: #718096;
-
-    font-size: 15px;
-
-    margin-bottom: 32px;
+.row:last-child{
+    border-bottom:none;
 }
 
-
-/* DETAILS */
-
-.details {
-    text-align: left;
-
-    background: #f7faff;
-
-    border: 1px solid #e2e9f3;
-
-    border-radius: 12px;
-
-    padding: 10px 25px;
-
-    margin-bottom: 25px;
+.label{
+    color:#8995a7;
 }
 
-.row {
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    padding: 17px 5px;
-
-    border-bottom: 1px solid #e2e9f3;
+.value{
+    font-weight:bold;
+    color:#173c76;
 }
 
-.row:last-child {
-    border-bottom: none;
+.request-id{
+    color:#1769e0;
+    font-size:20px;
 }
 
-.label {
-    color: #8995a7;
-
-    font-size: 14px;
+.buttons{
+    display:flex;
+    gap:12px;
+    justify-content:center;
+    flex-wrap:wrap;
 }
 
-.value {
-    color: #344b68;
-
-    font-size: 15px;
-
-    font-weight: bold;
-
-    text-align: right;
+.btn{
+    display:inline-block;
+    padding:12px 20px;
+    border-radius:7px;
+    text-decoration:none;
+    font-weight:bold;
 }
 
-
-/* STATUS */
-
-.status {
-    display: inline-block;
-
-    padding: 7px 16px;
-
-    border-radius: 20px;
-
-    background: #fff3d4;
-
-    color: #a36b00;
-
-    font-size: 12px;
-
-    font-weight: bold;
+.primary{
+    background:#1769e0;
+    color:white;
 }
 
-
-/* NEXT STEP */
-
-.next-box {
-    text-align: left;
-
-    background: #f0f6ff;
-
-    border-left: 4px solid #1769e0;
-
-    padding: 17px;
-
-    border-radius: 7px;
-
-    color: #536984;
-
-    font-size: 13px;
-
-    line-height: 1.6;
-
-    margin-bottom: 25px;
+.secondary{
+    background:#eef3f9;
+    color:#173c76;
 }
 
-.next-box b {
-    color: #173c76;
-
-    font-size: 15px;
-}
-
-
-/* BUTTONS */
-
-.buttons {
-    display: flex;
-
-    gap: 14px;
-
-    justify-content: center;
-}
-
-.track-btn {
-    flex: 1;
-
-    max-width: 300px;
-
-    padding: 14px 20px;
-
-    border-radius: 8px;
-
-    background: #1769e0;
-
-    color: white;
-
-    text-decoration: none;
-
-    font-size: 14px;
-
-    font-weight: bold;
-}
-
-.track-btn:hover {
-    background: #0d54bd;
-}
-
-.colleges-btn {
-    flex: 1;
-
-    max-width: 300px;
-
-    padding: 14px 20px;
-
-    border-radius: 8px;
-
-    border: 1px solid #1769e0;
-
-    background: white;
-
-    color: #1769e0;
-
-    text-decoration: none;
-
-    font-size: 14px;
-
-    font-weight: bold;
-}
-
-.colleges-btn:hover {
-    background: #f0f6ff;
-}
-
-
-/* FOOTER */
-
-.footer {
-    margin-top: 60px;
-
-    background: #123c88;
-
-    color: #dceaff;
-
-    text-align: center;
-
-    padding: 20px;
-
-    font-size: 13px;
-}
-
-
-/* MOBILE */
-
-@media(max-width:650px)
-{
-    .success-card {
-        padding: 30px 20px;
-    }
-
-    .success-card h1 {
-        font-size: 27px;
-    }
-
-    .row {
-        flex-direction: column;
-
-        align-items: flex-start;
-
-        gap: 6px;
-    }
-
-    .value {
-        text-align: left;
-    }
-
-    .buttons {
-        flex-direction: column;
-    }
-
-    .track-btn,
-    .colleges-btn {
-        max-width: 100%;
-        width: 100%;
-    }
+.note{
+    margin-top:20px;
+    padding:15px;
+    background:#fff9e8;
+    color:#806000;
+    border-radius:8px;
+    text-align:left;
+    font-size:14px;
 }
 
 </style>
 
 </head>
 
-
 <body>
 
 
-<!-- HEADER -->
-
 <div class="header">
 
-    <div class="logo">
+    <h1>CampusConnect</h1>
 
-        Campus<span>Connect</span>
-
-    </div>
-
-
-    <a href="index.jsp"
-       class="home-btn">
-
-        Home
-
-    </a>
+    <p>Admission Request</p>
 
 </div>
 
-
-<!-- MAIN -->
 
 <div class="container">
 
+<div class="card">
 
-    <div class="success-card">
+
+    <div class="success-icon">
+        ✓
+    </div>
 
 
-        <!-- SUCCESS ICON -->
+    <h2>
+        Admission Request Submitted
+    </h2>
 
-        <div class="success-icon">
 
-            ✓
+    <p class="message">
+
+        Your admission request has been successfully
+        submitted and is currently waiting for
+        College Admin approval.
+
+    </p>
+
+
+    <div class="request-box">
+
+
+        <div class="row">
+
+            <span class="label">
+                Request ID
+            </span>
+
+            <span class="value request-id">
+                <%= admissionId %>
+            </span>
 
         </div>
 
 
-        <!-- TITLE -->
+        <div class="row">
 
-        <h1>
+            <span class="label">
+                Applicant Name
+            </span>
 
-            Admission Request Submitted Successfully
-
-        </h1>
-
-
-        <p class="subtitle">
-
-            Your admission request has been successfully
-            submitted to the selected college.
-
-        </p>
-
-
-        <!-- DETAILS -->
-
-        <div class="details">
-
-
-            <div class="row">
-
-                <span class="label">
-
-                    Request ID
-
-                </span>
-
-                <span class="value">
-
-                    <%= admissionId %>
-
-                </span>
-
-            </div>
-
-
-            <div class="row">
-
-                <span class="label">
-
-                    Applicant Name
-
-                </span>
-
-                <span class="value">
-
-                    <%= name %>
-
-                </span>
-
-            </div>
-
-
-            <div class="row">
-
-                <span class="label">
-
-                    Email
-
-                </span>
-
-                <span class="value">
-
-                    <%= email %>
-
-                </span>
-
-            </div>
-
-
-            <div class="row">
-
-                <span class="label">
-
-                    College ID
-
-                </span>
-
-                <span class="value">
-
-                    <%= collegeId %>
-
-                </span>
-
-            </div>
-
-
-            <div class="row">
-
-                <span class="label">
-
-                    Application Status
-
-                </span>
-
-                <span class="value">
-
-                    <span class="status">
-
-                        PENDING
-
-                    </span>
-
-                </span>
-
-            </div>
-
+            <span class="value">
+                <%= name %>
+            </span>
 
         </div>
 
 
-        <!-- NEXT STEP -->
+        <div class="row">
 
-        <div class="next-box">
+            <span class="label">
+                Email
+            </span>
 
-            <b>What happens next?</b>
-
-            <br>
-
-            Your request will be reviewed by the college
-            administrator. After approval, you can check
-            your admission status and pay the admission fee.
+            <span class="value">
+                <%= email %>
+            </span>
 
         </div>
 
 
-        <!-- BUTTONS -->
+        <div class="row">
 
-        <div class="buttons">
+            <span class="label">
+                Status
+            </span>
 
-
-            <a href="admission_status.jsp?admissionId=<%= admissionId %>"
-               class="track-btn">
-
-                Track Admission Status
-
-            </a>
-
-
-            <a href="new_student_colleges.jsp"
-               class="colleges-btn">
-
-                View Available Colleges
-
-            </a>
-
+            <span class="value">
+                PENDING
+            </span>
 
         </div>
 
@@ -581,18 +254,47 @@ body {
     </div>
 
 
+    <div class="note">
+
+        <b>Important:</b>
+
+        Please remember your
+        <b>Request ID</b> and
+        <b>Email ID</b>.
+
+        You can use them later to check your
+        admission status. You do not need to
+        submit the admission request again.
+
+    </div>
+
+
+    <br>
+
+
+    <div class="buttons">
+
+        <a href="admission_status.jsp?admissionId=<%= admissionId %>"
+           class="btn primary">
+
+            View Status
+
+        </a>
+
+
+        <a href="new_student_check_status.jsp"
+           class="btn secondary">
+
+            Track Later
+
+        </a>
+
+    </div>
+
+
 </div>
 
-
-<!-- FOOTER -->
-
-<div class="footer">
-
-    CampusConnect |
-    Campus Recruitment Management System
-
 </div>
-
 
 </body>
 

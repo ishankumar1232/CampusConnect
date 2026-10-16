@@ -473,13 +473,22 @@
 </servlet-mapping>
 <servlet>
     <servlet-name>CollegeProfileController</servlet-name>
+
     <servlet-class>
         com.campusconnect.controller.CollegeProfileController
     </servlet-class>
+
+    <multipart-config>
+        <max-file-size>10485760</max-file-size>
+        <max-request-size>20971520</max-request-size>
+        <file-size-threshold>1048576</file-size-threshold>
+    </multipart-config>
+
 </servlet>
 
 <servlet-mapping>
     <servlet-name>CollegeProfileController</servlet-name>
+
     <url-pattern>/CollegeProfileController</url-pattern>
 </servlet-mapping>
 <servlet>
@@ -504,6 +513,16 @@
     <servlet-name>StudentProfileServlet</servlet-name>
     <url-pattern>/StudentProfileServlet</url-pattern>
 </servlet-mapping>
+<servlet>
+    <servlet-name>NewStudentCheckStatus</servlet-name>
+    <servlet-class>com.campusconnect.controller.NewStudentCheckStatus</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>NewStudentCheckStatus</servlet-name>
+    <url-pattern>/newStudentCheckStatus</url-pattern>
+</servlet-mapping>
+
 </web-app>
 
  

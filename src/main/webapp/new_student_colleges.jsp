@@ -1,8 +1,11 @@
+<%@ page language="java"
+    contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
+
 <%@ page import="java.sql.*" %>
 
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
@@ -14,460 +17,972 @@
 
 <style>
 
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-    font-family: Arial, sans-serif;
+/* =========================================================
+   CAMPUSCONNECT VISUAL STYLE
+   Based on the supplied CampusConnect index.jsp
+========================================================= */
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
 }
 
-body {
-    background: #f4f7fb;
-    color: #26364f;
+html{
+    scroll-behavior:smooth;
 }
 
-/* HEADER */
-
-.header {
-    background: linear-gradient(135deg, #123c88, #1769e0);
-    color: white;
-    padding: 20px 7%;
-
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+body{
+    min-height:100vh;
+    overflow-x:hidden;
+    background:#f5f8fc;
+    color:#102846;
+    font-family:Arial, Helvetica, sans-serif;
+    -webkit-font-smoothing:antialiased;
 }
 
-.logo {
-    font-size: 27px;
-    font-weight: bold;
+a{
+    text-decoration:none;
+    color:inherit;
 }
 
-.logo span {
-    color: #a9d0ff;
+/* ================= NAVBAR ================= */
+
+.navbar{
+    width:100%;
+    padding:18px 0;
+    background:#061b34;
+    box-shadow:0 10px 30px rgba(0,20,45,.16);
 }
 
-.home-btn {
-    color: white;
-    text-decoration: none;
+.nav-inner{
+    width:min(1180px,92%);
+    margin:auto;
+    padding:9px 10px 9px 14px;
 
-    border: 1px solid rgba(255,255,255,0.7);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
 
-    padding: 10px 17px;
+    border-radius:15px;
 
-    border-radius: 7px;
-
-    font-size: 14px;
-}
-
-.home-btn:hover {
-    background: rgba(255,255,255,0.15);
-}
-
-
-/* MAIN */
-
-.container {
-    width: 90%;
-    max-width: 1150px;
-    margin: 45px auto;
-}
-
-
-/* TITLE */
-
-.page-title {
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.page-title h1 {
-    color: #173c76;
-    font-size: 36px;
-    margin-bottom: 10px;
-}
-
-.page-title p {
-    color: #718096;
-    font-size: 15px;
-}
-
-
-/* SEARCH */
-
-.search-box {
-    background: white;
-
-    padding: 18px;
-
-    border-radius: 12px;
-
-    border: 1px solid #e2e8f0;
-
-    margin-bottom: 30px;
-
-    box-shadow: 0 5px 20px rgba(30,60,100,0.06);
-}
-
-.search-input {
-    width: 100%;
-
-    padding: 13px 16px;
-
-    border: 1px solid #d6dfeb;
-
-    border-radius: 8px;
-
-    outline: none;
-
-    font-size: 14px;
-}
-
-.search-input:focus {
-    border-color: #1769e0;
+    background:rgba(5,24,45,.72);
+    border:1px solid rgba(255,255,255,.12);
 
     box-shadow:
-    0 0 0 3px rgba(23,105,224,0.10);
+        0 12px 34px rgba(0,11,30,.16);
 }
 
-
-/* COLLEGE GRID */
-
-.college-grid {
-    display: grid;
-
-    grid-template-columns:
-    repeat(3, 1fr);
-
-    gap: 25px;
+.brand{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    color:#fff;
 }
 
+.brand-box{
+    width:38px;
+    height:38px;
 
-/* CARD */
+    display:flex;
+    align-items:center;
+    justify-content:center;
 
-.college-card {
-    background: white;
+    border-radius:10px;
 
-    border-radius: 15px;
+    background:rgba(255,255,255,.13);
+    border:1px solid rgba(255,255,255,.18);
 
-    overflow: hidden;
-
-    border: 1px solid #e2e8f0;
+    color:#fff;
+    font-size:10px;
+    font-weight:900;
 
     box-shadow:
-    0 7px 25px rgba(30,60,100,0.08);
-
-    transition: 0.3s;
+        inset 0 1px 0 rgba(255,255,255,.22),
+        0 8px 18px rgba(0,0,0,.12);
 }
 
-.college-card:hover {
-    transform: translateY(-5px);
+.brand-name{
+    font-size:18px;
+    font-weight:800;
+    letter-spacing:-.5px;
+}
+
+.brand-name span{
+    font-weight:400;
+    opacity:.68;
+}
+
+.back-home{
+    padding:10px 16px;
+
+    color:#12365c;
+    background:#fff;
+
+    border-radius:9px;
+
+    font-size:11px;
+    font-weight:800;
+
+    transition:.2s ease;
+}
+
+.back-home:hover{
+    color:#0b3561;
+    background:#eaf4ff;
+    transform:translateY(-1px);
+    box-shadow:0 9px 20px rgba(0,0,0,.17);
+}
+
+/* ================= HERO ================= */
+
+.page-hero{
+    position:relative;
+    overflow:hidden;
+
+    min-height:350px;
+
+    display:flex;
+    align-items:center;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(3,18,38,.97) 0%,
+            rgba(3,18,38,.90) 45%,
+            rgba(3,18,38,.48) 75%,
+            rgba(3,18,38,.15) 100%
+        ),
+        url("<%=request.getContextPath()%>/image/college-banner.png");
+
+    background-size:cover;
+    background-position:center;
+}
+
+.page-hero::after{
+    content:"";
+
+    position:absolute;
+    width:430px;
+    height:430px;
+
+    right:-170px;
+    top:-180px;
+
+    border-radius:50%;
+
+    border:70px solid rgba(100,175,255,.055);
+}
+
+.hero-content{
+    width:min(1180px,92%);
+    margin:auto;
+    position:relative;
+    z-index:2;
+}
+
+.eyebrow{
+    display:inline-flex;
+    align-items:center;
+    gap:9px;
+
+    padding:8px 13px;
+
+    color:#d7eaff;
+    background:rgba(255,255,255,.08);
+
+    border:1px solid rgba(255,255,255,.17);
+    border-radius:30px;
+
+    font-size:9px;
+    font-weight:900;
+    letter-spacing:1.5px;
+
+    box-shadow:0 7px 18px rgba(18,78,139,.08);
+}
+
+.eyebrow-dot{
+    width:7px;
+    height:7px;
+    border-radius:50%;
+    background:#62adff;
 
     box-shadow:
-    0 14px 35px rgba(30,60,100,0.13);
+        0 0 0 5px rgba(98,173,255,.10),
+        0 0 14px rgba(98,173,255,.70);
 }
 
+.page-hero h1{
+    max-width:760px;
+    margin-top:23px;
 
-/* IMAGE */
+    color:#fff;
 
-.college-image {
-    width: 100%;
-    height: 190px;
-
-    background: #e7f0ff;
+    font-size:clamp(43px,5vw,66px);
+    line-height:.98;
+    letter-spacing:-3px;
+    font-weight:800;
 }
 
-.college-image img {
-    width: 100%;
-    height: 100%;
-
-    object-fit: cover;
+.page-hero h1 span{
+    color:#64adff;
 }
 
+.hero-description{
+    max-width:600px;
+    margin-top:20px;
 
-/* CONTENT */
+    color:#c7d8e9;
 
-.card-content {
-    padding: 21px;
+    font-size:14px;
+    line-height:1.8;
 }
 
-.college-name {
-    color: #173c76;
+/* ================= MAIN ================= */
 
-    font-size: 20px;
+.main{
+    padding:70px 0 95px;
 
-    line-height: 1.35;
-
-    margin-bottom: 10px;
+    background:
+        radial-gradient(
+            circle at 90% 0%,
+            rgba(40,125,235,.07),
+            transparent 28%
+        ),
+        #f5f8fc;
 }
 
-.location {
-    color: #68778d;
-
-    font-size: 13px;
-
-    margin-bottom: 18px;
+.container{
+    width:min(1180px,92%);
+    margin:auto;
 }
 
+/* ================= TOP CONTROL CARD ================= */
 
-/* INFORMATION */
+.control-card{
+    padding:28px;
 
-.info {
-    border-top: 1px solid #edf0f5;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:25px;
 
-    padding-top: 14px;
+    background:#fff;
 
-    margin-bottom: 17px;
+    border:1px solid #dce6ef;
+    border-radius:20px;
+
+    box-shadow:
+        0 12px 35px rgba(20,55,90,.055);
+
+    margin-bottom:30px;
 }
 
-.info-row {
-    display: flex;
-
-    margin-bottom: 9px;
-
-    font-size: 13px;
+.control-text h2{
+    color:#102846;
+    font-size:25px;
+    letter-spacing:-1px;
+    margin-bottom:8px;
 }
 
-.info-label {
-    width: 65px;
-
-    color: #929dad;
+.control-text p{
+    color:#71849a;
+    font-size:12px;
+    line-height:1.7;
 }
 
-.info-value {
-    flex: 1;
+.status-button{
+    flex-shrink:0;
 
-    color: #465a75;
+    display:inline-flex;
+    align-items:center;
+    gap:10px;
 
-    word-break: break-word;
+    padding:13px 18px;
+
+    color:#fff;
+    background:#2479eb;
+
+    border-radius:10px;
+
+    font-size:11px;
+    font-weight:800;
+
+    box-shadow:
+        0 10px 25px rgba(36,121,235,.22);
+
+    transition:.22s ease;
 }
 
-
-/* BUTTON */
-
-.view-btn {
-    display: block;
-
-    width: 100%;
-
-    text-align: center;
-
-    text-decoration: none;
-
-    background: #1769e0;
-
-    color: white;
-
-    padding: 12px;
-
-    border-radius: 8px;
-
-    font-size: 13px;
-
-    font-weight: bold;
+.status-button:hover{
+    background:#166bdc;
+    transform:translateY(-2px);
 }
 
-.view-btn:hover {
-    background: #0d54bd;
+/* ================= SEARCH ================= */
+
+.search-panel{
+    margin-bottom:30px;
 }
 
-
-/* NO COLLEGE */
-
-.no-college {
-    grid-column: 1 / -1;
-
-    background: white;
-
-    padding: 50px;
-
-    text-align: center;
-
-    border-radius: 15px;
-
-    border: 1px solid #e2e8f0;
+.search-box{
+    position:relative;
+    max-width:700px;
 }
 
-.no-college h2 {
-    color: #173c76;
+.search-box input{
+    width:100%;
 
-    margin-bottom: 10px;
+    padding:16px 18px 16px 48px;
+
+    border:1px solid #dce6ef;
+    border-radius:12px;
+
+    background:#fff;
+
+    color:#263c55;
+    font-size:13px;
+
+    outline:none;
+
+    box-shadow:
+        0 8px 25px rgba(20,55,90,.04);
+
+    transition:.2s ease;
 }
 
-.no-college p {
-    color: #718096;
+.search-box input:focus{
+    border-color:#2479eb;
+
+    box-shadow:
+        0 0 0 4px rgba(36,121,235,.10),
+        0 10px 28px rgba(20,55,90,.07);
 }
 
+.search-icon{
+    position:absolute;
+    left:17px;
+    top:50%;
 
-/* FOOTER */
+    transform:translateY(-50%);
 
-.footer {
-    margin-top: 60px;
+    color:#2479eb;
+    font-size:16px;
 
-    background: #123c88;
-
-    color: #dceaff;
-
-    text-align: center;
-
-    padding: 20px;
-
-    font-size: 13px;
+    pointer-events:none;
 }
 
+/* ================= GRID ================= */
 
-/* RESPONSIVE */
+.college-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:20px;
+}
 
-@media(max-width: 900px) {
+/* ================= COLLEGE CARD ================= */
 
-    .college-grid {
-        grid-template-columns: repeat(2, 1fr);
+.college-card{
+    position:relative;
+
+    overflow:hidden;
+
+    min-width:0;
+
+    background:#fff;
+
+    border:1px solid #dce5ee;
+    border-radius:21px;
+
+    box-shadow:
+        0 12px 35px rgba(20,55,90,.055);
+
+    transition:.28s ease;
+}
+
+.college-card:hover{
+    transform:translateY(-6px);
+
+    border-color:#c9def2;
+
+    box-shadow:
+        0 24px 55px rgba(20,55,90,.11);
+}
+
+.college-card::before{
+    content:"";
+
+    position:absolute;
+    z-index:8;
+
+    top:0;
+    right:22px;
+    left:22px;
+
+    height:3px;
+
+    border-radius:0 0 4px 4px;
+
+    background:#2479eb;
+
+    opacity:0;
+
+    transform:scaleX(.55);
+
+    transition:.28s ease;
+}
+
+.college-card:hover::before{
+    opacity:1;
+    transform:scaleX(1);
+}
+
+/* ================= COLLEGE IMAGE ================= */
+
+.college-image-box{
+    position:relative;
+
+    width:100%;
+    height:235px;
+
+    overflow:hidden;
+
+    background:#dfeeff;
+}
+
+.college-image{
+    width:100%;
+    height:100%;
+
+    display:block;
+
+    object-fit:cover;
+
+    transition:.45s ease;
+}
+
+.college-card:hover .college-image{
+    transform:scale(1.045);
+}
+
+.college-image-box::after{
+    content:"";
+
+    position:absolute;
+    inset:0;
+
+    background:
+        linear-gradient(
+            180deg,
+            rgba(0,0,0,.02),
+            rgba(4,20,40,.40)
+        );
+
+    pointer-events:none;
+}
+
+/* ================= FLOATING LOGO ================= */
+
+.floating-logo{
+    position:absolute;
+    z-index:6;
+
+    left:20px;
+    bottom:17px;
+
+    width:78px;
+    height:78px;
+
+    padding:7px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    background:#fff;
+
+    border:1px solid rgba(255,255,255,.95);
+
+    border-radius:18px;
+
+    box-shadow:
+        0 12px 30px rgba(0,0,0,.23);
+}
+
+.floating-logo img{
+    width:100%;
+    height:100%;
+
+    display:block;
+
+    object-fit:contain;
+
+    border-radius:12px;
+
+    background:#fff;
+}
+
+/* ================= CARD CONTENT ================= */
+
+.card-content{
+    padding:22px;
+}
+
+.card-role{
+    display:flex;
+    align-items:center;
+    gap:8px;
+
+    margin-bottom:9px;
+
+    color:#2479eb;
+
+    font-size:8px;
+    font-weight:900;
+    letter-spacing:1.5px;
+}
+
+.card-role::before{
+    content:"";
+
+    width:20px;
+    height:2px;
+
+    border-radius:5px;
+
+    background:#2479eb;
+}
+
+.card-content h3{
+    margin-bottom:14px;
+
+    color:#102846;
+
+    font-size:20px;
+    line-height:1.25;
+
+    letter-spacing:-.6px;
+    font-weight:800;
+}
+
+.details{
+    display:flex;
+    flex-direction:column;
+    gap:8px;
+
+    padding-top:14px;
+
+    border-top:1px solid #edf1f5;
+}
+
+.detail-row{
+    display:flex;
+    align-items:flex-start;
+    gap:10px;
+
+    color:#61788f;
+
+    font-size:10.5px;
+    line-height:1.45;
+}
+
+.detail-icon{
+    width:27px;
+    height:27px;
+
+    flex-shrink:0;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    color:#2479eb;
+    background:#edf5ff;
+
+    border-radius:8px;
+
+    font-size:11px;
+    font-weight:900;
+}
+
+.detail-text{
+    min-width:0;
+
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+}
+
+.detail-text strong{
+    color:#304960;
+    font-size:9px;
+    font-weight:800;
+}
+
+.detail-text span{
+    color:#7e91a3;
+    font-size:9px;
+
+    overflow-wrap:anywhere;
+}
+
+/* ================= VIEW BUTTON ================= */
+
+.view-btn{
+    width:100%;
+
+    min-height:45px;
+
+    margin-top:18px;
+
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+
+    padding:8px 9px 8px 15px;
+
+    color:#fff;
+
+    background:#2479eb;
+
+    border-radius:10px;
+
+    transition:.22s ease;
+}
+
+.view-btn span{
+    font-size:11px;
+    font-weight:800;
+}
+
+.view-btn b{
+    width:28px;
+    height:28px;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    border-radius:50%;
+
+    background:rgba(255,255,255,.18);
+
+    font-size:14px;
+}
+
+.view-btn:hover{
+    background:#166bdc;
+    transform:translateY(-2px);
+}
+
+/* ================= EMPTY / ERROR ================= */
+
+.no-college{
+    grid-column:1 / -1;
+
+    padding:55px 25px;
+
+    text-align:center;
+
+    background:#fff;
+
+    border:1px solid #dce6ef;
+    border-radius:20px;
+
+    box-shadow:
+        0 12px 35px rgba(20,55,90,.055);
+}
+
+.no-college h3{
+    color:#102846;
+    margin-bottom:8px;
+}
+
+.no-college p{
+    color:#71849a;
+    font-size:13px;
+}
+
+/* ================= FOOTER ================= */
+
+footer{
+    padding:25px 0;
+
+    color:#607b96;
+
+    background:#061b34;
+
+    text-align:center;
+
+    font-size:9px;
+
+    border-top:1px solid rgba(255,255,255,.07);
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:900px){
+
+    .college-grid{
+        grid-template-columns:1fr;
+    }
+
+    .control-card{
+        align-items:flex-start;
+        flex-direction:column;
+    }
+
+    .status-button{
+        width:100%;
+        justify-content:center;
+    }
+}
+
+@media(max-width:650px){
+
+    .navbar{
+        padding:12px 0;
+    }
+
+    .nav-inner{
+        width:calc(100% - 28px);
+    }
+
+    .brand-name{
+        font-size:16px;
+    }
+
+    .page-hero{
+        min-height:420px;
+
+        background:
+            linear-gradient(
+                rgba(3,18,39,.88),
+                rgba(3,18,39,.96)
+            ),
+            url("<%=request.getContextPath()%>/image/college-banner.png");
+
+        background-size:cover;
+        background-position:center;
+    }
+
+    .hero-content{
+        width:calc(100% - 32px);
+    }
+
+    .page-hero h1{
+        font-size:43px;
+        letter-spacing:-2.8px;
+    }
+
+    .hero-description{
+        font-size:13px;
+    }
+
+    .main{
+        padding:55px 0 70px;
+    }
+
+    .container{
+        width:calc(100% - 32px);
+    }
+
+    .control-card{
+        padding:23px 20px;
+    }
+
+    .control-text h2{
+        font-size:22px;
+    }
+
+    .college-image-box{
+        height:210px;
+    }
+
+    .floating-logo{
+        width:70px;
+        height:70px;
+        left:16px;
+        bottom:15px;
+    }
+
+    .card-content{
+        padding:20px;
     }
 
 }
 
-@media(max-width: 600px) {
+@media(max-width:420px){
 
-    .college-grid {
-        grid-template-columns: 1fr;
+    .back-home{
+        padding:9px 12px;
+        font-size:10px;
     }
 
-    .header {
-        padding: 18px 5%;
+    .page-hero h1{
+        font-size:37px;
+    }
+
+    .college-image-box{
+        height:195px;
     }
 
 }
 
 </style>
 
-
 <script>
 
 function searchCollege()
 {
-
     var input =
-    document.getElementById("search");
-
-    var filter =
-    input.value.toLowerCase();
+        document.getElementById("search").value.toLowerCase();
 
     var cards =
-    document.getElementsByClassName("college-card");
-
+        document.getElementsByClassName("college-card");
 
     for(var i = 0; i < cards.length; i++)
     {
+        var text =
+            cards[i].innerText.toLowerCase();
 
-        var name =
-        cards[i]
-        .getElementsByClassName("college-name")[0]
-        .innerText
-        .toLowerCase();
-
-
-        var city =
-        cards[i]
-        .getElementsByClassName("college-city")[0]
-        .innerText
-        .toLowerCase();
-
-
-        if(name.indexOf(filter) > -1 ||
-           city.indexOf(filter) > -1)
+        if(text.includes(input))
         {
-            cards[i].style.display = "";
+            cards[i].style.display = "block";
         }
         else
         {
             cards[i].style.display = "none";
         }
-
     }
-
 }
 
 </script>
 
 </head>
 
-
 <body>
 
+<!-- ================= NAVBAR ================= -->
 
-<!-- HEADER -->
+<div class="navbar">
 
-<div class="header">
+    <div class="nav-inner">
 
-    <div class="logo">
+        <a href="index.jsp" class="brand">
 
-        Campus<span>Connect</span>
+            <div class="brand-box">
+                CC
+            </div>
+
+            <div class="brand-name">
+                CampusConnect
+                <span> | Student</span>
+            </div>
+
+        </a>
+
+        <a href="index.jsp" class="back-home">
+            Back to Home
+        </a>
 
     </div>
-
-
-    <a href="index.jsp"
-       class="home-btn">
-
-        Back to Home
-
-    </a>
 
 </div>
 
 
+<!-- ================= HERO ================= -->
 
-<!-- MAIN -->
+<section class="page-hero">
+
+    <div class="hero-content">
+
+        <div class="eyebrow">
+            <span class="eyebrow-dot"></span>
+            ADMISSIONS
+        </div>
+
+        <h1>
+            Find Your
+            <span>College.</span>
+        </h1>
+
+        <p class="hero-description">
+            Explore approved colleges, compare available options,
+            and begin your admission journey through CampusConnect.
+        </p>
+
+    </div>
+
+</section>
+
+
+<!-- ================= MAIN ================= -->
+
+<main class="main">
 
 <div class="container">
 
 
-<div class="page-title">
+    <!-- CONTROL -->
 
-    <h1>
-        Explore Colleges
-    </h1>
+    <div class="control-card">
 
-    <p>
-        Find the right college and start your
-        admission journey with CampusConnect.
-    </p>
+        <div class="control-text">
 
-</div>
+            <h2>
+                Available Colleges
+            </h2>
 
+            <p>
+                Explore approved colleges and apply for admission.
+                Already submitted a request? Check its current status.
+            </p>
 
+        </div>
 
-<!-- SEARCH -->
+        <a
+            href="new_student_check_status.jsp"
+            class="status-button">
 
-<div class="search-box">
+            Already Applied? Check Status
+            <span>→</span>
 
-    <input type="text"
+        </a>
 
-           id="search"
-
-           class="search-input"
-
-           placeholder="Search college by name or city..."
-
-           onkeyup="searchCollege()">
-
-</div>
+    </div>
 
 
+    <!-- SEARCH -->
 
-<!-- COLLEGE GRID -->
+    <div class="search-panel">
 
-<div class="college-grid">
+        <div class="search-box">
 
+            <span class="search-icon">
+                &#128269;
+            </span>
+
+            <input
+                type="text"
+                id="search"
+                placeholder="Search college or city..."
+                onkeyup="searchCollege()">
+
+        </div>
+
+    </div>
+
+
+    <!-- COLLEGE GRID -->
+
+    <div class="college-grid">
 
 <%
 
 Connection con = null;
-
 PreparedStatement ps = null;
-
 ResultSet rs = null;
-
 
 try
 {
@@ -475,7 +990,6 @@ try
     Class.forName(
         "oracle.jdbc.driver.OracleDriver"
     );
-
 
     con = DriverManager.getConnection(
 
@@ -490,10 +1004,20 @@ try
 
     String sql =
 
-        "SELECT COLLEGE_ID, COLLEGE_NAME, " +
-        "ADDRESS, CITY, STATE, EMAIL, PHONE " +
+        "SELECT COLLEGE_ID, " +
+        "COLLEGE_NAME, " +
+        "ADDRESS, " +
+        "CITY, " +
+        "STATE, " +
+        "EMAIL, " +
+        "PHONE, " +
+        "LOGO_IMAGE, " +
+        "COVER_IMAGE " +
+
         "FROM COLLEGE " +
-        "WHERE STATUS = 'APPROVED' " +
+
+        "WHERE STATUS='APPROVED' " +
+
         "ORDER BY COLLEGE_NAME";
 
 
@@ -510,109 +1034,245 @@ try
 
         found = true;
 
+
+        int collegeId =
+            rs.getInt("COLLEGE_ID");
+
+
+        String collegeName =
+            rs.getString("COLLEGE_NAME");
+
+
+        String address =
+            rs.getString("ADDRESS");
+
+
+        String city =
+            rs.getString("CITY");
+
+
+        String state =
+            rs.getString("STATE");
+
+
+        String email =
+            rs.getString("EMAIL");
+
+
+        String phone =
+            rs.getString("PHONE");
+
+
+        String logoImage =
+            rs.getString("LOGO_IMAGE");
+
+
+        String coverImage =
+            rs.getString("COVER_IMAGE");
+
+
+        String logoPath;
+
+        String coverPath;
+
+
+        if(logoImage != null &&
+           !logoImage.trim().equals(""))
+        {
+
+            logoPath =
+                request.getContextPath()
+                + "/college_images/"
+                + logoImage;
+
+        }
+        else
+        {
+
+            logoPath =
+                request.getContextPath()
+                + "/images/college-logo.png";
+
+        }
+
+
+        if(coverImage != null &&
+           !coverImage.trim().equals(""))
+        {
+
+            coverPath =
+                request.getContextPath()
+                + "/college_images/"
+                + coverImage;
+
+        }
+        else
+        {
+
+            coverPath =
+                request.getContextPath()
+                + "/image/college-banner.png";
+
+        }
+
 %>
 
+        <!-- COLLEGE CARD -->
 
-<!-- COLLEGE CARD -->
-
-<div class="college-card">
-
-
-    <div class="college-image">
-
-        <img src="images/college-default.jpg"
-             alt="College Image">
-
-    </div>
+        <div class="college-card">
 
 
-    <div class="card-content">
+            <!-- COVER IMAGE -->
+
+            <div class="college-image-box">
+
+                <img
+                    src="<%= coverPath %>"
+                    class="college-image"
+                    alt="<%= collegeName %> Cover Image"
+
+                    onerror="this.onerror=null;
+                    this.src='<%=request.getContextPath()%>/image/college-banner.png';">
 
 
-        <h2 class="college-name">
+                <!-- FLOATING LOGO -->
 
-            <%=rs.getString("COLLEGE_NAME")%>
+                <div class="floating-logo">
 
-        </h2>
+                    <img
+                        src="<%= logoPath %>"
+                        alt="<%= collegeName %> Logo"
+
+                        onerror="this.onerror=null;
+                        this.src='<%=request.getContextPath()%>/images/college-logo.png';">
+
+                </div>
+
+            </div>
 
 
-        <div class="location">
+            <!-- CONTENT -->
 
-            <span class="college-city">
+            <div class="card-content">
 
-                <%=rs.getString("CITY")%>
+                <div class="card-role">
+                    APPROVED COLLEGE
+                </div>
 
-            </span>
+                <h3>
+                    <%= collegeName %>
+                </h3>
 
-            ,
 
-            <%=rs.getString("STATE")%>
+                <div class="details">
+
+
+                    <div class="detail-row">
+
+                        <div class="detail-icon">
+                            &#128205;
+                        </div>
+
+                        <div class="detail-text">
+
+                            <strong>
+                                ADDRESS
+                            </strong>
+
+                            <span>
+                                <%= address %>
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="detail-row">
+
+                        <div class="detail-icon">
+                            &#9679;
+                        </div>
+
+                        <div class="detail-text">
+
+                            <strong>
+                                LOCATION
+                            </strong>
+
+                            <span>
+                                <%= city %>, <%= state %>
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="detail-row">
+
+                        <div class="detail-icon">
+                            &#9993;
+                        </div>
+
+                        <div class="detail-text">
+
+                            <strong>
+                                EMAIL
+                            </strong>
+
+                            <span>
+                                <%= email %>
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <div class="detail-row">
+
+                        <div class="detail-icon">
+                            &#9742;
+                        </div>
+
+                        <div class="detail-text">
+
+                            <strong>
+                                PHONE
+                            </strong>
+
+                            <span>
+                                <%= phone %>
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                </div>
+
+
+                <!-- VIEW DETAILS -->
+
+                <a
+                    href="new_student_college_compare.jsp?collegeId=<%= collegeId %>"
+                    class="view-btn">
+
+                    <span>
+                        View College Details
+                    </span>
+
+                    <b>
+                        →
+                    </b>
+
+                </a>
+
+            </div>
 
         </div>
-
-
-        <div class="info">
-
-
-            <div class="info-row">
-
-                <div class="info-label">
-                    Address
-                </div>
-
-                <div class="info-value">
-
-                    <%=rs.getString("ADDRESS")%>
-
-                </div>
-
-            </div>
-
-
-            <div class="info-row">
-
-                <div class="info-label">
-                    Email
-                </div>
-
-                <div class="info-value">
-
-                    <%=rs.getString("EMAIL")%>
-
-                </div>
-
-            </div>
-
-
-            <div class="info-row">
-
-                <div class="info-label">
-                    Phone
-                </div>
-
-                <div class="info-value">
-
-                    <%=rs.getString("PHONE")%>
-
-                </div>
-
-            </div>
-
-
-        </div>
-
-
-        <a href="new_student_college_compare.jsp?collegeId=<%=rs.getInt("COLLEGE_ID")%>"
-           class="view-btn">
-
-            View College Details
-
-        </a>
-
-
-    </div>
-
-</div>
 
 
 <%
@@ -625,20 +1285,18 @@ try
 
 %>
 
+        <div class="no-college">
 
-<div class="no-college">
+            <h3>
+                No Approved Colleges Available
+            </h3>
 
-    <h2>
-        No Colleges Available
-    </h2>
+            <p>
+                Currently there are no colleges available
+                for admission.
+            </p>
 
-    <p>
-        Currently there are no approved colleges
-        available for admission.
-    </p>
-
-</div>
-
+        </div>
 
 <%
 
@@ -650,19 +1308,17 @@ catch(Exception e)
 
 %>
 
+        <div class="no-college">
 
-<div class="no-college">
+            <h3>
+                Unable to Load Colleges
+            </h3>
 
-    <h2>
-        Unable to Load Colleges
-    </h2>
+            <p>
+                <%= e.getMessage() %>
+            </p>
 
-    <p>
-        <%=e.getMessage()%>
-    </p>
-
-</div>
-
+        </div>
 
 <%
 
@@ -672,43 +1328,52 @@ finally
 
     try
     {
-
         if(rs != null)
             rs.close();
-
-        if(ps != null)
-            ps.close();
-
-        if(con != null)
-            con.close();
-
     }
     catch(Exception e)
     {
+    }
 
+
+    try
+    {
+        if(ps != null)
+            ps.close();
+    }
+    catch(Exception e)
+    {
+    }
+
+
+    try
+    {
+        if(con != null)
+            con.close();
+    }
+    catch(Exception e)
+    {
     }
 
 }
 
 %>
 
+    </div>
 
 </div>
 
-</div>
+</main>
 
 
+<!-- ================= FOOTER ================= -->
 
-<!-- FOOTER -->
+<footer>
 
-<div class="footer">
+    © 2026 CampusConnect. All Rights Reserved.
 
-    CampusConnect |
-    Campus Recruitment Management System
-
-</div>
+</footer>
 
 
 </body>
-
 </html>

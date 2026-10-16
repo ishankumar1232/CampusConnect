@@ -1,7 +1,9 @@
 <%@ page import="java.sql.*" %>
+<%@ page language="java"
+    contentType="text/html; charset=UTF-8"
+    pageEncoding="UTF-8"%>
 
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
@@ -16,6 +18,10 @@
 
 <style>
 
+/* =========================
+   GLOBAL
+========================= */
+
 * {
     margin: 0;
     padding: 0;
@@ -24,225 +30,445 @@
 }
 
 body {
-    background: #f4f7fb;
+
+    background:
+        radial-gradient(
+            circle at 10% 5%,
+            rgba(37,99,235,0.08),
+            transparent 28%
+        ),
+        radial-gradient(
+            circle at 90% 10%,
+            rgba(14,165,233,0.07),
+            transparent 25%
+        ),
+        #f5f8fc;
+
     color: #26364f;
 }
 
 
-/* HEADER */
+/* =========================
+   HEADER
+========================= */
 
 .header {
-    background: linear-gradient(135deg, #123c88, #1769e0);
+
+    position: sticky;
+    top: 0;
+
+    z-index: 100;
+
+    background:
+        linear-gradient(
+            135deg,
+            #091b3d,
+            #123c88,
+            #1769e0
+        );
 
     color: white;
 
-    padding: 20px 7%;
+    padding: 17px 7%;
 
     display: flex;
 
     justify-content: space-between;
 
     align-items: center;
+
+    box-shadow:
+        0 8px 30px rgba(5,20,50,0.18);
 }
 
 .logo {
+
     font-size: 27px;
+
     font-weight: bold;
+
+    letter-spacing: -0.5px;
 }
 
 .logo span {
+
     color: #a9d0ff;
 }
 
 .back-btn-top {
+
     color: white;
 
     text-decoration: none;
 
-    border: 1px solid rgba(255,255,255,0.7);
+    border: 1px solid
+        rgba(255,255,255,0.65);
 
     padding: 10px 17px;
 
-    border-radius: 7px;
+    border-radius: 8px;
 
     font-size: 14px;
+
+    background:
+        rgba(255,255,255,0.06);
+
+    transition: 0.25s;
+}
+
+.back-btn-top:hover {
+
+    background: white;
+
+    color: #123c88;
+
+    transform: translateY(-1px);
 }
 
 
-/* MAIN */
+/* =========================
+   MAIN
+========================= */
 
 .container {
+
     width: 90%;
 
-    max-width: 1100px;
+    max-width: 1180px;
 
-    margin: 45px auto;
+    margin: 42px auto 70px;
 }
 
 
-/* TITLE */
+/* =========================
+   TITLE
+========================= */
 
 .page-title {
+
     text-align: center;
 
     margin-bottom: 30px;
 }
 
 .page-title h1 {
+
     color: #173c76;
 
-    font-size: 36px;
+    font-size: 40px;
 
     margin-bottom: 10px;
+
+    letter-spacing: -1px;
 }
 
 .page-title p {
+
     color: #718096;
 
     font-size: 15px;
 }
 
 
-/* COLLEGE CARD */
+/* =========================
+   COLLEGE CARD
+========================= */
 
 .college-card {
+
     background: white;
 
-    border-radius: 18px;
+    border-radius: 22px;
 
     overflow: hidden;
 
-    border: 1px solid #e2e8f0;
+    border:
+        1px solid rgba(148,163,184,0.22);
 
     box-shadow:
-    0 10px 30px rgba(30,60,100,0.10);
+        0 20px 55px
+        rgba(15,45,90,0.12);
 }
 
 
-/* COLLEGE TOP */
+/* =========================
+   COLLEGE TOP
+========================= */
 
 .college-top {
+
     display: flex;
 
-    min-height: 300px;
+    min-height: 350px;
 }
 
 
-/* IMAGE */
+/* =========================
+   IMAGE
+========================= */
 
 .college-image {
-    width: 42%;
 
-    background: #e7f0ff;
+    position: relative;
+
+    width: 48%;
+
+    min-height: 350px;
+
+    background: #dbeafe;
+
+    overflow: hidden;
 }
 
-.college-image img {
+.college-image > img {
+
     width: 100%;
 
     height: 100%;
 
-    min-height: 300px;
+    min-height: 350px;
 
     object-fit: cover;
+
+    transition: 0.5s;
+}
+
+.college-card:hover
+.college-image > img {
+
+    transform: scale(1.03);
 }
 
 
-/* BASIC */
+/* =========================
+   FLOATING LOGO
+========================= */
+
+.floating-logo {
+
+    position: absolute;
+
+    left: 28px;
+
+    bottom: 25px;
+
+    z-index: 5;
+
+    width: 92px;
+
+    height: 92px;
+
+    padding: 7px;
+
+    background: white;
+
+    border-radius: 18px;
+
+    border:
+        1px solid rgba(255,255,255,0.9);
+
+    box-shadow:
+        0 12px 30px rgba(0,0,0,0.20);
+}
+
+.floating-logo img {
+
+    width: 100%;
+
+    height: 100%;
+
+    object-fit: contain;
+
+    border-radius: 12px;
+}
+
+
+/* =========================
+   COLLEGE BASIC
+========================= */
 
 .college-basic {
-    width: 58%;
 
-    padding: 40px;
+    width: 52%;
+
+    padding: 48px;
 
     display: flex;
 
     flex-direction: column;
 
     justify-content: center;
+
+    background:
+        radial-gradient(
+            circle at 100% 0%,
+            rgba(37,99,235,0.06),
+            transparent 35%
+        ),
+        white;
 }
 
 .college-basic h2 {
+
     color: #173c76;
 
-    font-size: 30px;
+    font-size: 34px;
 
     line-height: 1.3;
 
     margin-bottom: 15px;
+
+    letter-spacing: -0.7px;
 }
 
 .location {
+
+    width: fit-content;
+
     color: #68778d;
 
-    font-size: 16px;
+    font-size: 15px;
 
     margin-bottom: 20px;
+
+    padding: 9px 13px;
+
+    border-radius: 10px;
+
+    background: #f4f7fb;
+
+    border:
+        1px solid #e4eaf2;
 }
 
 .available {
+
     width: fit-content;
 
     background: #e9f8ef;
 
     color: #21854b;
 
-    padding: 8px 15px;
+    padding: 9px 15px;
 
     border-radius: 20px;
 
     font-size: 12px;
 
     font-weight: bold;
+
+    box-shadow:
+        0 5px 14px
+        rgba(33,133,75,0.10);
 }
 
 
-/* SECTION */
+/* =========================
+   SECTION
+========================= */
 
 .section {
+
     background: white;
 
-    margin-top: 25px;
+    margin-top: 22px;
 
-    padding: 30px 35px;
+    padding: 31px;
 
-    border-radius: 15px;
+    border-radius: 18px;
 
-    border: 1px solid #e2e8f0;
+    border:
+        1px solid #e2e8f0;
 
     box-shadow:
-    0 7px 25px rgba(30,60,100,0.07);
+        0 12px 35px
+        rgba(20,50,90,0.06);
+
+    transition: 0.2s;
+}
+
+.section:hover {
+
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 15px 40px
+        rgba(20,50,90,0.09);
 }
 
 .section h3 {
+
     color: #173c76;
 
-    font-size: 21px;
+    font-size: 20px;
 
     margin-bottom: 20px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+}
+
+.section h3::before {
+
+    content: "";
+
+    width: 4px;
+
+    height: 22px;
+
+    border-radius: 10px;
+
+    background:
+        linear-gradient(
+            180deg,
+            #1769e0,
+            #49a5ff
+        );
 }
 
 
-/* INFO GRID */
+/* =========================
+   INFO GRID
+========================= */
 
 .info-grid {
+
     display: grid;
 
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns:
+        1fr 1fr;
 
     gap: 15px;
 }
 
 .info-box {
+
     background: #f7faff;
 
-    border: 1px solid #e2e9f3;
+    border:
+        1px solid #e2e9f3;
 
     padding: 17px;
 
-    border-radius: 9px;
+    border-radius: 10px;
+
+    transition: 0.2s;
+}
+
+.info-box:hover {
+
+    border-color: #b9d3f7;
+
+    background: #f2f7ff;
+
+    transform: translateY(-2px);
 }
 
 .info-label {
+
     display: block;
 
     color: #8995a7;
@@ -253,24 +479,31 @@ body {
 }
 
 .info-value {
+
     color: #344b68;
 
     font-size: 14px;
+
+    font-weight: 600;
 
     word-break: break-word;
 }
 
 
-/* ADDRESS */
+/* =========================
+   ADDRESS
+========================= */
 
 .address-box {
+
     background: #f7faff;
 
-    border: 1px solid #e2e9f3;
+    border:
+        1px solid #e2e9f3;
 
     padding: 18px;
 
-    border-radius: 9px;
+    border-radius: 10px;
 
     color: #344b68;
 
@@ -280,101 +513,166 @@ body {
 }
 
 
-/* COURSES */
+/* =========================
+   COURSES
+========================= */
 
 .course-list {
+
     display: grid;
 
     grid-template-columns:
-    repeat(3, 1fr);
+        repeat(3, 1fr);
 
     gap: 12px;
 }
 
 .course-item {
+
     background: #f7faff;
 
-    border: 1px solid #e2e9f3;
+    border:
+        1px solid #e2e9f3;
 
     padding: 15px;
 
-    border-radius: 8px;
+    border-radius: 10px;
 
     color: #344b68;
 
     font-size: 14px;
+
+    transition: 0.2s;
+}
+
+.course-item:hover {
+
+    background: #f2f7ff;
+
+    border-color: #b9d3f7;
+
+    transform: translateY(-2px);
 }
 
 
-/* DEPARTMENTS */
+/* =========================
+   DEPARTMENTS
+========================= */
 
 .department-list {
+
     display: grid;
 
     grid-template-columns:
-    repeat(3, 1fr);
+        repeat(3, 1fr);
 
     gap: 12px;
 }
 
 .department-item {
+
     background: #f7faff;
 
-    border: 1px solid #e2e9f3;
+    border:
+        1px solid #e2e9f3;
 
     padding: 15px;
 
-    border-radius: 8px;
+    border-radius: 10px;
 
     color: #344b68;
 
     font-size: 14px;
+
+    transition: 0.2s;
+}
+
+.department-item:hover {
+
+    background: #f2f7ff;
+
+    border-color: #b9d3f7;
+
+    transform: translateY(-2px);
 }
 
 
-/* ACTION */
+/* =========================
+   ACTIONS
+========================= */
 
 .actions {
-    background: white;
 
-    margin-top: 25px;
+    background:
+        rgba(255,255,255,0.96);
 
-    padding: 25px 35px;
+    margin-top: 22px;
 
-    border-radius: 15px;
+    padding: 17px;
 
-    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+
+    border:
+        1px solid #e2e8f0;
 
     display: flex;
 
     gap: 15px;
+
+    position: sticky;
+
+    bottom: 15px;
+
+    z-index: 20;
+
+    box-shadow:
+        0 15px 40px
+        rgba(15,45,90,0.14);
 }
 
 .select-btn {
+
     flex: 1;
 
     text-align: center;
 
     text-decoration: none;
 
-    background: #1769e0;
+    background:
+        linear-gradient(
+            135deg,
+            #1769e0,
+            #1258c4
+        );
 
     color: white;
 
     padding: 14px;
 
-    border-radius: 8px;
+    border-radius: 9px;
 
     font-size: 14px;
 
     font-weight: bold;
+
+    box-shadow:
+        0 8px 20px
+        rgba(23,105,224,0.22);
+
+    transition: 0.22s;
 }
 
 .select-btn:hover {
-    background: #0d54bd;
+
+    transform: translateY(-2px);
+
+    box-shadow:
+        0 12px 25px
+        rgba(23,105,224,0.28);
 }
 
 .back-btn {
+
     flex: 1;
 
     text-align: center;
@@ -385,100 +683,200 @@ body {
 
     color: #1769e0;
 
-    border: 1px solid #1769e0;
+    border:
+        1px solid #1769e0;
 
     padding: 14px;
 
-    border-radius: 8px;
+    border-radius: 9px;
 
     font-size: 14px;
 
     font-weight: bold;
+
+    transition: 0.22s;
+}
+
+.back-btn:hover {
+
+    background: #f1f6ff;
+
+    transform: translateY(-2px);
 }
 
 
-/* ERROR */
+/* =========================
+   ERROR
+========================= */
 
 .error-box {
+
     background: white;
 
     padding: 50px;
 
     text-align: center;
 
-    border-radius: 15px;
+    border-radius: 18px;
+
+    border:
+        1px solid #e2e8f0;
 
     box-shadow:
-    0 8px 25px rgba(30,60,100,0.08);
+        0 12px 35px
+        rgba(30,60,100,0.08);
 }
 
 .error-box h2 {
+
     color: #c0392b;
 
     margin-bottom: 10px;
 }
 
 .error-box p {
+
     color: #718096;
 
     margin-bottom: 20px;
 }
 
 
-/* FOOTER */
+/* =========================
+   FOOTER
+========================= */
 
 .footer {
+
     margin-top: 60px;
 
-    background: #123c88;
+    background: #091b3d;
 
     color: #dceaff;
 
     text-align: center;
 
-    padding: 20px;
+    padding: 24px;
 
     font-size: 13px;
 }
 
 
-/* RESPONSIVE */
+/* =========================
+   RESPONSIVE
+========================= */
 
 @media(max-width: 800px) {
 
     .college-top {
+
         flex-direction: column;
     }
 
     .college-image {
+
         width: 100%;
-        height: 230px;
+
+        height: 245px;
+
+        min-height: 245px;
     }
 
-    .college-image img {
-        min-height: 230px;
+    .college-image > img {
+
+        min-height: 245px;
     }
 
     .college-basic {
+
         width: 100%;
+
+        padding: 30px 24px;
     }
 
     .info-grid {
+
         grid-template-columns: 1fr;
     }
 
     .course-list {
-        grid-template-columns: 1fr 1fr;
+
+        grid-template-columns:
+            1fr 1fr;
     }
 
     .department-list {
-        grid-template-columns: 1fr 1fr;
+
+        grid-template-columns:
+            1fr 1fr;
     }
 
     .actions {
+
+        position: static;
+
         flex-direction: column;
     }
 
+    .floating-logo {
+
+        width: 74px;
+
+        height: 74px;
+
+        left: 18px;
+
+        bottom: 17px;
+    }
+}
+
+
+@media(max-width: 520px) {
+
+    .header {
+
+        padding: 14px 5%;
+    }
+
+    .logo {
+
+        font-size: 23px;
+    }
+
+    .back-btn-top {
+
+        padding: 8px 11px;
+
+        font-size: 12px;
+    }
+
+    .container {
+
+        width: 92%;
+
+        margin-top: 28px;
+    }
+
+    .page-title h1 {
+
+        font-size: 30px;
+    }
+
+    .course-list,
+    .department-list {
+
+        grid-template-columns: 1fr;
+    }
+
+    .college-basic h2 {
+
+        font-size: 27px;
+    }
+
+    .section {
+
+        padding: 24px 20px;
+    }
 }
 
 </style>
@@ -489,7 +887,9 @@ body {
 <body>
 
 
-<!-- HEADER -->
+<!-- =========================
+     HEADER
+========================= -->
 
 <div class="header">
 
@@ -511,7 +911,9 @@ body {
 
 
 
-<!-- MAIN -->
+<!-- =========================
+     MAIN
+========================= -->
 
 <div class="container">
 
@@ -519,7 +921,7 @@ body {
 <%
 
 String collegeId =
-request.getParameter("collegeId");
+    request.getParameter("collegeId");
 
 
 if(collegeId == null ||
@@ -566,6 +968,7 @@ if(collegeId == null ||
 <%
 
 }
+
 else
 {
 
@@ -591,21 +994,33 @@ try
         "CAMPUSCONNECT",
 
         "campus123"
-
     );
 
 
     String sql =
 
         "SELECT COLLEGE_ID, " +
+
         "COLLEGE_NAME, " +
+
         "ADDRESS, " +
+
         "CITY, " +
+
         "STATE, " +
+
         "EMAIL, " +
-        "PHONE " +
+
+        "PHONE, " +
+
+        "LOGO_IMAGE, " +
+
+        "COVER_IMAGE " +
+
         "FROM COLLEGE " +
+
         "WHERE COLLEGE_ID = ? " +
+
         "AND STATUS = 'APPROVED'";
 
 
@@ -613,8 +1028,11 @@ try
 
 
     ps.setInt(
+
         1,
+
         Integer.parseInt(collegeId)
+
     );
 
 
@@ -627,7 +1045,9 @@ try
 %>
 
 
-<!-- TITLE -->
+<!-- =========================
+     PAGE TITLE
+========================= -->
 
 <div class="page-title">
 
@@ -643,7 +1063,9 @@ try
 
 
 
-<!-- COLLEGE HEADER -->
+<!-- =========================
+     COLLEGE HEADER
+========================= -->
 
 <div class="college-card">
 
@@ -651,19 +1073,79 @@ try
     <div class="college-top">
 
 
+<%
+
+String logoImage =
+    rs.getString("LOGO_IMAGE");
+
+String coverImage =
+    rs.getString("COVER_IMAGE");
+
+
+String logoPath =
+    request.getContextPath()
+    + "/images/college-logo.png";
+
+
+String coverPath =
+    request.getContextPath()
+    + "/image/college-banner.png";
+
+
+if(logoImage != null &&
+   !logoImage.trim().equals(""))
+{
+
+    logoPath =
+        request.getContextPath()
+        + "/college_images/"
+        + logoImage;
+}
+
+
+if(coverImage != null &&
+   !coverImage.trim().equals(""))
+{
+
+    coverPath =
+        request.getContextPath()
+        + "/college_images/"
+        + coverImage;
+}
+
+%>
+
+
+        <!-- COLLEGE IMAGE -->
+
         <div class="college-image">
 
-            <img src="images/college-default.jpg"
-                 alt="College Image">
+            <img src="<%=coverPath%>"
+                 alt="College Cover Image">
+
+
+            <!-- FLOATING LOGO -->
+
+            <div class="floating-logo">
+
+                <img src="<%=logoPath%>"
+                     alt="College Logo">
+
+            </div>
 
         </div>
 
+
+
+        <!-- COLLEGE BASIC -->
 
         <div class="college-basic">
 
             <h2>
 
-                <%=rs.getString("COLLEGE_NAME")%>
+                <%=rs.getString(
+                    "COLLEGE_NAME"
+                )%>
 
             </h2>
 
@@ -671,7 +1153,6 @@ try
             <div class="location">
 
                 <%=rs.getString("CITY")%>,
-
                 <%=rs.getString("STATE")%>
 
             </div>
@@ -688,12 +1169,13 @@ try
 
     </div>
 
-
 </div>
 
 
 
-<!-- INFORMATION -->
+<!-- =========================
+     INFORMATION
+========================= -->
 
 <div class="section">
 
@@ -713,11 +1195,14 @@ try
 
             <span class="info-value">
 
-                <%=rs.getInt("COLLEGE_ID")%>
+                <%=rs.getInt(
+                    "COLLEGE_ID"
+                )%>
 
             </span>
 
         </div>
+
 
 
         <div class="info-box">
@@ -728,11 +1213,14 @@ try
 
             <span class="info-value">
 
-                <%=rs.getString("COLLEGE_NAME")%>
+                <%=rs.getString(
+                    "COLLEGE_NAME"
+                )%>
 
             </span>
 
         </div>
+
 
 
         <div class="info-box">
@@ -743,11 +1231,14 @@ try
 
             <span class="info-value">
 
-                <%=rs.getString("CITY")%>
+                <%=rs.getString(
+                    "CITY"
+                )%>
 
             </span>
 
         </div>
+
 
 
         <div class="info-box">
@@ -758,11 +1249,14 @@ try
 
             <span class="info-value">
 
-                <%=rs.getString("STATE")%>
+                <%=rs.getString(
+                    "STATE"
+                )%>
 
             </span>
 
         </div>
+
 
 
         <div class="info-box">
@@ -773,11 +1267,14 @@ try
 
             <span class="info-value">
 
-                <%=rs.getString("EMAIL")%>
+                <%=rs.getString(
+                    "EMAIL"
+                )%>
 
             </span>
 
         </div>
+
 
 
         <div class="info-box">
@@ -788,7 +1285,9 @@ try
 
             <span class="info-value">
 
-                <%=rs.getString("PHONE")%>
+                <%=rs.getString(
+                    "PHONE"
+                )%>
 
             </span>
 
@@ -801,7 +1300,9 @@ try
 
 
 
-<!-- ADDRESS -->
+<!-- =========================
+     ADDRESS
+========================= -->
 
 <div class="section">
 
@@ -812,11 +1313,17 @@ try
 
     <div class="address-box">
 
-        <%=rs.getString("ADDRESS")%>,
+        <%=rs.getString(
+            "ADDRESS"
+        )%>,
 
-        <%=rs.getString("CITY")%>,
+        <%=rs.getString(
+            "CITY"
+        )%>,
 
-        <%=rs.getString("STATE")%>
+        <%=rs.getString(
+            "STATE"
+        )%>
 
     </div>
 
@@ -824,7 +1331,9 @@ try
 
 
 
-<!-- COURSES -->
+<!-- =========================
+     COURSES
+========================= -->
 
 <div class="section">
 
@@ -849,13 +1358,15 @@ try
     psCourse = con.prepareStatement(
 
         "SELECT COURSE_ID, COURSE_NAME " +
-        "FROM COURSE " +
-        "ORDER BY COURSE_NAME"
 
+        "FROM COURSE " +
+
+        "ORDER BY COURSE_NAME"
     );
 
 
-    rsCourse = psCourse.executeQuery();
+    rsCourse =
+        psCourse.executeQuery();
 
 
     boolean courseFound = false;
@@ -871,7 +1382,9 @@ try
 
         <div class="course-item">
 
-            <%=rsCourse.getString("COURSE_NAME")%>
+            <%=rsCourse.getString(
+                "COURSE_NAME"
+            )%>
 
         </div>
 
@@ -899,6 +1412,7 @@ try
     }
 
 }
+
 finally
 {
 
@@ -919,7 +1433,9 @@ finally
 
 
 
-<!-- DEPARTMENTS -->
+<!-- =========================
+     DEPARTMENTS
+========================= -->
 
 <div class="section">
 
@@ -944,14 +1460,15 @@ try
     psDepartment = con.prepareStatement(
 
         "SELECT DEPARTMENT_ID, DEPARTMENT_NAME " +
-        "FROM DEPARTMENT " +
-        "ORDER BY DEPARTMENT_NAME"
 
+        "FROM DEPARTMENT " +
+
+        "ORDER BY DEPARTMENT_NAME"
     );
 
 
     rsDepartment =
-    psDepartment.executeQuery();
+        psDepartment.executeQuery();
 
 
     boolean departmentFound = false;
@@ -997,6 +1514,7 @@ try
     }
 
 }
+
 finally
 {
 
@@ -1017,21 +1535,25 @@ finally
 
 
 
-<!-- ACTIONS -->
+<!-- =========================
+     ACTIONS
+========================= -->
 
 <div class="actions">
 
 
-    <a href="new_student_admission_request.jsp?collegeId=<%=rs.getInt("COLLEGE_ID")%>"
-       class="select-btn">
+    <a
+        href="new_student_admission_request.jsp?collegeId=<%=rs.getInt("COLLEGE_ID")%>"
+        class="select-btn">
 
         Select This College
 
     </a>
 
 
-    <a href="new_student_colleges.jsp"
-       class="back-btn">
+    <a
+        href="new_student_colleges.jsp"
+        class="back-btn">
 
         Back to Colleges
 
@@ -1044,11 +1566,16 @@ finally
 <%
 
     }
+
     else
     {
 
 %>
 
+
+<!-- =========================
+     NOT FOUND
+========================= -->
 
 <div class="page-title">
 
@@ -1066,13 +1593,16 @@ finally
     </h2>
 
     <p>
-        This college is not currently available
-        for admission.
+
+        This college is not currently
+        available for admission.
+
     </p>
 
 
-    <a href="new_student_colleges.jsp"
-       class="back-btn">
+    <a
+        href="new_student_colleges.jsp"
+        class="back-btn">
 
         Back to Available Colleges
 
@@ -1086,11 +1616,16 @@ finally
     }
 
 }
+
 catch(Exception e)
 {
 
 %>
 
+
+<!-- =========================
+     DATABASE ERROR
+========================= -->
 
 <div class="error-box">
 
@@ -1099,7 +1634,9 @@ catch(Exception e)
     </h2>
 
     <p>
+
         <%=e.getMessage()%>
+
     </p>
 
 </div>
@@ -1108,6 +1645,7 @@ catch(Exception e)
 <%
 
 }
+
 finally
 {
 
@@ -1124,6 +1662,7 @@ finally
             con.close();
 
     }
+
     catch(Exception e)
     {
 
@@ -1140,11 +1679,14 @@ finally
 
 
 
-<!-- FOOTER -->
+<!-- =========================
+     FOOTER
+========================= -->
 
 <div class="footer">
 
     CampusConnect |
+
     Campus Recruitment Management System
 
 </div>

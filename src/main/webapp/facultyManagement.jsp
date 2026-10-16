@@ -1,361 +1,1464 @@
+<%@ page language="java"
+         contentType="text/html; charset=UTF-8"
+         pageEncoding="UTF-8"%>
+
 <%@ page import="java.sql.*" %>
 
 <%
-    Integer collegeId = (Integer) session.getAttribute("collegeId");
 
-    if(collegeId == null) {
+    Integer collegeId =
+        (Integer) session.getAttribute("collegeId");
+
+    if(collegeId == null)
+    {
         response.sendRedirect("collegeAdminLogin.jsp");
         return;
     }
+
 %>
 
+
 <!DOCTYPE html>
+
 <html>
 
 <head>
 
-    <title>Faculty Management</title>
+<meta charset="UTF-8">
 
-    <style>
+<title>Faculty Management</title>
 
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #f4f6f8;
-        }
 
-        .header {
-            background: #2c4358;
-            color: white;
-            padding: 25px 35px;
-            font-size: 32px;
-            font-weight: bold;
-        }
+<style>
 
-        .back {
-            margin: 30px;
-        }
+/* =========================================
+   BASIC
+========================================= */
 
-        .back a {
-            color: #2196f3;
-            text-decoration: none;
-            font-size: 18px;
-        }
+* {
+    box-sizing: border-box;
+}
 
-        .box {
-            background: white;
-            margin: 20px 30px;
-            padding: 25px;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px #ccc;
-        }
 
-        h2 {
-            color: #2c4358;
-        }
+body {
 
-        input, select {
-            padding: 10px;
-            margin: 6px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
+    margin: 0;
 
-        button {
-            padding: 10px 18px;
-            background: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
+    font-family: Arial, sans-serif;
 
-        button:hover {
-            background: #217dbb;
-        }
+    background: #f4f7fb;
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 25px;
-        }
+    color: #183b5b;
 
-        th {
-            background: #3498db;
-            color: white;
-            padding: 13px;
-        }
+}
 
-        td {
-            padding: 11px;
-            text-align: center;
-            border-bottom: 1px solid #ddd;
-        }
 
-        .delete {
-            background: #e74c3c;
-        }
+/* =========================================
+   HEADER
+========================================= */
 
-        .delete:hover {
-            background: #c0392b;
-        }
+.header {
 
-    </style>
+    background: linear-gradient(
+        135deg,
+        #07385e,
+        #0d5b8f
+    );
+
+    color: white;
+
+    padding: 22px 35px;
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 15px;
+
+    box-shadow:
+        0 3px 12px rgba(0,0,0,0.12);
+
+}
+
+
+.header-icon {
+
+    width: 52px;
+
+    height: 52px;
+
+    border-radius: 13px;
+
+    background: rgba(255,255,255,0.15);
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 28px;
+
+}
+
+
+.header h1 {
+
+    margin: 0;
+
+    font-size: 29px;
+
+}
+
+
+.header p {
+
+    margin: 5px 0 0;
+
+    font-size: 13px;
+
+    color: #c9deec;
+
+}
+
+
+/* =========================================
+   CONTAINER
+========================================= */
+
+.container {
+
+    width: 94%;
+
+    max-width: 1450px;
+
+    margin: 25px auto 50px;
+
+}
+
+
+/* =========================================
+   BACK
+========================================= */
+
+.back {
+
+    margin-bottom: 20px;
+
+}
+
+
+.back a {
+
+    display: inline-block;
+
+    text-decoration: none;
+
+    color: #1685ed;
+
+    font-size: 15px;
+
+    font-weight: bold;
+
+    padding: 9px 14px;
+
+    border-radius: 8px;
+
+}
+
+
+.back a:hover {
+
+    background: #e8f4fc;
+
+}
+
+
+/* =========================================
+   BOX
+========================================= */
+
+.box {
+
+    background: white;
+
+    margin-bottom: 22px;
+
+    padding: 25px;
+
+    border-radius: 16px;
+
+    border: 1px solid #e1eaf1;
+
+    box-shadow:
+        0 5px 18px rgba(0,0,0,0.07);
+
+}
+
+
+/* =========================================
+   BOX HEADER
+========================================= */
+
+.box-title {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 10px;
+
+    margin-bottom: 20px;
+
+}
+
+
+.box-title-icon {
+
+    width: 42px;
+
+    height: 42px;
+
+    background: #eaf5ff;
+
+    border-radius: 10px;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 22px;
+
+}
+
+
+.box-title h2 {
+
+    margin: 0;
+
+    color: #183f60;
+
+    font-size: 22px;
+
+}
+
+
+/* =========================================
+   ADD FACULTY FORM
+========================================= */
+
+.form-row {
+
+    display: grid;
+
+    grid-template-columns:
+        1.2fr
+        1.2fr
+        1fr
+        1.5fr
+        auto;
+
+    gap: 12px;
+
+    align-items: center;
+
+}
+
+
+input,
+select {
+
+    width: 100%;
+
+    padding: 12px 13px;
+
+    border: 1px solid #d3dce4;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+
+    outline: none;
+
+    background: white;
+
+}
+
+
+input:focus,
+select:focus {
+
+    border-color: #1685ed;
+
+    box-shadow:
+        0 0 0 3px rgba(22,133,237,0.10);
+
+}
+
+
+.add-btn {
+
+    padding: 12px 20px;
+
+    background: #1685ed;
+
+    color: white;
+
+    border: none;
+
+    border-radius: 8px;
+
+    font-size: 14px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+    white-space: nowrap;
+
+}
+
+
+.add-btn:hover {
+
+    background: #0874d1;
+
+}
+
+
+/* =========================================
+   FORM NOTE
+========================================= */
+
+.form-note {
+
+    margin-top: 13px;
+
+    color: #7b8c98;
+
+    font-size: 12px;
+
+}
+
+
+/* =========================================
+   FACULTY LIST
+========================================= */
+
+.list-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 18px;
+
+}
+
+
+.list-header h2 {
+
+    margin: 0;
+
+    color: #183f60;
+
+    font-size: 22px;
+
+}
+
+
+.college-id {
+
+    color: #718493;
+
+    font-size: 12px;
+
+}
+
+
+.college-id strong {
+
+    color: #1685ed;
+
+}
+
+
+/* =========================================
+   TABLE
+========================================= */
+
+.table-wrapper {
+
+    width: 100%;
+
+    overflow-x: auto;
+
+}
+
+
+table {
+
+    width: 100%;
+
+    min-width: 900px;
+
+    border-collapse: collapse;
+
+}
+
+
+th {
+
+    background: #0d78b5;
+
+    color: white;
+
+    padding: 15px 12px;
+
+    font-size: 13px;
+
+    text-align: center;
+
+    white-space: nowrap;
+
+}
+
+
+td {
+
+    padding: 15px 12px;
+
+    border-bottom: 1px solid #edf1f4;
+
+    text-align: center;
+
+    font-size: 13px;
+
+    color: #43596a;
+
+}
+
+
+tbody tr:hover {
+
+    background: #f7fbfe;
+
+}
+
+
+tbody tr:last-child td {
+
+    border-bottom: none;
+
+}
+
+
+/* =========================================
+   FACULTY ID
+========================================= */
+
+.faculty-id {
+
+    color: #1685ed;
+
+    font-weight: bold;
+
+}
+
+
+/* =========================================
+   FACULTY NAME
+========================================= */
+
+.faculty-name {
+
+    color: #294b63;
+
+    font-weight: bold;
+
+}
+
+
+/* =========================================
+   EMAIL
+========================================= */
+
+.email {
+
+    color: #61788a;
+
+}
+
+
+/* =========================================
+   DEPARTMENT
+========================================= */
+
+.department {
+
+    display: inline-block;
+
+    padding: 7px 11px;
+
+    background: #eef7ff;
+
+    color: #176da5;
+
+    border-radius: 15px;
+
+    font-size: 11px;
+
+    font-weight: bold;
+
+}
+
+
+/* =========================================
+   DELETE
+========================================= */
+
+.delete {
+
+    border: none;
+
+    background: #e84c4c;
+
+    color: white;
+
+    padding: 8px 14px;
+
+    border-radius: 6px;
+
+    font-size: 12px;
+
+    font-weight: bold;
+
+    cursor: pointer;
+
+}
+
+
+.delete:hover {
+
+    background: #c93737;
+
+}
+
+
+/* =========================================
+   EMPTY
+========================================= */
+
+.no-data {
+
+    padding: 60px 20px;
+
+    text-align: center;
+
+}
+
+
+.no-data-icon {
+
+    width: 65px;
+
+    height: 65px;
+
+    margin: auto;
+
+    border-radius: 50%;
+
+    background: #eaf5ff;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    font-size: 30px;
+
+}
+
+
+.no-data h3 {
+
+    margin: 15px 0 7px;
+
+    color: #34546b;
+
+}
+
+
+.no-data p {
+
+    margin: 0;
+
+    color: #8494a0;
+
+    font-size: 13px;
+
+}
+
+
+/* =========================================
+   NOTE
+========================================= */
+
+.note {
+
+    margin-top: 18px;
+
+    padding: 14px 17px;
+
+    background: #eff8ff;
+
+    border-left: 4px solid #1685ed;
+
+    border-radius: 8px;
+
+    color: #627787;
+
+    font-size: 12px;
+
+    line-height: 1.6;
+
+}
+
+
+/* =========================================
+   MOBILE
+========================================= */
+
+@media(max-width: 900px)
+{
+
+    .form-row {
+
+        grid-template-columns: 1fr 1fr;
+
+    }
+
+
+    .add-btn {
+
+        width: 100%;
+
+    }
+
+}
+
+
+@media(max-width: 600px)
+{
+
+    .header {
+
+        padding: 18px;
+
+    }
+
+
+    .header h1 {
+
+        font-size: 22px;
+
+    }
+
+
+    .container {
+
+        width: 94%;
+
+    }
+
+
+    .form-row {
+
+        grid-template-columns: 1fr;
+
+    }
+
+
+    .list-header {
+
+        display: block;
+
+    }
+
+
+    .college-id {
+
+        margin-top: 8px;
+
+    }
+
+}
+
+</style>
 
 </head>
 
+
 <body>
 
+
+<!-- =========================================
+     HEADER
+========================================= -->
+
 <div class="header">
-    Faculty Management
-</div>
 
 
-<div class="back">
-    <a href="collegeAdminDashboard.jsp">
-        ← Back to Dashboard
-    </a>
-</div>
+    <div class="header-icon">
+
+        &#128105;
+
+    </div>
 
 
-<!-- Add Faculty -->
+    <div>
 
-<div class="box">
+        <h1>
+            Faculty Management
+        </h1>
 
-    <h2>Add Faculty</h2>
 
-    <form action="FacultyController" method="post">
+        <p>
+            Manage faculty members and departments
+        </p>
 
-        <input type="hidden"
-               name="action"
-               value="add">
+    </div>
 
-        <input type="text"
-               name="name"
-               placeholder="Faculty Name"
-               required>
-
-        <input type="email"
-               name="email"
-               placeholder="Email"
-               required>
-
-        <input type="text"
-               name="phone"
-               placeholder="Phone"
-               required>
-
-        <select name="departmentId" required>
-
-            <option value="">
-                Select Department
-            </option>
-
-<%
-    Connection con1 = null;
-    PreparedStatement ps1 = null;
-    ResultSet rs1 = null;
-
-    try {
-
-        Class.forName("oracle.jdbc.driver.OracleDriver");
-
-        con1 = DriverManager.getConnection(
-            "jdbc:oracle:thin:@localhost:1521:XE",
-            "CAMPUSCONNECT",
-            "campus123"
-        );
-
-        String sql1 =
-            "SELECT DEPARTMENT_ID, DEPARTMENT_NAME " +
-            "FROM DEPARTMENT " +
-            "WHERE COLLEGE_ID=? " +
-            "ORDER BY DEPARTMENT_NAME";
-
-        ps1 = con1.prepareStatement(sql1);
-
-        ps1.setInt(1, collegeId);
-
-        rs1 = ps1.executeQuery();
-
-        while(rs1.next()) {
-%>
-
-            <option value="<%=rs1.getInt("DEPARTMENT_ID")%>">
-                <%=rs1.getString("DEPARTMENT_NAME")%>
-            </option>
-
-<%
-        }
-
-    } catch(Exception e) {
-
-        out.println("<option>Error loading departments</option>");
-
-    } finally {
-
-        if(rs1 != null) try { rs1.close(); } catch(Exception e) {}
-        if(ps1 != null) try { ps1.close(); } catch(Exception e) {}
-        if(con1 != null) try { con1.close(); } catch(Exception e) {}
-
-    }
-%>
-
-        </select>
-
-        <button type="submit">
-            Add Faculty
-        </button>
-
-    </form>
 
 </div>
 
 
-<!-- Faculty List -->
 
-<div class="box">
+<!-- =========================================
+     MAIN
+========================================= -->
 
-    <h2>Faculty List</h2>
+<div class="container">
 
-    <table>
 
-        <tr>
-            <th>Faculty ID</th>
-            <th>Name</th>
-            <th>Email</th>
-            <th>Phone</th>
-            <th>Department</th>
-            <th>Action</th>
-        </tr>
+    <!-- BACK -->
 
-<%
-    Connection con2 = null;
-    PreparedStatement ps2 = null;
-    ResultSet rs2 = null;
+    <div class="back">
 
-    try {
+        <a href="collegeAdminDashboard.jsp">
 
-        Class.forName("oracle.jdbc.driver.OracleDriver");
+            &#8592; Back to Dashboard
 
-        con2 = DriverManager.getConnection(
-            "jdbc:oracle:thin:@localhost:1521:XE",
-            "CAMPUSCONNECT",
-            "campus123"
-        );
+        </a>
 
-        String sql2 =
-            "SELECT F.FACULTY_ID, " +
-            "F.NAME, " +
-            "F.EMAIL, " +
-            "F.PHONE, " +
-            "D.DEPARTMENT_NAME " +
-            "FROM FACULTY F " +
-            "LEFT JOIN DEPARTMENT D " +
-            "ON F.DEPARTMENT_ID=D.DEPARTMENT_ID " +
-            "WHERE F.COLLEGE_ID=? " +
-            "ORDER BY F.FACULTY_ID";
+    </div>
 
-        ps2 = con2.prepareStatement(sql2);
 
-        ps2.setInt(1, collegeId);
 
-        rs2 = ps2.executeQuery();
+    <!-- =====================================
+         ADD FACULTY
+    ====================================== -->
 
-        boolean found = false;
+    <div class="box">
 
-        while(rs2.next()) {
 
-            found = true;
-%>
+        <div class="box-title">
 
-        <tr>
 
-            <td>
-                <%=rs2.getInt("FACULTY_ID")%>
-            </td>
+            <div class="box-title-icon">
 
-            <td>
-                <%=rs2.getString("NAME")%>
-            </td>
+                &#10133;
 
-            <td>
-                <%=rs2.getString("EMAIL")%>
-            </td>
+            </div>
 
-            <td>
-                <%=rs2.getString("PHONE")%>
-            </td>
 
-            <td>
-                <%=rs2.getString("DEPARTMENT_NAME")%>
-            </td>
+            <h2>
 
-            <td>
+                Add Faculty
 
-                <form action="FacultyController"
-                      method="post">
+            </h2>
 
-                    <input type="hidden"
-                           name="action"
-                           value="delete">
 
-                    <input type="hidden"
-                           name="facultyId"
-                           value="<%=rs2.getInt("FACULTY_ID")%>">
+        </div>
 
-                    <button type="submit"
-                            class="delete">
-                        Delete
-                    </button>
 
-                </form>
 
-            </td>
+        <form
+            action="FacultyController"
+            method="post"
+        >
 
-        </tr>
 
-<%
-        }
+            <input
+                type="hidden"
+                name="action"
+                value="add"
+            >
 
-        if(!found) {
-%>
 
-        <tr>
+            <div class="form-row">
 
-            <td colspan="6">
-                No faculty found.
-            </td>
 
-        </tr>
+                <!-- NAME -->
 
-<%
-        }
+                <input
+                    type="text"
+                    name="name"
+                    placeholder="Faculty Name"
+                    required
+                >
 
-    } catch(Exception e) {
-%>
 
-        <tr>
+                <!-- EMAIL -->
 
-            <td colspan="6">
-                Error: <%=e.getMessage()%>
-            </td>
+                <input
+                    type="email"
+                    name="email"
+                    placeholder="Email"
+                    required
+                >
 
-        </tr>
 
-<%
-    } finally {
+                <!-- PHONE -->
 
-        if(rs2 != null) try { rs2.close(); } catch(Exception e) {}
-        if(ps2 != null) try { ps2.close(); } catch(Exception e) {}
-        if(con2 != null) try { con2.close(); } catch(Exception e) {}
+                <input
+                    type="text"
+                    name="phone"
+                    placeholder="Phone"
+                    required
+                >
 
-    }
-%>
 
-    </table>
+                <!-- DEPARTMENT -->
+
+                <select
+                    name="departmentId"
+                    required
+                >
+
+
+                    <option value="">
+
+                        Select Department
+
+                    </option>
+
+
+        <%
+
+            Connection con1 = null;
+
+            PreparedStatement ps1 = null;
+
+            ResultSet rs1 = null;
+
+
+            try
+            {
+
+                Class.forName(
+                    "oracle.jdbc.driver.OracleDriver"
+                );
+
+
+                con1 =
+                    DriverManager.getConnection(
+
+                        "jdbc:oracle:thin:@localhost:1521:XE",
+
+                        "CAMPUSCONNECT",
+
+                        "campus123"
+
+                    );
+
+
+                String sql1 =
+
+                    "SELECT DEPARTMENT_ID, " +
+                    "DEPARTMENT_NAME " +
+
+                    "FROM DEPARTMENT " +
+
+                    "WHERE COLLEGE_ID=? " +
+
+                    "ORDER BY DEPARTMENT_NAME";
+
+
+                ps1 =
+                    con1.prepareStatement(sql1);
+
+
+                ps1.setInt(
+                    1,
+                    collegeId
+                );
+
+
+                rs1 =
+                    ps1.executeQuery();
+
+
+                while(rs1.next())
+                {
+
+        %>
+
+
+                    <option
+                        value="<%=rs1.getInt("DEPARTMENT_ID")%>"
+                    >
+
+                        <%=rs1.getString("DEPARTMENT_NAME")%>
+
+                    </option>
+
+
+        <%
+
+                }
+
+            }
+            catch(Exception e)
+            {
+
+        %>
+
+
+                    <option value="">
+
+                        Error loading departments
+
+                    </option>
+
+
+        <%
+
+            }
+            finally
+            {
+
+                if(rs1 != null)
+                {
+                    try
+                    {
+                        rs1.close();
+                    }
+                    catch(Exception e)
+                    {
+                    }
+                }
+
+
+                if(ps1 != null)
+                {
+                    try
+                    {
+                        ps1.close();
+                    }
+                    catch(Exception e)
+                    {
+                    }
+                }
+
+
+                if(con1 != null)
+                {
+                    try
+                    {
+                        con1.close();
+                    }
+                    catch(Exception e)
+                    {
+                    }
+                }
+
+            }
+
+        %>
+
+
+                </select>
+
+
+                <!-- ADD BUTTON -->
+
+                <button
+                    type="submit"
+                    class="add-btn"
+                >
+
+                    &#43; Add Faculty
+
+                </button>
+
+
+            </div>
+
+
+        </form>
+
+
+        <div class="form-note">
+
+            &#128161;
+
+            Enter faculty details and select the
+            department before adding the faculty member.
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =====================================
+         FACULTY LIST
+    ====================================== -->
+
+    <div class="box">
+
+
+        <div class="list-header">
+
+
+            <h2>
+
+                &#128101; Faculty List
+
+            </h2>
+
+
+            <div class="college-id">
+
+                College ID:
+
+                <strong>
+                    <%=collegeId%>
+                </strong>
+
+            </div>
+
+
+        </div>
+
+
+
+        <div class="table-wrapper">
+
+
+        <%
+
+            Connection con2 = null;
+
+            PreparedStatement ps2 = null;
+
+            ResultSet rs2 = null;
+
+
+            try
+            {
+
+                Class.forName(
+                    "oracle.jdbc.driver.OracleDriver"
+                );
+
+
+                con2 =
+                    DriverManager.getConnection(
+
+                        "jdbc:oracle:thin:@localhost:1521:XE",
+
+                        "CAMPUSCONNECT",
+
+                        "campus123"
+
+                    );
+
+
+                String sql2 =
+
+                    "SELECT F.FACULTY_ID, " +
+                    "F.NAME, " +
+                    "F.EMAIL, " +
+                    "F.PHONE, " +
+                    "D.DEPARTMENT_NAME " +
+
+                    "FROM FACULTY F " +
+
+                    "LEFT JOIN DEPARTMENT D " +
+
+                    "ON F.DEPARTMENT_ID=D.DEPARTMENT_ID " +
+
+                    "WHERE F.COLLEGE_ID=? " +
+
+                    "ORDER BY F.FACULTY_ID";
+
+
+                ps2 =
+                    con2.prepareStatement(sql2);
+
+
+                ps2.setInt(
+                    1,
+                    collegeId
+                );
+
+
+                rs2 =
+                    ps2.executeQuery();
+
+
+                boolean found = false;
+
+        %>
+
+
+        <table>
+
+
+            <thead>
+
+                <tr>
+
+                    <th>
+                        Faculty ID
+                    </th>
+
+                    <th>
+                        &#128100; Name
+                    </th>
+
+                    <th>
+                        &#128231; Email
+                    </th>
+
+                    <th>
+                        &#128222; Phone
+                    </th>
+
+                    <th>
+                        &#127979; Department
+                    </th>
+
+                    <th>
+                        Action
+                    </th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+
+        <%
+
+                while(rs2.next())
+                {
+
+                    found = true;
+
+        %>
+
+
+                <tr>
+
+
+                    <!-- FACULTY ID -->
+
+                    <td>
+
+                        <span class="faculty-id">
+
+                            #<%=rs2.getInt("FACULTY_ID")%>
+
+                        </span>
+
+                    </td>
+
+
+
+                    <!-- NAME -->
+
+                    <td>
+
+                        <span class="faculty-name">
+
+                            <%=rs2.getString("NAME")%>
+
+                        </span>
+
+                    </td>
+
+
+
+                    <!-- EMAIL -->
+
+                    <td>
+
+                        <span class="email">
+
+                            <%=rs2.getString("EMAIL")%>
+
+                        </span>
+
+                    </td>
+
+
+
+                    <!-- PHONE -->
+
+                    <td>
+
+                        <%=rs2.getString("PHONE")%>
+
+                    </td>
+
+
+
+                    <!-- DEPARTMENT -->
+
+                    <td>
+
+                        <span class="department">
+
+                            &#127979;
+
+                            <%=rs2.getString("DEPARTMENT_NAME")%>
+
+                        </span>
+
+                    </td>
+
+
+
+                    <!-- DELETE -->
+
+                    <td>
+
+
+                        <form
+                            action="FacultyController"
+                            method="post"
+                        >
+
+
+                            <input
+                                type="hidden"
+                                name="action"
+                                value="delete"
+                            >
+
+
+                            <input
+                                type="hidden"
+                                name="facultyId"
+                                value="<%=rs2.getInt("FACULTY_ID")%>"
+                            >
+
+
+                            <button
+                                type="submit"
+                                class="delete"
+                                onclick="return confirm('Are you sure you want to delete this faculty member?');"
+                            >
+
+                                &#10005; Delete
+
+                            </button>
+
+
+                        </form>
+
+
+                    </td>
+
+
+                </tr>
+
+
+        <%
+
+                }
+
+
+                if(!found)
+                {
+
+        %>
+
+
+                <tr>
+
+                    <td colspan="6">
+
+
+                        <div class="no-data">
+
+
+                            <div class="no-data-icon">
+
+                                &#128105;
+
+                            </div>
+
+
+                            <h3>
+
+                                No Faculty Found
+
+                            </h3>
+
+
+                            <p>
+
+                                No faculty members have been
+                                added to this college yet.
+
+                            </p>
+
+
+                        </div>
+
+
+                    </td>
+
+                </tr>
+
+
+        <%
+
+                }
+
+            }
+            catch(Exception e)
+            {
+
+        %>
+
+
+                <tr>
+
+                    <td colspan="6">
+
+
+                        <div class="no-data">
+
+
+                            <div class="no-data-icon">
+
+                                &#9888;
+
+                            </div>
+
+
+                            <h3>
+
+                                Unable to Load Faculty
+
+                            </h3>
+
+
+                            <p>
+
+                                Error:
+                                <%=e.getMessage()%>
+
+                            </p>
+
+
+                        </div>
+
+
+                    </td>
+
+                </tr>
+
+
+        <%
+
+            }
+            finally
+            {
+
+                if(rs2 != null)
+                {
+                    try
+                    {
+                        rs2.close();
+                    }
+                    catch(Exception e)
+                    {
+                    }
+                }
+
+
+                if(ps2 != null)
+                {
+                    try
+                    {
+                        ps2.close();
+                    }
+                    catch(Exception e)
+                    {
+                    }
+                }
+
+
+                if(con2 != null)
+                {
+                    try
+                    {
+                        con2.close();
+                    }
+                    catch(Exception e)
+                    {
+                    }
+                }
+
+            }
+
+        %>
+
+
+            </tbody>
+
+        </table>
+
+
+        </div>
+
+
+    </div>
+
+
+
+    <!-- =====================================
+         NOTE
+    ====================================== -->
+
+    <div class="note">
+
+        &#128161;
+
+        <strong>Faculty Management:</strong>
+
+        Faculty members are displayed according to
+        the currently logged-in college.
+
+    </div>
+
 
 </div>
+
 
 </body>
 
