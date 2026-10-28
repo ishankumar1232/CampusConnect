@@ -201,52 +201,55 @@ public class Student {
 
     // Student Login
 
+ // Student Login
     public boolean LoginMethod() {
 
-        boolean result = false;
+        String sql =
+            "SELECT STUDENT_ID, NAME, COLLEGE_ID, COURSE_ID, " +
+            "EMAIL, PHONE, PROFILE_IMAGE " +
+            "FROM STUDENT " +
+            "WHERE LOWER(EMAIL) = LOWER(?) " +
+            "AND PASSWORD = ? " +
+            "AND STATUS = 'ACTIVE'";
 
         try {
-
             Class.forName("oracle.jdbc.driver.OracleDriver");
 
-            Connection con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
+            try (
+                Connection con = DriverManager.getConnection(
+                    "jdbc:oracle:thin:@localhost:1521:XE",
+                    "CAMPUSCONNECT",
+                    "campus123"
+                );
 
-            Statement stmt = con.createStatement();
+                PreparedStatement ps = con.prepareStatement(sql)
+            ) {
+                ps.setString(1, email);
+                ps.setString(2, password);
 
-            String q1 =
-                "SELECT STUDENT_ID FROM STUDENT " +
-                "WHERE EMAIL='" + email + "' " +
-                "AND PASSWORD='" + password + "' " +
-                "AND STATUS='ACTIVE'";
+                try (ResultSet rs = ps.executeQuery()) {
 
-            ResultSet rs = stmt.executeQuery(q1);
+                    if (rs.next()) {
 
-            if(rs.next()) {
+                        this.studentId = rs.getInt("STUDENT_ID");
+                        this.name = rs.getString("NAME");
+                        this.collegeId = rs.getInt("COLLEGE_ID");
+                        this.courseId = rs.getInt("COURSE_ID");
+                        this.email = rs.getString("EMAIL");
+                        this.phone = rs.getString("PHONE");
+                        this.profileImage = rs.getString("PROFILE_IMAGE");
 
-                studentId = rs.getInt("STUDENT_ID");
-
-                result = true;
+                        return true;
+                    }
+                }
             }
 
-            rs.close();
-            stmt.close();
-            con.close();
-
-        }
-        catch(Exception e) {
-
+        } catch (Exception e) {
             e.printStackTrace();
-
         }
 
-        return result;
+        return false;
     }
-
-
     // Total Students of a College
 
     public int getStudentCount(int collegeId) {
