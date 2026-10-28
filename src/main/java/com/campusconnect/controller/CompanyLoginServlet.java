@@ -1,3 +1,4 @@
+
 package com.campusconnect.controller;
 
 import java.io.IOException;
@@ -15,7 +16,8 @@ import com.campusconnect.dao.CompanyDAO;
 @WebServlet("/CompanyLoginServlet")
 public class CompanyLoginServlet extends HttpServlet {
 
-    protected void doPost(HttpServletRequest request, HttpServletResponse response)
+    protected void doPost(HttpServletRequest request,
+                          HttpServletResponse response)
             throws ServletException, IOException {
 
         // Get login details
@@ -38,54 +40,24 @@ public class CompanyLoginServlet extends HttpServlet {
             session.setAttribute("companyName", c.getCompanyName());
             session.setAttribute("email", c.getEmail());
 
-            /*
-             * =====================================================
-             * COMPANY LOGO AND BANNER
-             * =====================================================
-             */
+            // Get logo and banner paths from database
+            String logoPath = c.getLogoUrl();
+            String bannerPath = c.getBannerUrl();
 
-            String companyName = c.getCompanyName();
+            // Use default images if paths are empty
+            if (logoPath == null || logoPath.trim().isEmpty()) {
+                logoPath = "images/company/default-logo.png";
+            }
 
-            String logoPath = "images/company/default-logo.png";
-            String bannerPath = "images/company/default-banner.png";
-
-            if (companyName != null) {
-
-                String name = companyName.trim().toLowerCase();
-
-                // TCS
-                if (name.contains("tcs")
-                        || name.contains("tata consultancy")) {
-
-                    logoPath = "images/company/tcs-logo.png";
-                    bannerPath = "images/company/tcs-banner.png";
-                }
-
-                // Infosys
-                else if (name.contains("infosys")) {
-
-                    logoPath = "images/company/infosys-logo.png";
-                    bannerPath = "images/company/infosys-dashboard.png";
-                }
-
-                // Google
-                else if (name.contains("google")) {
-
-                    logoPath = "images/company/google-logo.png";
-                    bannerPath = "images/company/google-dashboard.png";
-                }
+            if (bannerPath == null || bannerPath.trim().isEmpty()) {
+                bannerPath = "images/company/default-banner.png";
             }
 
             // Store image paths in session
             session.setAttribute("companyLogo", logoPath);
             session.setAttribute("companyBanner", bannerPath);
 
-            /*
-             * =====================================================
-             * REDIRECT TO COMPANY DASHBOARD
-             * =====================================================
-             */
-
+            // Redirect to company dashboard
             response.sendRedirect("company-dashboard.jsp");
 
         } else {

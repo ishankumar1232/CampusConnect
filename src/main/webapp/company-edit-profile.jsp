@@ -18,23 +18,71 @@
         return;
     }
 
-    String companyLogo = "";
+    String companyLogo = c.getLogoUrl();
     String companyInitial = "";
 
     String companyName = c.getCompanyName();
+    if (companyName == null || "null".equalsIgnoreCase(companyName.trim())) companyName = "";
 
-    if (companyName != null && companyName.length() > 0) {
+    String companyPhone = c.getPhone();
+    if (companyPhone == null || "null".equalsIgnoreCase(companyPhone.trim())) companyPhone = "";
+
+    String companyAddress = c.getAddress();
+    if (companyAddress == null || "null".equalsIgnoreCase(companyAddress.trim())) companyAddress = "";
+
+    String companyWebsite = c.getWebsite();
+    if (companyWebsite == null || "null".equalsIgnoreCase(companyWebsite.trim())) companyWebsite = "";
+
+    if (companyName.length() > 0) {
         companyInitial = companyName.substring(0, 1).toUpperCase();
     }
 
-    if ("TCS".equalsIgnoreCase(companyName)) {
-        companyLogo = "images/company/tcs-logo.png";
+    boolean useNameBasedFallback =
+            companyLogo == null || companyLogo.trim().isEmpty();
+
+    if (companyLogo != null) {
+        companyLogo = companyLogo.trim();
     }
-    else if ("Infosys".equalsIgnoreCase(companyName)) {
-        companyLogo = "images/company/infosys-logo.png";
+
+    if (!useNameBasedFallback) {
+        String normalizedLogoPath = companyLogo
+                .replace('\\', '/')
+                .toLowerCase(java.util.Locale.ROOT);
+        useNameBasedFallback =
+                normalizedLogoPath.equals("images/company/tcs-logo.png") ||
+                normalizedLogoPath.endsWith("/images/company/tcs-logo.png");
     }
-    else if ("Google".equalsIgnoreCase(companyName)) {
-        companyLogo = "images/company/google-logo.png";
+
+    if (useNameBasedFallback) {
+        String companyLogoName = companyName == null
+                ? ""
+                : companyName.trim().toLowerCase(java.util.Locale.ROOT);
+
+        if (companyLogoName.contains("infosys")) {
+            companyLogo = "images/company/infosys-logo.png";
+        } else if (companyLogoName.contains("google")) {
+            companyLogo = "images/company/google-logo.png";
+        } else if (companyLogoName.contains("tcs") ||
+                companyLogoName.contains("tata consultancy")) {
+            companyLogo = "images/company/tcs-logo.png";
+        } else {
+            companyLogo = "images/company/tcs-logo.png";
+        }
+    }
+
+    // Prefix application-relative paths with the current web context.
+    // Leave absolute HTTP(S) and scheme-relative URLs unchanged.
+    if (!companyLogo.matches("(?i)^(https?:)?//.*$")) {
+        String contextPath = request.getContextPath();
+
+        if (!companyLogo.equals(contextPath) &&
+                !companyLogo.startsWith(contextPath + "/")) {
+            if (companyLogo.startsWith("/")) {
+                companyLogo = contextPath + companyLogo;
+            } else {
+                companyLogo = contextPath + "/" + companyLogo;
+            }
+        }
     }
 %>
 
@@ -559,6 +607,75 @@
             }
         }
 
+
+        /* ---------- UPDATE MESSAGE MODAL ---------- */
+
+        .update-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background: rgba(15, 53, 91, 0.48);
+        }
+
+        .update-overlay.is-visible {
+            display: flex;
+        }
+
+        .update-dialog {
+            width: min(100%, 430px);
+            padding: 30px;
+            border: 1px solid #d6e1ee;
+            border-radius: 16px;
+            background: #ffffff;
+            box-shadow: 0 18px 45px rgba(15, 53, 91, 0.22);
+            color: #0b355d;
+            text-align: center;
+        }
+
+        .update-dialog p {
+            margin: 16px 0 22px;
+            font-size: 17px;
+            line-height: 1.5;
+        }
+
+        .update-spinner {
+            width: 40px;
+            height: 40px;
+            margin: 0 auto;
+            border: 4px solid #d6e1ee;
+            border-top-color: #087bea;
+            border-radius: 50%;
+            animation: update-spin 0.8s linear infinite;
+        }
+
+        .update-spinner[hidden],
+        .update-dialog button[hidden] {
+            display: none;
+        }
+
+        .update-dialog button {
+            min-width: 110px;
+            padding: 12px 24px;
+            border: 0;
+            border-radius: 9px;
+            background: #087bea;
+            color: #ffffff;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .update-dialog button:hover {
+            background: #0568ca;
+        }
+
+        @keyframes update-spin {
+            to { transform: rotate(360deg); }
+        }
     </style>
 
 </head>
@@ -684,6 +801,7 @@
 
 
             <form
+                id="companyEditForm"
                 method="post"
                 action="company-update.jsp"
             >
@@ -723,7 +841,7 @@
                         <input
                             type="text"
                             name="companyName"
-                            value="<%= c.getCompanyName() %>"
+                            value="<%= companyName %>"
                             required
                         >
 
@@ -761,7 +879,7 @@
                         <input
                             type="text"
                             name="phone"
-                            value="<%= c.getPhone() %>"
+                            value="<%= companyPhone %>"
                             required
                         >
 
@@ -781,7 +899,7 @@
                         <textarea
                             name="address"
                             required
-                        ><%= c.getAddress() %></textarea>
+                        ><%= companyAddress %></textarea>
 
                     </div>
 
@@ -798,7 +916,7 @@
                         <input
                             type="text"
                             name="website"
-                            value="<%= c.getWebsite() %>"
+                            value="<%= companyWebsite %>"
                         >
 
                     </div>
@@ -872,6 +990,77 @@
 </div>
 
 
+
+<div id="updateOverlay" class="update-overlay" aria-hidden="true">
+    <div class="update-dialog" role="alertdialog" aria-modal="true"
+         aria-labelledby="updateMessage">
+        <div id="updateSpinner" class="update-spinner"></div>
+        <p id="updateMessage">Updating your company profile…</p>
+        <button id="updateOk" type="button" hidden>OK</button>
+    </div>
+</div>
+
+<script>
+    (function () {
+        var form = document.getElementById("companyEditForm");
+        var overlay = document.getElementById("updateOverlay");
+        var message = document.getElementById("updateMessage");
+        var spinner = document.getElementById("updateSpinner");
+        var okButton = document.getElementById("updateOk");
+        var saveButton = form.querySelector(".save-button");
+        var redirectAfterSuccess = false;
+
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            message.textContent = "Updating your company profile…";
+            spinner.hidden = false;
+            okButton.hidden = true;
+            overlay.classList.add("is-visible");
+            overlay.setAttribute("aria-hidden", "false");
+            saveButton.disabled = true;
+
+            try {
+                var response = await fetch(form.action, {
+                    method: "POST",
+                    body: new URLSearchParams(new FormData(form)),
+                    headers: {
+                        "Accept": "application/json",
+                        "Content-Type": "application/x-www-form-urlencoded; charset=UTF-8"
+                    }
+                });
+
+                var result = await response.json();
+                spinner.hidden = true;
+                message.textContent = result.message ||
+                    "The update could not be completed.";
+                okButton.hidden = false;
+                redirectAfterSuccess = response.ok && result.success;
+                okButton.focus();
+
+                if (!redirectAfterSuccess) {
+                    saveButton.disabled = false;
+                }
+            } catch (error) {
+                spinner.hidden = true;
+                message.textContent =
+                    "Could not connect to the server. Please try again.";
+                okButton.hidden = false;
+                okButton.focus();
+                saveButton.disabled = false;
+            }
+        });
+
+        okButton.addEventListener("click", function () {
+            if (redirectAfterSuccess) {
+                window.location.href = "company-profile.jsp";
+                return;
+            }
+            overlay.classList.remove("is-visible");
+            overlay.setAttribute("aria-hidden", "true");
+        });
+    })();
+</script>
 </body>
 
 </html>

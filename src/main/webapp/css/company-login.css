@@ -849,3 +849,58 @@ body {
         padding-top: 10px;
     }
 }
+/* Centered validation message modal */
+.message-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(18, 61, 107, 0.42);
+}
+
+.message-overlay.is-visible {
+    display: flex;
+}
+
+.message-box {
+    width: min(100%, 420px);
+    padding: 28px;
+    border: 1px solid #d6e1ee;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 18px 45px rgba(25, 70, 120, 0.22);
+    color: #123d6b;
+    text-align: center;
+}
+
+.message-box p {
+    margin-bottom: 22px;
+    color: #123d6b;
+    font-size: 17px;
+    line-height: 1.5;
+}
+
+.message-box button {
+    min-width: 110px;
+    padding: 12px 24px;
+    border: 0;
+    border-radius: 9px;
+    background: #176fe5;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.message-box button:hover {
+    background: #0f60cc;
+}
+
+.message-box button:focus-visible {
+    outline: 3px solid rgba(38, 116, 223, 0.35);
+    outline-offset: 3px;
+}
+

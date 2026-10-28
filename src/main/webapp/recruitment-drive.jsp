@@ -14,20 +14,68 @@
 
     }
 
-    String logoPath = "images/company/tcs-logo.png";
+    Integer companyId = (Integer) session.getAttribute("companyId");
+    String logoPath = null;
 
-    if (companyName.toLowerCase().contains("infosys")) {
+    if (companyId != null) {
+        com.campusconnect.bean.Company company =
+                new com.campusconnect.bean.Company();
+        company.setCompanyId(companyId);
 
-        logoPath = "images/company/infosys-logo.png";
-
+        if (company.SelectMethod()) {
+            logoPath = company.getLogoUrl();
+        }
     }
 
-    else if (companyName.toLowerCase().contains("google")) {
-
-        logoPath = "images/company/google-logo.png";
-
+    if (logoPath != null) {
+        logoPath = logoPath.trim();
     }
 
+    boolean useNameBasedFallback =
+            logoPath == null || logoPath.isEmpty();
+
+    if (!useNameBasedFallback) {
+        String normalizedLogoPath = logoPath
+                .replace('\\', '/')
+                .toLowerCase(java.util.Locale.ROOT);
+        useNameBasedFallback =
+                normalizedLogoPath.equals("images/company/tcs-logo.png") ||
+                normalizedLogoPath.endsWith("/images/company/tcs-logo.png");
+    }
+
+    if (useNameBasedFallback) {
+        String companyLogoName = companyName.trim()
+                .toLowerCase(java.util.Locale.ROOT);
+
+        if (companyLogoName.contains("infosys")) {
+            logoPath = "images/company/infosys-logo.png";
+        } else if (companyLogoName.contains("google")) {
+            logoPath = "images/company/google-logo.png";
+        } else if (companyLogoName.contains("tcs") ||
+                companyLogoName.contains("tata consultancy")) {
+            logoPath = "images/company/tcs-logo.png";
+        } else {
+            logoPath = "images/company/tcs-logo.png";
+        }
+    }
+
+    // Prefix application-relative paths with the current web context.
+    // Leave absolute HTTP(S) and scheme-relative URLs unchanged.
+    if (!logoPath.matches("(?i)^(https?:)?//.*$")) {
+        String contextPath = request.getContextPath();
+
+        if (!logoPath.equals(contextPath) &&
+                !logoPath.startsWith(contextPath + "/")) {
+            if (logoPath.startsWith("/")) {
+                logoPath = contextPath + logoPath;
+            } else {
+                logoPath = contextPath + "/" + logoPath;
+            }
+        }
+    }
+
+    String logoUrl = logoPath + (logoPath.contains("?") ? "&" : "?") + "v=2";
+    String defaultLogoUrl = request.getContextPath() + "/images/company/tcs-logo.png";
 %>
 
 <!DOCTYPE html>
@@ -1252,11 +1300,11 @@
 
                 <img
 
-                    src="<%= request.getContextPath() %>/<%= logoPath %>?v=2"
+                    src="<%= logoUrl %>"
 
                     alt="<%= companyName %> Logo"
 
-                    onerror="this.style.display='none';"
+                    onerror="this.onerror=null;this.src='<%= defaultLogoUrl %>';"
 
                 >
 

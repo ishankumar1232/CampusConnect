@@ -1,5 +1,9 @@
 <%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
+<%
+    boolean invalidLogin = "invalid".equals(request.getParameter("error"));
+%>
+
 <!DOCTYPE html>
 <html lang="en">
 
@@ -13,9 +17,54 @@
     <title>Company Login | CampusConnect</title>
 
     <link rel="stylesheet" href="css/company-login.css?v=2">
+    
+    
+<style>
+    .back-home-link {
+        display: block;
+        width: 100%;
+        margin-top: 16px;
+        padding: 13px 20px;
+        text-align: center;
+        background: #ffffff;
+        color: #1769d2;
+        border: 1px solid #d5e2f2;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 700;
+        text-decoration: none;
+        transition: 0.2s ease;
+    }
+
+    .back-home-link:hover {
+        background: #eef5ff;
+        border-color: #1769d2;
+    }
+</style>
+    
 
     <script>
 
+        function showMessage(message)
+        {
+            var overlay = document.getElementById("messageOverlay");
+            var messageText = document.getElementById("messageText");
+            var okButton = document.getElementById("messageOk");
+
+            messageText.textContent = message;
+            overlay.classList.add("is-visible");
+            overlay.setAttribute("aria-hidden", "false");
+
+            // Focus the dialog button after the current validation call finishes.
+            window.setTimeout(function () {
+                okButton.focus();
+            }, 0);
+
+            okButton.onclick = function () {
+                overlay.classList.remove("is-visible");
+                overlay.setAttribute("aria-hidden", "true");
+            };
+        }
         function validateForm() {
 
             var email =
@@ -30,7 +79,7 @@
             if ((email == "" || email == null) &&
                 (password == "" || password == null)) {
 
-                alert("Email and Password are required");
+                showMessage("Email and Password are required");
 
                 document.forms["myForm"]["email"].focus();
 
@@ -42,7 +91,7 @@
 
             if (email == "" || email == null) {
 
-                alert("Email is required");
+                showMessage("Email is required");
 
                 document.forms["myForm"]["email"].focus();
 
@@ -54,7 +103,7 @@
 
             if (password == "" || password == null) {
 
-                alert("Password is required");
+                showMessage("Password is required");
 
                 document.forms["myForm"]["password"].focus();
 
@@ -66,13 +115,18 @@
 
             if (password.length < 6) {
 
-                alert("Password must be at least 6 characters");
+                showMessage("Password must be at least 6 characters");
 
                 document.forms["myForm"]["password"].focus();
 
                 return false;
             }
 
+
+            // Preserve the email across the failed-login redirect; never store the password.
+            try {
+                sessionStorage.setItem("ccCompanyLoginEmail", email.trim());
+            } catch (ignored) { }
 
             return true;
         }
@@ -337,7 +391,7 @@
 
 
                 </form>
-
+                   
 
 
                 <!-- REGISTER -->
@@ -349,6 +403,12 @@
                     <a href="company-registration.jsp">
                         Register Here
                     </a>
+                    
+                                    
+<a href="index.jsp" class="back-home-link">
+    &larr; Back to CampusConnect
+</a>
+           
 
                 </div>
 
@@ -360,6 +420,47 @@
 
     </div>
 
+
+<div class="message-overlay" id="messageOverlay" aria-hidden="true">
+    <div class="message-box"
+         role="alertdialog"
+         aria-modal="true"
+         aria-labelledby="messageText">
+        <p id="messageText"></p>
+        <button type="button" id="messageOk">OK</button>
+    </div>
+</div>
+<% if (invalidLogin) { %>
+<script>
+    (function () {
+        var emailInput = document.getElementById("email");
+        var passwordInput = document.getElementById("password");
+        var savedEmail = null;
+
+        try {
+            savedEmail = sessionStorage.getItem("ccCompanyLoginEmail");
+            sessionStorage.removeItem("ccCompanyLoginEmail");
+        } catch (ignored) { }
+
+        if (emailInput && savedEmail) emailInput.value = savedEmail;
+        if (passwordInput) passwordInput.value = "";
+
+        showMessage("Incorrect email or password. Please try again.");
+
+        var okButton = document.getElementById("messageOk");
+        if (okButton && passwordInput) {
+            okButton.addEventListener("click", function () {
+                passwordInput.focus();
+            }, { once: true });
+        }
+
+        // Make the message one-time so a refresh does not show it again.
+        if (window.history && window.history.replaceState) {
+            window.history.replaceState(null, document.title, window.location.pathname);
+        }
+    })();
+</script>
+<% } %>
 </body>
 
 </html>

@@ -29,42 +29,54 @@
     // COMPANY LOGO
     // =========================================================
 
-    String companyLogo =
-            "images/company/tcs-logo.png";
+    String companyLogo = c.getLogoUrl();
+    if (companyLogo != null) {
+        companyLogo = companyLogo.trim();
+    }
 
+    boolean useNameBasedFallback =
+            companyLogo == null || companyLogo.isEmpty();
 
-    if (result && c.getCompanyName() != null) {
+    if (!useNameBasedFallback) {
+        String normalizedLogoPath = companyLogo
+                .replace('\\', '/')
+                .toLowerCase(java.util.Locale.ROOT);
+        useNameBasedFallback =
+                normalizedLogoPath.equals("images/company/tcs-logo.png") ||
+                normalizedLogoPath.endsWith("/images/company/tcs-logo.png");
+    }
 
-        String companyName =
-                c.getCompanyName()
-                 .trim()
-                 .toLowerCase();
+    if (useNameBasedFallback) {
+        String companyLogoName = c.getCompanyName() == null
+                ? ""
+                : c.getCompanyName().trim().toLowerCase(java.util.Locale.ROOT);
 
-
-        if (companyName.contains("infosys")) {
-
-            companyLogo =
-                    "images/company/infosys-logo.png";
-
-        }
-
-        else if (companyName.contains("google")) {
-
-            companyLogo =
-                    "images/company/google-logo.png";
-
-        }
-
-        else if (
-            companyName.contains("tcs") ||
-            companyName.contains("tata consultancy")
-        ) {
-
-            companyLogo =
-                    "images/company/tcs-logo.png";
+        if (companyLogoName.contains("infosys")) {
+            companyLogo = "images/company/infosys-logo.png";
+        } else if (companyLogoName.contains("google")) {
+            companyLogo = "images/company/google-logo.png";
+        } else if (companyLogoName.contains("tcs") ||
+                companyLogoName.contains("tata consultancy")) {
+            companyLogo = "images/company/tcs-logo.png";
+        } else {
+            companyLogo = "images/company/tcs-logo.png";
         }
     }
 
+    // Prefix application-relative paths with the current web context.
+    // Leave absolute HTTP(S) and scheme-relative URLs unchanged.
+    if (!companyLogo.matches("(?i)^(https?:)?//.*$")) {
+        String contextPath = request.getContextPath();
+
+        if (!companyLogo.equals(contextPath) &&
+                !companyLogo.startsWith(contextPath + "/")) {
+            if (companyLogo.startsWith("/")) {
+                companyLogo = contextPath + companyLogo;
+            } else {
+                companyLogo = contextPath + "/" + companyLogo;
+            }
+        }
+    }
 %>
 
 

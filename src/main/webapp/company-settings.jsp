@@ -17,9 +17,60 @@
     String email = (String) session.getAttribute("email");
     if (companyName == null || companyName.trim().length() == 0) companyName = "Company";
     if (email == null) email = "";
-    String companyLogo = (String) session.getAttribute("companyLogo");
-    if (companyLogo == null || companyLogo.trim().length() == 0) {
-        companyLogo = "TCS".equalsIgnoreCase(companyName.trim()) ? "images/company/tcs-logo.png" : null;
+    com.campusconnect.bean.Company company =
+            new com.campusconnect.bean.Company();
+    company.setCompanyId(companyId);
+
+    String companyLogo = null;
+    if (company.SelectMethod()) {
+        companyLogo = company.getLogoUrl();
+    }
+
+    if (companyLogo != null) {
+        companyLogo = companyLogo.trim();
+    }
+
+    boolean useNameBasedFallback =
+            companyLogo == null || companyLogo.isEmpty();
+
+    if (!useNameBasedFallback) {
+        String normalizedLogoPath = companyLogo
+                .replace('\\', '/')
+                .toLowerCase(java.util.Locale.ROOT);
+        useNameBasedFallback =
+                normalizedLogoPath.equals("images/company/tcs-logo.png") ||
+                normalizedLogoPath.endsWith("/images/company/tcs-logo.png");
+    }
+
+    if (useNameBasedFallback) {
+        String companyLogoName = companyName.trim()
+                .toLowerCase(java.util.Locale.ROOT);
+
+        if (companyLogoName.contains("infosys")) {
+            companyLogo = "images/company/infosys-logo.png";
+        } else if (companyLogoName.contains("google")) {
+            companyLogo = "images/company/google-logo.png";
+        } else if (companyLogoName.contains("tcs") ||
+                companyLogoName.contains("tata consultancy")) {
+            companyLogo = "images/company/tcs-logo.png";
+        } else {
+            companyLogo = "images/company/tcs-logo.png";
+        }
+    }
+
+    // Prefix application-relative paths with the current web context.
+    // Leave absolute HTTP(S) and scheme-relative URLs unchanged.
+    if (!companyLogo.matches("(?i)^(https?:)?//.*$")) {
+        String contextPath = request.getContextPath();
+
+        if (!companyLogo.equals(contextPath) &&
+                !companyLogo.startsWith(contextPath + "/")) {
+            if (companyLogo.startsWith("/")) {
+                companyLogo = contextPath + companyLogo;
+            } else {
+                companyLogo = contextPath + "/" + companyLogo;
+            }
+        }
     }
     String companyInitial = companyName.substring(0, 1).toUpperCase();
 %>

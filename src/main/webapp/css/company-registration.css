@@ -7,8 +7,8 @@
 
 body {
     font-family: Arial, Helvetica, sans-serif;
-    background: #f4f7fb;
-    color: #102a4c;
+    background: #f3f7fc;
+    color: #123d6b;
 }
 
 
@@ -34,7 +34,11 @@ body {
     max-width: 480px;
     min-height: 650px;
 
-    background: #17457f;
+    background: linear-gradient(
+        145deg,
+        #2867bd 0%,
+        #176fe3 100%
+    );
     color: white;
 
     padding: 55px 52px;
@@ -65,7 +69,7 @@ body {
     font-weight: bold;
     letter-spacing: 1.2px;
 
-    color: #8fc1ff;
+    color: #72b0ff;
 
     margin-bottom: 18px;
 }
@@ -85,7 +89,7 @@ body {
     font-size: 16px;
     line-height: 1.7;
 
-    color: #dceaff;
+    color: #ffffff;
 }
 
 
@@ -104,7 +108,7 @@ body {
 
     border-radius: 0 18px 18px 0;
 
-    box-shadow: 0 18px 45px rgba(25, 55, 90, 0.10);
+    box-shadow: 0 18px 45px rgba(25, 70, 120, 0.12);
 
     overflow-y: auto;
 }
@@ -117,14 +121,14 @@ body {
 
 .registration-box h2 {
     font-size: 30px;
-    color: #102a4c;
+    color: #123d6b;
 
     margin-bottom: 8px;
 }
 
 
 .subtitle {
-    color: #6b7d93;
+    color: #66809f;
 
     font-size: 15px;
     line-height: 1.5;
@@ -135,7 +139,7 @@ body {
 
 .mandatory-note {
     font-size: 13px;
-    color: #718096;
+    color: #123d6b;
 
     margin-bottom: 22px;
 }
@@ -152,7 +156,7 @@ body {
 ================================ */
 
 .form-section {
-    border-top: 1px solid #e5ebf2;
+    border-top: 1px solid #e1e8f0;
 
     padding-top: 22px;
     margin-top: 20px;
@@ -161,7 +165,7 @@ body {
 
 .form-section h3 {
     font-size: 16px;
-    color: #183d69;
+    color: #123d6b;
 
     margin-bottom: 18px;
 }
@@ -190,7 +194,7 @@ body {
     font-size: 14px;
     font-weight: bold;
 
-    color: #183d69;
+    color: #123d6b;
 
     margin-bottom: 7px;
 }
@@ -200,7 +204,7 @@ body {
 .form-group textarea {
     width: 100%;
 
-    border: 1px solid #d5dfeb;
+    border: 1px solid #d6e1ee;
     border-radius: 8px;
 
     padding: 12px 13px;
@@ -208,8 +212,8 @@ body {
     font-family: Arial, Helvetica, sans-serif;
     font-size: 14px;
 
-    color: #183d69;
-    background: #fff;
+    color: #123d6b;
+    background: #fbfdff;
 
     outline: none;
 
@@ -231,15 +235,15 @@ body {
 
 .form-group input:focus,
 .form-group textarea:focus {
-    border-color: #2f73d9;
+    border-color: #2674df;
 
-    box-shadow: 0 0 0 3px rgba(47, 115, 217, 0.10);
+    box-shadow: 0 0 0 3px rgba(38, 116, 223, 0.10);
 }
 
 
 .form-group input::placeholder,
 .form-group textarea::placeholder {
-    color: #9aa9ba;
+    color: #91a7c2;
 }
 
 
@@ -250,7 +254,7 @@ body {
 
 .status-field input {
     background: #f5f8fc;
-    color: #60748b;
+    color: #607894;
 }
 
 
@@ -275,7 +279,7 @@ body {
     border: none;
     border-radius: 8px;
 
-    background: #17457f;
+    background: #176fe5;
     color: white;
 
     font-size: 14px;
@@ -289,7 +293,7 @@ body {
 
 
 .submit-button:hover {
-    background: #123966;
+    background: #0f60cc;
 }
 
 
@@ -302,11 +306,11 @@ body {
     width: 95px;
     height: 46px;
 
-    border: 1px solid #d5dfeb;
+    border: 1px solid #d6e1ee;
     border-radius: 8px;
 
     background: white;
-    color: #63778e;
+    color: #607894;
 
     font-size: 14px;
 
@@ -331,14 +335,14 @@ body {
     margin-top: 25px;
     padding-top: 20px;
 
-    color: #718096;
+    color: #66809f;
 
     font-size: 14px;
 }
 
 
 .login-link a {
-    color: #17457f;
+    color: #0867d8;
 
     font-weight: bold;
 
@@ -445,4 +449,62 @@ body {
         width: 100%;
     }
 
+}
+
+
+
+
+/* Centered validation message modal */
+.message-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(18, 61, 107, 0.42);
+}
+
+.message-overlay.is-visible {
+    display: flex;
+}
+
+.message-box {
+    width: min(100%, 420px);
+    padding: 28px;
+    border: 1px solid #d6e1ee;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 18px 45px rgba(25, 70, 120, 0.22);
+    color: #123d6b;
+    text-align: center;
+}
+
+.message-box p {
+    margin-bottom: 22px;
+    color: #123d6b;
+    font-size: 17px;
+    line-height: 1.5;
+}
+
+.message-box button {
+    min-width: 110px;
+    padding: 12px 24px;
+    border: 0;
+    border-radius: 9px;
+    background: #176fe5;
+    color: #ffffff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.message-box button:hover {
+    background: #0f60cc;
+}
+
+.message-box button:focus-visible {
+    outline: 3px solid rgba(38, 116, 223, 0.35);
+    outline-offset: 3px;
 }
