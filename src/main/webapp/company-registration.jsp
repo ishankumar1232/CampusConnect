@@ -15,6 +15,31 @@
 
     <script>
 
+        function showMessage(message, onClose)
+        {
+            var overlay = document.getElementById("messageOverlay");
+            var messageText = document.getElementById("messageText");
+            var okButton = document.getElementById("messageOk");
+
+            messageText.textContent = message;
+            overlay.classList.add("is-visible");
+            overlay.setAttribute("aria-hidden", "false");
+
+            // Move keyboard focus into the dialog after validation finishes.
+            window.setTimeout(function () {
+                okButton.focus();
+            }, 0);
+
+            okButton.onclick = function () {
+                overlay.classList.remove("is-visible");
+                overlay.setAttribute("aria-hidden", "true");
+
+                if (onClose)
+                {
+                    onClose();
+                }
+            };
+        }
         function validateForm()
         {
             var companyName = document.forms["myForm"]["companyName"].value;
@@ -37,7 +62,7 @@
                 (address == "" || address == null) &&
                 (status == "" || status == null))
             {
-                alert("All mandatory fields are blank");
+                showMessage("All mandatory fields are blank");
 
                 document.forms["myForm"]["companyName"].focus();
 
@@ -49,7 +74,7 @@
 
             if (companyName == "" || companyName == null)
             {
-                alert("Company Name is required");
+                showMessage("Company Name is required");
 
                 document.forms["myForm"]["companyName"].focus();
 
@@ -60,7 +85,7 @@
 
             if (!letters.test(companyName))
             {
-                alert("Company Name should contain letters only");
+                showMessage("Company Name should contain letters only");
 
                 document.forms["myForm"]["companyName"].focus();
 
@@ -72,7 +97,7 @@
 
             if (email == "" || email == null)
             {
-                alert("Email is required");
+                showMessage("Email is required");
 
                 document.forms["myForm"]["email"].focus();
 
@@ -84,7 +109,7 @@
 
             if (phone == "" || phone == null)
             {
-                alert("Phone Number is required");
+                showMessage("Phone Number is required");
 
                 document.forms["myForm"]["phone"].focus();
 
@@ -95,7 +120,7 @@
 
             if (!numbers.test(phone))
             {
-                alert("Phone Number should contain numbers only");
+                showMessage("Phone Number should contain numbers only");
 
                 document.forms["myForm"]["phone"].focus();
 
@@ -104,7 +129,7 @@
 
             if (phone.length != 10)
             {
-                alert("Phone Number must be 10 digits");
+                showMessage("Phone Number must be 10 digits");
 
                 document.forms["myForm"]["phone"].focus();
 
@@ -116,7 +141,7 @@
 
             if (password == "" || password == null)
             {
-                alert("Password is required");
+                showMessage("Password is required");
 
                 document.forms["myForm"]["password"].focus();
 
@@ -125,7 +150,7 @@
 
             if (password.length < 6)
             {
-                alert("Password must be at least 6 characters");
+                showMessage("Password must be at least 6 characters");
 
                 document.forms["myForm"]["password"].focus();
 
@@ -137,7 +162,7 @@
 
             if (confirmPassword == "" || confirmPassword == null)
             {
-                alert("Confirm Password is required");
+                showMessage("Confirm Password is required");
 
                 document.forms["myForm"]["confirmPassword"].focus();
 
@@ -146,7 +171,7 @@
 
             if (password != confirmPassword)
             {
-                alert("Password and Confirm Password do not match");
+                showMessage("Password and Confirm Password do not match");
 
                 document.forms["myForm"]["confirmPassword"].focus();
 
@@ -158,7 +183,7 @@
 
             if (address == "" || address == null)
             {
-                alert("Address is required");
+                showMessage("Address is required");
 
                 document.forms["myForm"]["address"].focus();
 
@@ -173,7 +198,7 @@
                 if (website.indexOf("http://") != 0 &&
                     website.indexOf("https://") != 0)
                 {
-                    alert("Website should start with http:// or https://");
+                    showMessage("Website should start with http:// or https://");
 
                     document.forms["myForm"]["website"].focus();
 
@@ -186,7 +211,7 @@
 
             if (status == "" || status == null)
             {
-                alert("Status is required");
+                showMessage("Status is required");
 
                 document.forms["myForm"]["status"].focus();
 
@@ -194,9 +219,11 @@
             }
 
 
-            alert("Form Submitted Successfully");
+            showMessage("Form Submitted Successfully", function () {
+                document.forms["myForm"].submit();
+            });
 
-            return true;
+            return false;
         }
 
     </script>
@@ -443,6 +470,16 @@
 
 </div>
 
+
+<div class="message-overlay" id="messageOverlay" aria-hidden="true">
+    <div class="message-box"
+         role="alertdialog"
+         aria-modal="true"
+         aria-labelledby="messageText">
+        <p id="messageText"></p>
+        <button type="button" id="messageOk">OK</button>
+    </div>
+</div>
 </body>
 
 </html>

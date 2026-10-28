@@ -2,8 +2,10 @@ package com.campusconnect.bean;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.SQLException;
+import java.sql.Types;
 
 public class Company {
 
@@ -15,138 +17,116 @@ public class Company {
     private String address;
     private String website;
     private String status;
-	public int getCompanyId() {
-		return companyId;
-	}
-	public void setCompanyId(int companyId) {
-		this.companyId = companyId;
-	}
-	public String getCompanyName() {
-		return companyName;
-	}
-	public void setCompanyName(String companyName) {
-		this.companyName = companyName;
-	}
-	public String getEmail() {
-		return email;
-	}
-	public void setEmail(String email) {
-		this.email = email;
-	}
-	public String getPhone() {
-		return phone;
-	}
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
-	public String getPassword() {
-		return password;
-	}
-	public void setPassword(String password) {
-		this.password = password;
-	}
-	public String getAddress() {
-		return address;
-	}
-	public void setAddress(String address) {
-		this.address = address;
-	}
-	public String getWebsite() {
-		return website;
-	}
-	public void setWebsite(String website) {
-		this.website = website;
-	}
-	public String getStatus() {
-		return status;
-	}
-	public void setStatus(String status) {
-		this.status = status;
-	}
+    private String logoUrl;
+    private String bannerUrl;
 
-	
-	public boolean SelectMethod()
-	{
-	    try
-	    {
-	        Class.forName("oracle.jdbc.driver.OracleDriver");
+    public int getCompanyId() { return companyId; }
+    public void setCompanyId(int companyId) { this.companyId = companyId; }
 
-	        Connection con = DriverManager.getConnection(
-	            "jdbc:oracle:thin:@localhost:1521:XE",
-	            "CAMPUSCONNECT",
-	            "campus123"
-	        );
+    public String getCompanyName() { return companyName; }
+    public void setCompanyName(String companyName) { this.companyName = companyName; }
 
-	        Statement stmt = con.createStatement();
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
-	        String q1 = "SELECT * FROM COMPANY " +
-	                    "WHERE COMPANY_ID = " + companyId;
+    public String getPhone() { return phone; }
+    public void setPhone(String phone) { this.phone = phone; }
 
-	        ResultSet rs = stmt.executeQuery(q1);
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-	        if(rs.next())
-	        {
-	            companyName = rs.getString("COMPANY_NAME");
-	            email = rs.getString("EMAIL");
-	            phone = rs.getString("PHONE");
-	            address = rs.getString("ADDRESS");
-	            website = rs.getString("WEBSITE");
-	            status = rs.getString("STATUS");
+    public String getAddress() { return address; }
+    public void setAddress(String address) { this.address = address; }
 
-	            con.close();
+    public String getWebsite() { return website; }
+    public void setWebsite(String website) { this.website = website; }
 
-	            return true;
-	        }
-	        else
-	        {
-	            con.close();
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
 
-	            return false;
-	        }
-	    }
-	    catch(Exception e)
-	    {
-	        return false;
-	    }
-	}
-	
-	public boolean UpdateMethod()
-	{
-	    try
-	    {
-	        Class.forName("oracle.jdbc.driver.OracleDriver");
+    public String getLogoUrl() { return logoUrl; }
+    public void setLogoUrl(String logoUrl) { this.logoUrl = logoUrl; }
 
-	        Connection con = DriverManager.getConnection(
-	            "jdbc:oracle:thin:@localhost:1521:XE",
-	            "CAMPUSCONNECT",
-	            "campus123"
-	        );
+    public String getBannerUrl() { return bannerUrl; }
+    public void setBannerUrl(String bannerUrl) { this.bannerUrl = bannerUrl; }
 
-	        Statement stmt = con.createStatement();
+    private Connection getConnection() throws Exception {
+        Class.forName("oracle.jdbc.driver.OracleDriver");
+        return DriverManager.getConnection(
+            "jdbc:oracle:thin:@localhost:1521:XE",
+            "CAMPUSCONNECT",
+            "campus123"
+        );
+    }
 
-	        String q1 = "UPDATE COMPANY SET " +
-	                    "COMPANY_NAME = '" + companyName + "', " +
-	                    "PHONE = '" + phone + "', " +
-	                    "ADDRESS = '" + address + "', " +
-	                    "WEBSITE = '" + website + "' " +
-	                    "WHERE COMPANY_ID = " + companyId;
+    public boolean SelectMethod() {
+        String sql = "SELECT COMPANY_NAME, EMAIL, PHONE, ADDRESS, " +
+                     "WEBSITE, STATUS, LOGO_URL, BANNER_URL " +
+                     "FROM COMPANY WHERE COMPANY_ID = ?";
 
-	        int x = stmt.executeUpdate(q1);
+        try (Connection con = getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
 
-	        con.close();
+            stmt.setInt(1, companyId);
 
-	        if(x > 0)
-	        {
-	            return true;
-	        }
-	        else
-	        {
-	            return false;
-	        }
-	    }
-	    catch(Exception e)
-	    {
-	        return false;
-	    }
-	}
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (!rs.next()) {
+                    return false;
+                }
+
+                companyName = rs.getString("COMPANY_NAME");
+                email = rs.getString("EMAIL");
+                phone = rs.getString("PHONE");
+
+                address = rs.getString("ADDRESS");
+                website = rs.getString("WEBSITE");
+                status = rs.getString("STATUS");
+                logoUrl = rs.getString("LOGO_URL");
+                bannerUrl = rs.getString("BANNER_URL");
+                return true;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    public boolean UpdateMethod() {
+        if (companyName == null) {
+            return false;
+        }
+
+        String cleanName = companyName.trim();
+        if (cleanName.isEmpty() || "null".equalsIgnoreCase(cleanName)) {
+            return false;
+        }
+
+        String sql = "UPDATE COMPANY SET COMPANY_NAME = ?, PHONE = ?, " +
+                     "ADDRESS = ?, WEBSITE = ? WHERE COMPANY_ID = ?";
+
+        try (Connection con = getConnection();
+             PreparedStatement stmt = con.prepareStatement(sql)) {
+
+            stmt.setString(1, cleanName);
+            setOptionalString(stmt, 2, phone);
+            setOptionalString(stmt, 3, address);
+            setOptionalString(stmt, 4, website);
+            stmt.setInt(5, companyId);
+
+            return stmt.executeUpdate() > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    private void setOptionalString(PreparedStatement stmt, int index,
+                                  String value) throws SQLException {
+        if (value == null || value.trim().isEmpty() ||
+            "null".equalsIgnoreCase(value.trim())) {
+            stmt.setNull(index, Types.VARCHAR);
+        } else {
+            stmt.setString(index, value.trim());
+        }
+    }
 }

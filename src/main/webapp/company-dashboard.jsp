@@ -1,411 +1,2285 @@
-<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
-<%
-    String companyName = (String) session.getAttribute("companyName");
-    String email = (String) session.getAttribute("email");
+<%@ page import="java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.util.ArrayList,java.util.HashMap,java.util.List,java.util.Map,com.campusconnect.util.DBConnection" %>
 
-    if (companyName == null) {
-        response.sendRedirect("company-login.jsp");
-        return;
+
+
+<%!
+    private String safeCompanyImagePath(String path, String fallback) {
+        if (path == null || path.trim().isEmpty()) {
+            return fallback;
+        }
+
+        String safePath = path.trim().replace('\\', '/');
+        while (safePath.startsWith("/")) {
+            safePath = safePath.substring(1);
+        }
+
+        if (safePath.isEmpty() || safePath.startsWith("//") || safePath.contains(":")
+                || safePath.contains("..") || safePath.indexOf('\\') >= 0) {
+            return fallback;
+        }
+        return safePath;
+    }
+
+    private String dashboardEscape(String value) {
+        if (value == null) return "";
+        return value.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
     }
 %>
 
+<%
+
+    // =========================================================
+
+    // GET COMPANY DETAILS FROM SESSION
+
+    // =========================================================
+
+
+
+    String companyName = (String) session.getAttribute("companyName");
+
+    String email = (String) session.getAttribute("email");
+
+
+
+    String companyLogo = (String) session.getAttribute("companyLogo");
+
+    String companyBanner = (String) session.getAttribute("companyBanner");
+
+    Integer companyId = (Integer) session.getAttribute("companyId");
+
+
+
+    if (companyId == null) {
+
+        response.sendRedirect("company-login.jsp");
+
+        return;
+
+    }
+
+
+
+
+
+    // =========================================================
+
+    // DEFAULT VALUES
+
+    // =========================================================
+
+
+
+    if (companyName == null || companyName.trim().equals("")) {
+
+        companyName = "Company";
+
+    }
+
+
+
+    if (email == null) {
+
+        email = "";
+
+    }
+
+
+
+    String companyLogoFallback = "images/company/default-logo.png";
+    String companyBannerFallback = "images/company/default-banner.png";
+
+    companyLogo = safeCompanyImagePath(companyLogo, companyLogoFallback);
+    companyBanner = safeCompanyImagePath(companyBanner, companyBannerFallback);
+
+    String contextPath = request.getContextPath();
+    String companyLogoUrl = contextPath + "/" + companyLogo;
+    String companyBannerUrl = contextPath + "/" + companyBanner;
+
+
+
+
+
+    // =========================================================
+
+    // COMPANY INITIAL
+
+    // =========================================================
+
+
+
+    String companyInitial = companyName.substring(0, 1).toUpperCase();
+
+
+
+    int pendingApplications = 0;
+
+    int pendingOffers = 0;
+
+    boolean notificationDataError = false;
+
+    try (Connection connection = DBConnection.getConnection()) {
+
+        try (PreparedStatement ps = connection.prepareStatement(
+
+                "SELECT COUNT(*) FROM APPLICATION A JOIN RECRUITMENT_DRIVE D ON D.DRIVE_ID = A.DRIVE_ID WHERE D.COMPANY_ID = ? AND UPPER(TRIM(A.STATUS)) = 'PENDING'")) {
+
+            ps.setInt(1, companyId.intValue());
+
+            try (ResultSet rs = ps.executeQuery()) { if (rs.next()) pendingApplications = rs.getInt(1); }
+
+        }
+
+        try (PreparedStatement ps = connection.prepareStatement(
+
+                "SELECT COUNT(*) FROM OFFER WHERE COMPANY_ID = ? AND UPPER(TRIM(OFFER_STATUS)) = 'PENDING'")) {
+
+            ps.setInt(1, companyId.intValue());
+
+            try (ResultSet rs = ps.executeQuery()) { if (rs.next()) pendingOffers = rs.getInt(1); }
+
+        }
+
+    } catch (Exception e) {
+
+        notificationDataError = true;
+
+        application.log("Unable to load company dashboard notifications for companyId=" + companyId, e);
+
+    }
+
+    int actionCount = pendingApplications + pendingOffers;
+
+    int totalDrives = 0;
+    int totalApplications = 0;
+    int scheduledInterviews = 0;
+    int totalOffers = 0;
+    boolean dashboardDataError = false;
+    List<Map<String, Object>> recentDrives = new ArrayList<Map<String, Object>>();
+
+    try (Connection connection = DBConnection.getConnection()) {
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT COUNT(*) FROM RECRUITMENT_DRIVE WHERE COMPANY_ID = ?")) {
+            ps.setInt(1, companyId.intValue());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) totalDrives = rs.getInt(1);
+            }
+        }
+
+        String recentDriveSql = "SELECT DRIVE_ID, DRIVE_TYPE, JOB_TITLE, VACANCY, DEADLINE, STATUS " +
+                "FROM (SELECT DRIVE_ID, DRIVE_TYPE, JOB_TITLE, VACANCY, DEADLINE, STATUS " +
+                "FROM RECRUITMENT_DRIVE WHERE COMPANY_ID = ? ORDER BY DRIVE_ID DESC) " +
+                "WHERE ROWNUM <= 5";
+        try (PreparedStatement ps = connection.prepareStatement(recentDriveSql)) {
+            ps.setInt(1, companyId.intValue());
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Map<String, Object> drive = new HashMap<String, Object>();
+                    drive.put("id", rs.getInt("DRIVE_ID"));
+                    drive.put("type", rs.getString("DRIVE_TYPE"));
+                    drive.put("title", rs.getString("JOB_TITLE"));
+                    drive.put("vacancy", rs.getInt("VACANCY"));
+                    drive.put("deadline", rs.getDate("DEADLINE"));
+                    drive.put("status", rs.getString("STATUS"));
+                    recentDrives.add(drive);
+                }
+            }
+        }
+
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT COUNT(*) FROM APPLICATION A JOIN RECRUITMENT_DRIVE D " +
+                "ON D.DRIVE_ID = A.DRIVE_ID WHERE D.COMPANY_ID = ?")) {
+            ps.setInt(1, companyId.intValue());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) totalApplications = rs.getInt(1);
+            }
+        }
+
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT COUNT(*) FROM INTERVIEW I JOIN APPLICATION A " +
+                "ON A.APPLICATION_ID = I.APPLICATION_ID JOIN RECRUITMENT_DRIVE D " +
+                "ON D.DRIVE_ID = A.DRIVE_ID WHERE D.COMPANY_ID = ? " +
+                "AND UPPER(TRIM(I.STATUS)) = 'SCHEDULED'")) {
+            ps.setInt(1, companyId.intValue());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) scheduledInterviews = rs.getInt(1);
+            }
+        }
+
+        try (PreparedStatement ps = connection.prepareStatement(
+                "SELECT COUNT(*) FROM OFFER WHERE COMPANY_ID = ?")) {
+            ps.setInt(1, companyId.intValue());
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) totalOffers = rs.getInt(1);
+            }
+        }
+    } catch (Exception e) {
+        dashboardDataError = true;
+        application.log("Unable to load company dashboard activity for companyId=" + companyId, e);
+    }
+
+%>
+
+
+
+
+
 <!DOCTYPE html>
+
+
+
 <html lang="en">
+
+
 
 <head>
 
+
+
     <meta charset="UTF-8">
 
+
+
     <meta name="viewport"
+
           content="width=device-width, initial-scale=1.0">
 
-    <title>Company Dashboard | CampusConnect</title>
+
+
+    <title>
+
+        <%= companyName %> Dashboard | CampusConnect
+
+    </title>
+
+
+
+    <!-- Font Awesome -->
 
     <link rel="stylesheet"
-          href="css/company-dashboard.css">
+
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+
+
+
+    <link rel="stylesheet"
+
+          href="css/company-dashboard.css?v=11">
+
+
+
+    <style>
+
+        .top-header .header-right{gap:18px}
+
+        .topbar-control{position:relative;display:flex;align-items:center}
+
+        .notification-trigger{position:relative;width:42px;height:42px;display:grid;place-items:center;border:0;border-radius:12px;background:transparent;color:#153b63;cursor:pointer;transition:background .18s,color .18s}
+
+        .notification-trigger:hover,.notification-trigger[aria-expanded="true"]{background:#f0f5fc;color:#1769c2}
+
+        .notification-trigger i{font-size:19px}
+
+        .notification-count{position:absolute;top:0;right:-1px;min-width:18px;height:18px;padding:0 4px;display:flex;align-items:center;justify-content:center;border:2px solid #fff;border-radius:12px;background:#e4545d;color:#fff;font-size:10px;font-weight:700;line-height:1}
+
+        .header-divider{height:42px}
+
+        .account-trigger{display:flex;align-items:center;padding:4px 8px;border:0;border-radius:12px;background:transparent;text-align:left;cursor:pointer;transition:background .18s}
+
+        .account-trigger:hover,.account-trigger[aria-expanded="true"]{background:#f5f8fc}
+
+        .profile-arrow{transition:transform .18s;color:#7d8ca1}
+
+        .account-trigger[aria-expanded="true"] .profile-arrow{transform:rotate(180deg)}
+
+        .topbar-menu{position:absolute;z-index:1000;top:calc(100% + 12px);right:0;width:350px;max-width:calc(100vw - 32px);overflow:hidden;border:1px solid #e1e8f1;border-radius:15px;background:#fff;box-shadow:0 18px 48px rgba(20,44,76,.18);animation:menuIn .16s ease-out}
+
+        .topbar-menu[hidden]{display:none!important}
+
+        @keyframes menuIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+
+        .menu-head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:17px 18px;border-bottom:1px solid #edf1f6}
+
+        .menu-head strong{display:block;color:#153b63;font-size:15px}.menu-head span{display:block;margin-top:3px;color:#8391a5;font-size:12px}
+
+        .menu-head .menu-total{display:grid;place-items:center;min-width:29px;height:29px;padding:0 8px;border-radius:10px;background:#eef4ff;color:#2867cf;font-size:12px;font-weight:700}
+
+        .notification-items{padding:6px 10px;max-height:340px;overflow:auto}
+
+        .notification-item{display:flex;align-items:flex-start;gap:12px;padding:12px 9px;border-radius:10px;text-decoration:none;transition:background .16s}
+
+        .notification-item:hover{background:#f6f9fd}
+
+        .notification-icon{width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;border-radius:11px;background:#edf4ff;color:#2867cf}
+
+        .notification-icon.offer{background:#fff4df;color:#bc7b08}.notification-icon.drive{background:#e8f7ef;color:#17834c}
+
+        .notification-copy{min-width:0;flex:1}.notification-copy strong{display:block;color:#304967;font-size:13px}.notification-copy span{display:block;margin-top:4px;color:#8291a6;font-size:12px;line-height:1.45}.notification-copy b{color:#153b63}
+
+        .notification-chevron{margin:11px 2px 0 auto;color:#a5b1c0;font-size:11px}
+
+        .notification-empty{padding:29px 18px;text-align:center;color:#7e8da2}.notification-empty i{display:block;margin-bottom:10px;color:#25a36f;font-size:24px}.notification-empty strong{display:block;color:#304967;font-size:14px}.notification-empty span{display:block;margin-top:5px;font-size:12px}
+
+        .menu-footer{padding:12px 18px;border-top:1px solid #edf1f6;background:#fbfcfe}.menu-footer a{color:#2867cf;text-decoration:none;font-size:12px;font-weight:700}.menu-footer a:hover{text-decoration:underline}
+
+        .account-menu{width:270px;padding:8px}
+
+        .account-menu-summary{display:flex;align-items:center;gap:11px;padding:11px 10px 14px;border-bottom:1px solid #edf1f6;margin-bottom:6px}
+
+        .account-menu-summary .profile-circle{width:42px;height:42px;flex:0 0 42px}
+
+        .account-menu-summary strong{display:block;max-width:175px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#203f62;font-size:13px}
+
+        .account-menu-summary span{display:block;max-width:175px;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#8794a7;font-size:11px}
+
+        .account-menu-link{display:flex;align-items:center;gap:11px;padding:10px;border-radius:9px;color:#405773;text-decoration:none;font-size:13px;font-weight:600;transition:background .15s,color .15s}
+
+        .account-menu-link i{width:17px;text-align:center;color:#8394aa}.account-menu-link:hover{background:#f4f7fb;color:#2065c6}.account-menu-link.logout{margin-top:5px;border-top:1px solid #edf1f6;border-radius:0 0 9px 9px;padding-top:14px;color:#c84c55}.account-menu-link.logout i{color:#c84c55}
+
+        @media(max-width:600px){.topbar-menu{right:-8px;width:320px}.top-header .header-right{gap:8px}.profile-info{display:none}.account-trigger{gap:7px}.header-divider{margin:0 3px}}
+
+    </style>
+
+
 
 </head>
 
+
+
+
+
 <body>
 
-<div class="dashboard">
 
 
-    <!-- ================= SIDEBAR ================= -->
 
-    <div class="sidebar">
 
-        <div class="logo">
-            CampusConnect
-            <span>Company Portal</span>
+<!-- =========================================================
+
+     MAIN WRAPPER
+
+     ========================================================= -->
+
+
+
+<div class="dashboard-wrapper">
+
+
+
+
+
+    <!-- =====================================================
+
+         SIDEBAR
+
+         ===================================================== -->
+
+
+
+    <aside class="sidebar">
+
+
+
+
+
+        <!-- BRAND -->
+
+        <div class="sidebar-logo">
+
+
+
+            <div class="brand-name">
+
+                Campus<span>Connect</span>
+
+            </div>
+
+
+
+            <div class="brand-subtitle">
+
+                COMPANY PORTAL
+
+            </div>
+
+
+
         </div>
 
 
-        <div class="menu-title">
-            OVERVIEW
+
+
+
+        <!-- SIDEBAR CONTENT -->
+
+
+
+        <div class="sidebar-content">
+
+
+
+
+
+            <!-- ================= OVERVIEW ================= -->
+
+
+
+            <div class="menu-section-title">
+
+                OVERVIEW
+
+            </div>
+
+
+
+
+
+            <a href="company-dashboard.jsp"
+
+               class="menu-item active">
+
+
+
+                <i class="fa-solid fa-house"></i>
+
+
+
+                <span>
+
+                    Dashboard
+
+                </span>
+
+
+
+            </a>
+
+
+
+
+
+            <a href="company-profile.jsp"
+
+               class="menu-item">
+
+
+
+                <i class="fa-solid fa-building"></i>
+
+
+
+                <span>
+
+                    Company Profile
+
+                </span>
+
+
+
+            </a>
+
+
+
+
+
+            <!-- ================= RECRUITMENT ================= -->
+
+
+
+            <div class="menu-section-title">
+
+                RECRUITMENT
+
+            </div>
+
+
+
+
+
+            <a href="recruitment-drive.jsp"
+
+               class="menu-item">
+
+
+
+                <i class="fa-solid fa-plus"></i>
+
+
+
+                <span>
+
+                    Create Drive
+
+                </span>
+
+
+
+            </a>
+
+
+
+
+
+            <a href="view-recruitment-drives.jsp"
+
+               class="menu-item">
+
+
+
+                <i class="fa-solid fa-briefcase"></i>
+
+
+
+                <span>
+
+                    Recruitment Drives
+
+                </span>
+
+
+
+            </a>
+
+
+
+
+
+            <a href="company-applicants.jsp"
+
+               class="menu-item">
+
+
+
+                <i class="fa-solid fa-users"></i>
+
+
+
+                <span>
+
+                    Applicants
+
+                </span>
+
+
+
+            </a>
+
+
+
+
+
+            <a href="company-shortlisted.jsp"
+
+               class="menu-item">
+
+
+
+                <i class="fa-solid fa-star"></i>
+
+
+
+                <span>
+
+                    Shortlisted Candidates
+
+                </span>
+
+
+
+            </a>
+
+
+
+
+
+            <a href="company-interviews.jsp"
+
+               class="menu-item">
+
+
+
+                <i class="fa-regular fa-square"></i>
+
+
+
+                <span>
+
+                    Interviews
+
+                </span>
+
+
+
+            </a>
+
+
+
+
+
+            <a href="company-offers.jsp"
+
+               class="menu-item">
+
+
+
+                <i class="fa-regular fa-gem"></i>
+
+
+
+                <span>
+
+                    Offers &amp; Selections
+
+                </span>
+
+
+
+            </a>
+
+
+
+
+
+            <!-- ================= ANALYTICS ================= -->
+
+
+
+            <div class="menu-section-title">
+
+                ANALYTICS
+
+            </div>
+
+
+
+
+
+            <a href="company-reports.jsp"
+
+               class="menu-item">
+
+
+
+                <i class="fa-solid fa-chart-column"></i>
+
+
+
+                <span>
+
+                    Reports &amp; Analytics
+
+                </span>
+
+
+
+            </a>
+
+
+
+
+
+            <a href="company-analytics.jsp"
+
+               class="menu-item">
+
+
+
+                <i class="fa-solid fa-chart-line"></i>
+
+
+
+                <span>
+
+                    Analytics Insights
+
+                </span>
+
+
+
+            </a>
+
+
+
+
+
         </div>
 
-        <a href="company-dashboard.jsp"
-           class="menu active">
-            Dashboard
-        </a>
-
-        <a href="company-profile.jsp"
-           class="menu">
-            Company Profile
-        </a>
 
 
-        <div class="menu-title">
-            RECRUITMENT
-        </div>
 
-        <a href="recruitment-drive.jsp"
-           class="menu">
-            Create Drive
-        </a>
 
-        <a href="view-recruitment-drives.jsp"
-           class="menu">
-            Recruitment Drives
-        </a>
+        <!-- ================= BOTTOM MENU ================= -->
 
-        <a href="company-reports.jsp"
-           class="menu">
-            Reports &amp; Analytics
-        </a>
 
 
         <div class="sidebar-bottom">
 
-            <a href="CompanyLogoutServlet"
-               class="menu logout">
-                Logout
+
+
+
+
+            <a href="company-settings.jsp"
+
+               class="menu-item">
+
+
+
+                <i class="fa-solid fa-gear"></i>
+
+
+
+                <span>
+
+                    Settings
+
+                </span>
+
+
+
             </a>
+
+
+
+
+
+            <a href="CompanyLogoutServlet"
+
+               class="menu-item logout">
+
+
+
+                <i class="fa-solid fa-right-from-bracket"></i>
+
+
+
+                <span>
+
+                    Logout
+
+                </span>
+
+
+
+            </a>
+
+
+
+
 
         </div>
 
-    </div>
 
 
-    <!-- ================= MAIN ================= -->
-
-    <div class="main">
 
 
-        <!-- ================= TOP BAR ================= -->
+    </aside>
 
-        <div class="topbar">
 
-            <div>
 
-                <span class="portal-title">
+
+
+
+
+    <!-- =====================================================
+
+         MAIN CONTENT
+
+         ===================================================== -->
+
+
+
+    <main class="main-content">
+
+
+
+
+
+        <!-- =================================================
+
+             TOP HEADER
+
+             ================================================= -->
+
+
+
+        <header class="top-header">
+
+
+
+
+
+            <!-- PAGE TITLE -->
+
+
+
+            <div class="page-title">
+
+
+
+                <div class="portal-label">
+
                     COMPANY PORTAL
-                </span>
+
+                </div>
+
+
 
                 <h1>
+
                     Dashboard
+
                 </h1>
+
+
 
             </div>
 
 
-            <!-- COMPANY PROFILE -->
 
-            <div class="company-info">
 
-                <button class="company-button"
-                        onclick="toggleProfile()">
 
-                    <span class="company-details">
+            <!-- HEADER RIGHT -->
+
+
+
+            <div class="header-right">
+
+
+
+
+
+                <!-- NOTIFICATION -->
+
+
+
+                <div class="topbar-control">
+
+                    <button type="button" class="notification-trigger" id="notificationButton" aria-label="Notifications<%= actionCount > 0 ? ", " + actionCount + " items need attention" : "" %>" aria-haspopup="true" aria-expanded="false" aria-controls="notificationMenu">
+
+                        <i class="fa-regular fa-bell" aria-hidden="true"></i>
+
+                        <% if (actionCount > 0) { %><span class="notification-count"><%= actionCount > 99 ? "99+" : String.valueOf(actionCount) %></span><% } %>
+
+                    </button>
+
+                    <div class="topbar-menu" id="notificationMenu" role="dialog" aria-label="Company notifications" hidden>
+
+                        <div class="menu-head"><div><strong>Needs attention</strong><span>Current activity for <%= companyName %></span></div><span class="menu-total"><%= actionCount %></span></div>
+
+                        <% if (notificationDataError) { %>
+
+                            <div class="notification-empty"><i class="fa-solid fa-circle-exclamation" style="color:#d89122"></i><strong>Activity is unavailable</strong><span>Refresh the page to try again.</span></div>
+
+                        <% } else if (actionCount == 0) { %>
+
+                            <div class="notification-empty"><i class="fa-regular fa-circle-check"></i><strong>You're all caught up</strong><span>No pending applications or offers need attention.</span></div>
+
+                        <% } else { %>
+
+                            <div class="notification-items">
+
+                                <% if (pendingApplications > 0) { %>
+
+                                <a class="notification-item" href="company-applicants.jsp"><span class="notification-icon"><i class="fa-solid fa-users"></i></span><span class="notification-copy"><strong>Applications to review</strong><span><b><%= pendingApplications %></b> application<%= pendingApplications == 1 ? "" : "s" %> have PENDING company status.</span></span><i class="fa-solid fa-chevron-right notification-chevron"></i></a>
+
+                                <% } %>
+
+                                <% if (pendingOffers > 0) { %>
+
+                                <a class="notification-item" href="company-offers.jsp"><span class="notification-icon offer"><i class="fa-regular fa-gem"></i></span><span class="notification-copy"><strong>Offers awaiting response</strong><span><b><%= pendingOffers %></b> offer<%= pendingOffers == 1 ? " is" : "s are" %> marked PENDING.</span></span><i class="fa-solid fa-chevron-right notification-chevron"></i></a>
+
+                                <% } %>
+
+                            </div>
+
+                        <% } %>
+
+                        <div class="menu-footer"><a href="company-reports.jsp">View recruitment reports <i class="fa-solid fa-arrow-right"></i></a></div>
+
+                    </div>
+
+                </div>
+
+
+
+
+
+                <div class="header-divider"></div>
+
+
+
+
+
+                <!-- COMPANY ACCOUNT -->
+
+
+
+                <div class="topbar-control">
+
+                <button type="button" class="company-account account-trigger" id="accountButton" aria-label="Company account menu" aria-haspopup="true" aria-expanded="false" aria-controls="accountMenu">
+
+
+
+
+
+                    <!-- INITIAL CIRCLE -->
+
+
+
+                    <span class="profile-circle">
+
+
+
+                        <%= companyInitial %>
+
+
+
+                    </span>
+
+
+
+
+
+                    <!-- COMPANY DETAILS -->
+
+
+
+                    <span class="profile-info">
+
+
 
                         <strong>
+
                             <%= companyName %>
+
                         </strong>
 
+
+
                         <span>
+
                             <%= email %>
+
                         </span>
 
+
+
                     </span>
 
-                    <span class="arrow">
-                        ▼
+
+
+
+
+                    <span class="profile-arrow">
+
+                        ⌄
+
                     </span>
+
+
+
+
 
                 </button>
 
+                <div class="topbar-menu account-menu" id="accountMenu" role="menu" aria-label="Company account menu" hidden>
 
-                <div class="profile-dropdown"
-                     id="profileDropdown">
+                    <div class="account-menu-summary"><div class="profile-circle"><%= companyInitial %></div><div><strong><%= companyName %></strong><span><%= email %></span></div></div>
 
-                    <a href="company-profile.jsp">
-                        View Profile
-                    </a>
+                    <a class="account-menu-link" href="company-profile.jsp" role="menuitem"><i class="fa-solid fa-building"></i> Company profile</a>
 
-                    <a href="CompanyLogoutServlet">
-                        Logout
-                    </a>
+                    <a class="account-menu-link" href="company-settings.jsp" role="menuitem"><i class="fa-solid fa-gear"></i> Settings</a>
+
+                    <a class="account-menu-link logout" href="CompanyLogoutServlet" role="menuitem"><i class="fa-solid fa-right-from-bracket"></i> Log out</a>
 
                 </div>
 
+                </div>
+
+
+
+
+
             </div>
 
-        </div>
 
 
-        <!-- ================= CONTENT ================= -->
-
-        <div class="content">
 
 
-            <!-- ================= WELCOME ================= -->
+        </header>
 
-            <div class="welcome">
 
-                <div class="welcome-content">
 
-                    <span class="welcome-label">
-                        COMPANY DASHBOARD
-                    </span>
 
-                    <h2>
-                        Welcome back, <%= companyName %>
-                    </h2>
+
+
+
+        <!-- =================================================
+
+             PAGE BODY
+
+             ================================================= -->
+
+
+
+        <div class="page-body">
+
+
+
+
+
+            <!-- =================================================
+
+                 HERO BANNER
+
+                 ================================================= -->
+
+
+
+            <section class="hero-banner">
+
+
+
+
+
+                <!-- RIGHT SIDE COMPANY IMAGE -->
+
+
+
+                <div class="hero-image">
+
+
+
+                    <img src="<%= companyBannerUrl %>"
+
+                         alt="<%= companyName %> Banner">
+
+
+
+                    <div class="image-overlay"></div>
+
+
+
+                </div>
+
+
+
+
+
+                <!-- HERO CONTENT -->
+
+
+
+                <div class="hero-left">
+
+
+
+
+
+                    <!-- COMPANY LOGO -->
+
+
+
+                    <div class="hero-logo">
+
+
+
+                        <img src="<%= companyLogoUrl %>"
+
+                             alt="<%= companyName %> Logo">
+
+
+
+                    </div>
+
+
+
+
+
+                    <!-- HERO TEXT -->
+
+
+
+                    <div class="hero-content">
+
+
+
+
+
+                        <div class="hero-small-title">
+
+
+
+                            GOOD TO SEE YOU AGAIN,
+
+
+
+                        </div>
+
+
+
+
+
+                        <h2>
+
+
+
+                            Welcome back,
+
+                            <%= companyName %>
+
+
+
+                            <span class="wave">
+
+                                👋
+
+                            </span>
+
+
+
+                        </h2>
+
+
+
+
+
+                        <p>
+
+
+
+                            Together let's build the next generation
+
+                            of talent. Hire. Engage. Grow. Partner with
+
+                            top talent from leading campuses across India,
+
+                            all in one place.
+
+
+
+                        </p>
+
+
+
+
+
+                        <!-- BUTTONS -->
+
+
+
+                        <div class="hero-buttons">
+
+
+
+
+
+                            <a href="recruitment-drive.jsp"
+
+                               class="hero-btn primary-btn">
+
+
+
+                                <span>＋</span>
+
+
+
+                                Create Recruitment Drive
+
+
+
+                            </a>
+
+
+
+
+
+                            <a href="view-recruitment-drives.jsp"
+
+                               class="hero-btn secondary-btn">
+
+
+
+                                View All Drives
+
+
+
+                            </a>
+
+
+
+
+
+                        </div>
+
+
+
+
+
+                    </div>
+
+
+
+
+
+                </div>
+
+
+
+
+
+                <!-- =================================================
+
+                     HERO FEATURES
+
+                     ================================================= -->
+
+
+
+                <div class="hero-features">
+
+
+
+
+
+                    <!-- HIRE -->
+
+
+
+                    <div class="feature-item">
+
+
+
+                        <div class="feature-icon">
+
+                            ♟
+
+                        </div>
+
+
+
+                        <div>
+
+
+
+                            <strong>
+
+                                Hire
+
+                            </strong>
+
+
+
+                            <span>
+
+                                Top Talent
+
+                            </span>
+
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+
+
+                    <!-- BUILD -->
+
+
+
+                    <div class="feature-item">
+
+
+
+                        <div class="feature-icon">
+
+                            ◈
+
+                        </div>
+
+
+
+                        <div>
+
+
+
+                            <strong>
+
+                                Build
+
+                            </strong>
+
+
+
+                            <span>
+
+                                Stronger Teams
+
+                            </span>
+
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+
+
+                    <!-- SHAPE -->
+
+
+
+                    <div class="feature-item">
+
+
+
+                        <div class="feature-icon">
+
+                            ▥
+
+                        </div>
+
+
+
+                        <div>
+
+
+
+                            <strong>
+
+                                Shape
+
+                            </strong>
+
+
+
+                            <span>
+
+                                A Better Tomorrow
+
+                            </span>
+
+
+
+                        </div>
+
+
+
+                    </div>
+
+
+
+
+
+                </div>
+
+
+
+
+
+                <!-- =================================================
+
+                     COMPANY QUOTE
+
+                     ================================================= -->
+
+
+
+                <div class="hero-quote">
+
+
 
                     <p>
-                        Manage your recruitment activities and connect
-                        with talented students across CampusConnect's
-                        partner colleges — all from one place.
+
+
+
+                        "Building a more inclusive,
+
+                        sustainable and brighter future
+
+                        through the power of people."
+
+
+
                     </p>
 
 
-                    <div class="welcome-buttons">
 
-                        <a href="recruitment-drive.jsp"
-                           class="primary-button">
-                            + Create Recruitment Drive
-                        </a>
+                    <strong>
 
-                        <a href="view-recruitment-drives.jsp"
-                           class="secondary-button">
-                            View Drives
-                        </a>
 
-                    </div>
+
+                        — <%= companyName %>
+
+
+
+                    </strong>
+
+
 
                 </div>
 
-            </div>
 
 
-            <!-- ================= QUICK ACTIONS ================= -->
 
-            <div class="section">
+
+            </section>
+
+
+
+
+
+
+
+            <!-- =================================================
+
+                 STATISTICS
+
+                 ================================================= -->
+
+
+
+            <section class="stats-grid">
+
+
+
+
+
+                <!-- TOTAL DRIVES -->
+
+
+
+                <div class="stat-card">
+
+
+
+
+
+                    <div class="stat-icon blue">
+
+                        ♟
+
+                    </div>
+
+
+
+
+
+                    <div class="stat-info">
+
+
+
+                        <strong>
+
+                            <%= dashboardDataError ? "—" : totalDrives %>
+
+                        </strong>
+
+
+
+                        <span>
+
+                            Total Drives
+
+                        </span>
+
+
+
+                    </div>
+
+
+
+
+
+                    <a href="view-recruitment-drives.jsp">
+
+
+
+                        View all →
+
+
+
+                    </a>
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+                <!-- APPLICATIONS -->
+
+
+
+                <div class="stat-card">
+
+
+
+
+
+                    <div class="stat-icon blue">
+
+                        ▤
+
+                    </div>
+
+
+
+
+
+                    <div class="stat-info">
+
+
+
+                        <strong>
+
+                            <%= dashboardDataError ? "—" : totalApplications %>
+
+                        </strong>
+
+
+
+                        <span>
+
+                            Total Applications
+
+                        </span>
+
+
+
+                    </div>
+
+
+
+
+
+                    <a href="company-applicants.jsp">
+
+
+
+                        View all →
+
+
+
+                    </a>
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+                <!-- INTERVIEWS -->
+
+
+
+                <div class="stat-card">
+
+
+
+
+
+                    <div class="stat-icon blue">
+
+                        ◷
+
+                    </div>
+
+
+
+
+
+                    <div class="stat-info">
+
+
+
+                        <strong>
+
+                            <%= dashboardDataError ? "—" : scheduledInterviews %>
+
+                        </strong>
+
+
+
+                        <span>
+
+                            Interviews Scheduled
+
+                        </span>
+
+
+
+                    </div>
+
+
+
+
+
+                    <a href="company-interviews.jsp">
+
+
+
+                        View all →
+
+
+
+                    </a>
+
+
+
+
+
+                </div>
+
+
+
+
+
+
+
+                <!-- OFFERS -->
+
+
+
+                <div class="stat-card">
+
+
+
+
+
+                    <div class="stat-icon green">
+
+                        ✓
+
+                    </div>
+
+
+
+
+
+                    <div class="stat-info">
+
+
+
+                        <strong>
+
+                            <%= dashboardDataError ? "—" : totalOffers %>
+
+                        </strong>
+
+
+
+                        <span>
+
+                            Offers Made
+
+                        </span>
+
+
+
+                    </div>
+
+
+
+
+
+                    <a href="company-offers.jsp">
+
+
+
+                        View all →
+
+
+
+                    </a>
+
+
+
+
+
+                </div>
+
+
+
+
+
+            </section>
+
+
+
+
+
+
+
+            <!-- =================================================
+
+                 QUICK ACTIONS
+
+                 ================================================= -->
+
+
+
+            <section class="quick-actions">
+
+
+
+
 
                 <div class="section-heading">
 
-                    <div>
 
-                        <h2>
-                            Quick Actions
-                        </h2>
 
-                        <p class="section-text">
-                            Jump straight into your most common
-                            recruitment tasks
-                        </p>
+                    <h2>
 
-                    </div>
+                        Quick Actions
+
+                    </h2>
+
+
+
+                    <p>
+
+                        Jump straight into your most common
+
+                        recruitment tasks
+
+                    </p>
+
+
 
                 </div>
 
 
-                <div class="cards">
 
 
-                    <!-- PROFILE -->
 
-                    <a href="company-profile.jsp"
-                       class="card">
+                <div class="quick-grid">
 
-                        <div class="card-icon">
-                            ◯
+
+
+
+
+                    <!-- COMPANY PROFILE -->
+
+
+
+                    <div class="quick-card">
+
+
+
+
+
+                        <div class="quick-icon">
+
+                            ▦
+
                         </div>
 
-                        <h3>
-                            Company Profile
-                        </h3>
 
-                        <p>
-                            View and update your company details,
-                            industry information and contact preferences.
-                        </p>
 
-                        <span class="card-link">
-                            Open →
-                        </span>
 
-                    </a>
+
+                        <div class="quick-content">
+
+
+
+                            <h3>
+
+                                Company Profile
+
+                            </h3>
+
+
+
+                            <p>
+
+
+
+                                View and update your company
+
+                                details, industry information
+
+                                and contact preferences.
+
+
+
+                            </p>
+
+
+
+                            <a href="company-profile.jsp">
+
+
+
+                                Open →
+
+
+
+                            </a>
+
+
+
+                        </div>
+
+
+
+
+
+                    </div>
+
+
+
+
+
 
 
                     <!-- CREATE DRIVE -->
 
-                    <a href="recruitment-drive.jsp"
-                       class="card">
 
-                        <div class="card-icon">
-                            +
+
+                    <div class="quick-card">
+
+
+
+
+
+                        <div class="quick-icon">
+
+                            ＋
+
                         </div>
 
-                        <h3>
-                            Create Recruitment Drive
-                        </h3>
-
-                        <p>
-                            Set up a new drive with role details,
-                            eligibility criteria and application deadlines.
-                        </p>
-
-                        <span class="card-link">
-                            Open →
-                        </span>
-
-                    </a>
 
 
-                    <!-- DRIVES -->
 
-                    <a href="view-recruitment-drives.jsp"
-                       class="card">
 
-                        <div class="card-icon">
+                        <div class="quick-content">
+
+
+
+                            <h3>
+
+                                Create Recruitment Drive
+
+                            </h3>
+
+
+
+                            <p>
+
+
+
+                                Set up a new drive with role
+
+                                details, eligibility criteria
+
+                                and application deadlines.
+
+
+
+                            </p>
+
+
+
+                            <a href="recruitment-drive.jsp">
+
+
+
+                                Open →
+
+
+
+                            </a>
+
+
+
+                        </div>
+
+
+
+
+
+                    </div>
+
+
+
+
+
+
+
+                    <!-- RECRUITMENT DRIVES -->
+
+
+
+                    <div class="quick-card">
+
+
+
+
+
+                        <div class="quick-icon">
+
                             ☷
+
                         </div>
 
-                        <h3>
-                            Recruitment Drives
-                        </h3>
 
-                        <p>
-                            Track every drive you've published and
-                            review student applications as they arrive.
-                        </p>
 
-                        <span class="card-link">
-                            Open →
-                        </span>
 
-                    </a>
+
+                        <div class="quick-content">
+
+
+
+                            <h3>
+
+                                Recruitment Drives
+
+                            </h3>
+
+
+
+                            <p>
+
+
+
+                                Track every drive you've
+
+                                published and review student
+
+                                applications as they arrive.
+
+
+
+                            </p>
+
+
+
+                            <a href="view-recruitment-drives.jsp">
+
+
+
+                                Open →
+
+
+
+                            </a>
+
+
+
+                        </div>
+
+
+
+
+
+                    </div>
+
+
+
+
+
 
 
                     <!-- REPORTS -->
 
-                    <a href="company-reports.jsp"
-                       class="card">
 
-                        <div class="card-icon">
+
+                    <div class="quick-card">
+
+
+
+
+
+                        <div class="quick-icon">
+
                             ▥
+
                         </div>
 
-                        <h3>
-                            Reports &amp; Analytics
-                        </h3>
-
-                        <p>
-                            Review hiring outcomes and drive performance
-                            once reporting data is available.
-                        </p>
-
-                        <span class="card-link">
-                            Open →
-                        </span>
-
-                    </a>
 
 
-                </div>
-
-            </div>
 
 
-            <!-- ================= ACTIVITY ================= -->
-
-            <div class="section">
-
-                <h2>
-                    Recruitment Activity
-                </h2>
-
-                <p class="section-text">
-                    A live summary of your drives and applicants
-                </p>
+                        <div class="quick-content">
 
 
-                <div class="activity">
 
-                    <div class="activity-icon">
-                        ~
+                            <h3>
+
+                                Reports &amp; Analytics
+
+                            </h3>
+
+
+
+                            <p>
+
+
+
+                                Review hiring outcomes, drive
+
+                                performance and gain insights
+
+                                with detailed reports.
+
+
+
+                            </p>
+
+
+
+                            <a href="company-reports.jsp">
+
+
+
+                                Open →
+
+
+
+                            </a>
+
+
+
+                        </div>
+
+
+
+
+
                     </div>
 
-                    <h3>
-                        No activity to show yet
-                    </h3>
 
-                    <p>
-                        Once you create a recruitment drive,
-                        your applicant and shortlisting metrics
-                        will appear here automatically.
-                    </p>
+
+
 
                 </div>
 
-            </div>
+
+
+
+
+            </section>
+
+
+
+
+
+
+
+            <!-- =================================================
+
+                 RECRUITMENT ACTIVITY
+
+                 ================================================= -->
+
+
+
+            <section class="activity-section">
+
+
+
+
+
+                <div class="section-heading">
+
+
+
+                    <h2>
+
+                        Recruitment Activity
+
+                    </h2>
+
+
+
+                    <p>
+
+                        A live summary of your drives and applicants
+
+                    </p>
+
+
+
+                </div>
+
+
+
+
+
+                                <div class="activity-box">
+                    <% if (dashboardDataError) { %>
+                        <div class="activity-empty activity-error">
+                            <i aria-hidden="true">!</i>
+                            <h3>Recruitment activity is temporarily unavailable</h3>
+                            <p>Please refresh the dashboard in a moment.</p>
+                            <a href="company-dashboard.jsp" class="activity-button">Refresh dashboard</a>
+                        </div>
+                    <% } else if (totalDrives == 0) { %>
+                        <div class="activity-empty">
+                            <i aria-hidden="true">▤</i>
+                            <h3>No recruitment drives yet</h3>
+                            <p>Create your first drive to start tracking recruitment activity here.</p>
+                            <a href="recruitment-drive.jsp" class="activity-button">＋ Create Recruitment Drive</a>
+                        </div>
+                    <% } else { %>
+                        <div class="activity-list">
+                            <div class="activity-list-header">
+                                <div>
+                                    <h3>Latest recruitment drives</h3>
+                                    <p>Showing your 5 most recently created drives</p>
+                                </div>
+                                <a href="view-recruitment-drives.jsp">View all drives <span aria-hidden="true">→</span></a>
+                            </div>
+                            <% for (Map<String, Object> drive : recentDrives) {
+                                String driveTitle = (String) drive.get("title");
+                                String driveType = (String) drive.get("type");
+                                String driveStatus = (String) drive.get("status");
+                                java.sql.Date driveDeadline = (java.sql.Date) drive.get("deadline");
+                                if (driveTitle == null || driveTitle.trim().isEmpty()) driveTitle = "Untitled drive";
+                                if (driveType == null || driveType.trim().isEmpty()) driveType = "Recruitment drive";
+                                if (driveStatus == null || driveStatus.trim().isEmpty()) driveStatus = "UNKNOWN";
+                                String deadlineLabel = driveDeadline == null ? "No deadline set" :
+                                        new java.text.SimpleDateFormat("dd MMM yyyy").format(driveDeadline);
+                            %>
+                                <article class="activity-row">
+                                    <div class="activity-row-icon" aria-hidden="true">↗</div>
+                                    <div class="activity-row-content">
+                                        <div class="activity-row-title">
+                                            <h4><%= dashboardEscape(driveTitle) %></h4>
+                                            <span class="activity-status <%= "CLOSED".equalsIgnoreCase(driveStatus) ? "closed" : "active" %>"><%= dashboardEscape(driveStatus) %></span>
+                                        </div>
+                                        <p><%= dashboardEscape(driveType) %> <span>·</span> <%= drive.get("vacancy") %> vacancies <span>·</span> Deadline <%= deadlineLabel %></p>
+                                    </div>
+                                    <a class="activity-manage" href="edit-recruitment-drive.jsp?driveId=<%= drive.get("id") %>">Manage <span aria-hidden="true">→</span></a>
+                                </article>
+                            <% } %>
+                        </div>
+                    <% } %>
+                </div>
+</section>
+
+
+
 
 
         </div>
 
-    </div>
+
+
+
+
+    </main>
+
+
+
+
 
 </div>
 
 
-<!-- ================= PROFILE DROPDOWN ================= -->
 
 <script>
 
-function toggleProfile() {
+(function () {
 
-    var dropdown =
-        document.getElementById("profileDropdown");
+    var controls = [
 
-    dropdown.classList.toggle("show");
+        { button: document.getElementById("notificationButton"), menu: document.getElementById("notificationMenu") },
 
-}
+        { button: document.getElementById("accountButton"), menu: document.getElementById("accountMenu") }
 
+    ];
 
-document.addEventListener("click", function(event) {
+    function closeAll(except) {
 
-    var button =
-        document.querySelector(".company-button");
+        controls.forEach(function (control) {
 
-    var dropdown =
-        document.getElementById("profileDropdown");
+            if (control !== except) {
 
+                control.menu.hidden = true;
 
-    if (!button.contains(event.target) &&
-        !dropdown.contains(event.target)) {
+                control.button.setAttribute("aria-expanded", "false");
 
-        dropdown.classList.remove("show");
+            }
+
+        });
 
     }
 
-});
+    controls.forEach(function (control) {
+
+        control.button.addEventListener("click", function (event) {
+
+            event.stopPropagation();
+
+            var shouldOpen = control.menu.hidden;
+
+            closeAll(control);
+
+            control.menu.hidden = !shouldOpen;
+
+            control.button.setAttribute("aria-expanded", String(shouldOpen));
+
+        });
+
+        control.menu.addEventListener("click", function (event) { event.stopPropagation(); });
+
+    });
+
+    document.addEventListener("click", function () { closeAll(null); });
+
+    document.addEventListener("keydown", function (event) {
+
+        if (event.key === "Escape") {
+
+            closeAll(null);
+
+            var focused = controls.filter(function (control) { return document.activeElement === control.button; })[0];
+
+            if (focused) focused.button.focus();
+
+        }
+
+    });
+
+}());
 
 </script>
 
 
+
+
+
 </body>
+
+
 
 </html>
