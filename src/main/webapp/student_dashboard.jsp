@@ -198,8 +198,8 @@ a {
 }
 
 .logout:hover {
-    background: var(--blue);
-    border-color: var(--blue);
+    background: var(--primary);
+    border-color: var(--primary);
 }
 
 /* SIDEBAR */
@@ -314,29 +314,6 @@ a {
     color: #dbeaff;
     font-size: 14px;
     line-height: 1.5;
-}
-
-.profile-progress-ring {
-    width: 70px;
-    height: 70px;
-    border-radius: 50%;
-    background: conic-gradient(#38bdf8 75%, rgba(255,255,255,0.2) 0);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-}
-
-.progress-inner {
-    width: 58px;
-    height: 58px;
-    background: #2563eb;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 14px;
-    font-weight: 700;
 }
 
 /* SECTION HEADERS */
@@ -524,15 +501,12 @@ a {
         <a class="utility-btn" href="student_profile.jsp" title="My Profile"><i class="fa-solid fa-gear"></i></a>
     </div>
 
-    <!-- WELCOME BANNER -->
+    <!-- WELCOME BANNER (Progress Ring Removed) -->
     <section class="welcome">
         <div class="welcome-content">
             <div class="welcome-label">STUDENT PORTAL</div>
             <h1>Welcome Back, <%= studentName %></h1>
             <p>Your personalized hub for academic success and career growth.</p>
-        </div>
-        <div class="profile-progress-ring">
-            <div class="progress-inner">75%</div>
         </div>
     </section>
 
