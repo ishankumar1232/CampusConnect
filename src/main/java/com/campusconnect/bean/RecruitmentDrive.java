@@ -1,6 +1,11 @@
 package com.campusconnect.bean;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+
+import com.campusconnect.util.DBConnection;
 
 public class RecruitmentDrive
 {
@@ -17,6 +22,10 @@ public class RecruitmentDrive
     private String deadline;
     private String status;
 
+
+    // =========================
+    // GETTERS AND SETTERS
+    // =========================
 
     public int getDriveId()
     {
@@ -150,438 +159,241 @@ public class RecruitmentDrive
     }
 
 
+    // =========================
+    // INSERT METHOD
+    // =========================
+
     public boolean InsertMethod()
     {
+        boolean result = false;
+
         try
         {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
+            Connection con = DBConnection.getConnection();
 
-            Connection con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
+            /*
+             * Generate next DRIVE_ID.
+             * This is used because we are not changing
+             * the existing table structure or depending
+             * on an unknown sequence name.
+             */
+            String idSql =
+                    "SELECT NVL(MAX(DRIVE_ID),0) + 1 AS NEXT_ID " +
+                    "FROM RECRUITMENT_DRIVE";
 
-            Statement stmt = con.createStatement();
+            Statement st = con.createStatement();
 
-            String q1 = "INSERT INTO RECRUITMENT_DRIVE " +
-                        "(DRIVE_ID, COMPANY_ID, DRIVE_TYPE, JOB_TITLE, DESCRIPTION, " +
-                        "VACANCY, ELIGIBILITY_CGPA, REQUIRED_BRANCH, REQUIRED_SKILLS, " +
-                        "SALARY, DEADLINE, STATUS) " +
-                        "VALUES (DRIVE_SEQ.NEXTVAL, " +
-                        getCompanyId() + ", '" +
-                        getDriveType() + "', '" +
-                        getJobTitle() + "', '" +
-                        getDescription() + "', " +
-                        getVacancy() + ", " +
-                        getEligibilityCgpa() + ", '" +
-                        getRequiredBranch() + "', '" +
-                        getRequiredSkills() + "', " +
-                        getSalary() + ", " +
-                        "TO_DATE('" + getDeadline() + "', 'DD-MM-YYYY'), '" +
-                        getStatus() + "')";
+            ResultSet rs = st.executeQuery(idSql);
 
-            int x = stmt.executeUpdate(q1);
+            if(rs.next())
+            {
+                driveId = rs.getInt("NEXT_ID");
+            }
 
+            rs.close();
+            st.close();
+
+
+            String sql =
+                    "INSERT INTO RECRUITMENT_DRIVE " +
+                    "(DRIVE_ID, COMPANY_ID, DRIVE_TYPE, JOB_TITLE, " +
+                    "DESCRIPTION, VACANCY, ELIGIBILITY_CGPA, " +
+                    "REQUIRED_BRANCH, REQUIRED_SKILLS, SALARY, " +
+                    "DEADLINE, STATUS) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, " +
+                    "TO_DATE(?, 'DD-MM-YYYY'), ?)";
+
+
+            PreparedStatement ps = con.prepareStatement(sql);
+
+            ps.setInt(1, driveId);
+            ps.setInt(2, companyId);
+            ps.setString(3, driveType);
+            ps.setString(4, jobTitle);
+            ps.setString(5, description);
+            ps.setInt(6, vacancy);
+            ps.setDouble(7, eligibilityCgpa);
+            ps.setString(8, requiredBranch);
+            ps.setString(9, requiredSkills);
+            ps.setDouble(10, salary);
+            ps.setString(11, deadline);
+            ps.setString(12, status);
+
+
+            int rows = ps.executeUpdate();
+
+            if(rows > 0)
+            {
+                result = true;
+            }
+
+            ps.close();
             con.close();
-
-            if(x > 0)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
         }
         catch(Exception e)
         {
             e.printStackTrace();
-            return false;
         }
+
+        return result;
     }
+
+
+    // =========================
+    // SELECT BY ID METHOD
+    // =========================
+
+    public ResultSet SelectByIdMethod()
+    {
+        ResultSet rs = null;
+
+        try
+        {
+            Connection con = DBConnection.getConnection();
+
+            String sql =
+                    "SELECT * FROM RECRUITMENT_DRIVE " +
+                    "WHERE DRIVE_ID = ? " +
+                    "AND COMPANY_ID = ?";
+
+            PreparedStatement ps = con.prepareStatement(sql);
+
+            ps.setInt(1, driveId);
+            ps.setInt(2, companyId);
+
+            rs = ps.executeQuery();
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
+        }
+
+        return rs;
+    }
+    
     
     public ResultSet SelectMethod()
     {
+        ResultSet rs = null;
+
         try
         {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
+            Connection con = DBConnection.getConnection();
 
-            Connection con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
+            String sql = "SELECT * FROM RECRUITMENT_DRIVE WHERE COMPANY_ID = ?";
 
-            Statement stmt = con.createStatement();
+            PreparedStatement ps = con.prepareStatement(sql);
 
-            String q1 = "SELECT * FROM RECRUITMENT_DRIVE " +
-                        "WHERE COMPANY_ID = " + companyId +
-                        " ORDER BY DRIVE_ID";
+            ps.setInt(1, companyId);
 
-            ResultSet rs = stmt.executeQuery(q1);
-
-            return rs;
+            rs = ps.executeQuery();
         }
         catch(Exception e)
         {
             e.printStackTrace();
-            return null;
         }
+
+        return rs;
     }
-    
-    public ResultSet SelectByIdMethod()
-    {
-        try
-        {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
 
-            Connection con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
 
-            Statement stmt = con.createStatement();
+    // =========================
+    // UPDATE METHOD
+    // =========================
 
-            String q1 = "SELECT * FROM RECRUITMENT_DRIVE " +
-                        "WHERE DRIVE_ID = " + driveId +
-                        " AND COMPANY_ID = " + companyId;
-
-            ResultSet rs = stmt.executeQuery(q1);
-
-            return rs;
-        }
-        catch(Exception e)
-        {
-            e.printStackTrace();
-            return null;
-        }
-    }
-    
     public boolean UpdateMethod()
     {
+        boolean result = false;
+
         try
         {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
+            Connection con = DBConnection.getConnection();
 
-            Connection con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
+            String sql =
+                    "UPDATE RECRUITMENT_DRIVE SET " +
+                    "DRIVE_TYPE = ?, " +
+                    "JOB_TITLE = ?, " +
+                    "DESCRIPTION = ?, " +
+                    "VACANCY = ?, " +
+                    "ELIGIBILITY_CGPA = ?, " +
+                    "REQUIRED_BRANCH = ?, " +
+                    "REQUIRED_SKILLS = ?, " +
+                    "SALARY = ?, " +
+                    "DEADLINE = TO_DATE(?, 'DD-MM-YYYY'), " +
+                    "STATUS = ? " +
+                    "WHERE DRIVE_ID = ? " +
+                    "AND COMPANY_ID = ?";
 
-            Statement stmt = con.createStatement();
 
-            String q1 = "UPDATE RECRUITMENT_DRIVE SET " +
-                        "DRIVE_TYPE = '" + getDriveType() + "', " +
-                        "JOB_TITLE = '" + getJobTitle() + "', " +
-                        "DESCRIPTION = '" + getDescription() + "', " +
-                        "VACANCY = " + getVacancy() + ", " +
-                        "ELIGIBILITY_CGPA = " + getEligibilityCgpa() + ", " +
-                        "REQUIRED_BRANCH = '" + getRequiredBranch() + "', " +
-                        "REQUIRED_SKILLS = '" + getRequiredSkills() + "', " +
-                        "SALARY = " + getSalary() + ", " +
-                        "DEADLINE = TO_DATE('" + getDeadline() + "', 'YYYY-MM-DD'), " +
-                        "STATUS = '" + getStatus() + "' " +
-                        "WHERE DRIVE_ID = " + getDriveId() +
-                        " AND COMPANY_ID = " + getCompanyId();
+            PreparedStatement ps = con.prepareStatement(sql);
 
-            int x = stmt.executeUpdate(q1);
+            ps.setString(1, driveType);
+            ps.setString(2, jobTitle);
+            ps.setString(3, description);
+            ps.setInt(4, vacancy);
+            ps.setDouble(5, eligibilityCgpa);
+            ps.setString(6, requiredBranch);
+            ps.setString(7, requiredSkills);
+            ps.setDouble(8, salary);
+            ps.setString(9, deadline);
+            ps.setString(10, status);
+            ps.setInt(11, driveId);
+            ps.setInt(12, companyId);
 
+
+            int rows = ps.executeUpdate();
+
+            if(rows > 0)
+            {
+                result = true;
+            }
+
+            ps.close();
             con.close();
-
-            if(x > 0)
-            {
-                return true;
-            }
-            else
-            {
-                return false;
-            }
         }
         catch(Exception e)
         {
             e.printStackTrace();
-            return false;
         }
+
+        return result;
     }
-        
-        public boolean CloseMethod()
+
+
+
+public boolean CloseMethod()
+{
+    boolean result = false;
+
+    try
+    {
+        Connection con = DBConnection.getConnection();
+
+        String sql = "UPDATE RECRUITMENT_DRIVE "
+                   + "SET STATUS = 'CLOSED' "
+                   + "WHERE DRIVE_ID = ? "
+                   + "AND COMPANY_ID = ?";
+
+        PreparedStatement ps = con.prepareStatement(sql);
+
+        ps.setInt(1, driveId);
+        ps.setInt(2, companyId);
+
+        int rows = ps.executeUpdate();
+
+        if(rows > 0)
         {
-            try
-            {
-                Class.forName("oracle.jdbc.driver.OracleDriver");
-
-                Connection con = DriverManager.getConnection(
-                    "jdbc:oracle:thin:@localhost:1521:XE",
-                    "CAMPUSCONNECT",
-                    "campus123"
-                );
-
-                Statement stmt = con.createStatement();
-
-                String q1 = "UPDATE RECRUITMENT_DRIVE " +
-                            "SET STATUS = 'CLOSED' " +
-                            "WHERE DRIVE_ID = " + getDriveId() +
-                            " AND COMPANY_ID = " + getCompanyId();
-
-                int x = stmt.executeUpdate(q1);
-
-                con.close();
-
-                if(x > 0)
-                {
-                    return true;
-                }
-                else
-                {
-                    return false;
-                }
-            }
-            catch(Exception e)
-            {
-                e.printStackTrace();
-                return false;
-            }
+            result = true;
         }
-        
-        public int TotalDriveMethod()
-        {
-            try
-            {
-                Class.forName("oracle.jdbc.driver.OracleDriver");
 
-                Connection con = DriverManager.getConnection(
-                    "jdbc:oracle:thin:@localhost:1521:XE",
-                    "CAMPUSCONNECT",
-                    "campus123"
-                );
-
-                Statement stmt = con.createStatement();
-
-                String q1 = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE " +
-                            "WHERE COMPANY_ID = " + getCompanyId();
-
-                ResultSet rs = stmt.executeQuery(q1);
-
-                if(rs.next())
-                {
-                    int total = rs.getInt(1);
-
-                    con.close();
-
-                    return total;
-                }
-
-                con.close();
-
-                return 0;
-            }
-            catch(Exception e)
-            {
-                e.printStackTrace();
-                return 0;
-            }
-        }
-        
-        public int ActiveDriveMethod()
-        {
-            try
-            {
-                Class.forName("oracle.jdbc.driver.OracleDriver");
-
-                Connection con = DriverManager.getConnection(
-                    "jdbc:oracle:thin:@localhost:1521:XE",
-                    "CAMPUSCONNECT",
-                    "campus123"
-                );
-
-                Statement stmt = con.createStatement();
-
-                String q1 = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE " +
-                            "WHERE COMPANY_ID = " + getCompanyId() +
-                            " AND STATUS = 'ACTIVE'";
-
-                ResultSet rs = stmt.executeQuery(q1);
-
-                if(rs.next())
-                {
-                    int total = rs.getInt(1);
-
-                    con.close();
-
-                    return total;
-                }
-
-                con.close();
-
-                return 0;
-            }
-            catch(Exception e)
-            {
-                e.printStackTrace();
-                return 0;
-            }
-        }
-        
-        public int ClosedDriveMethod()
-        {
-            try
-            {
-                Class.forName("oracle.jdbc.driver.OracleDriver");
-
-                Connection con = DriverManager.getConnection(
-                    "jdbc:oracle:thin:@localhost:1521:XE",
-                    "CAMPUSCONNECT",
-                    "campus123"
-                );
-
-                Statement stmt = con.createStatement();
-
-                String q1 = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE " +
-                            "WHERE COMPANY_ID = " + getCompanyId() +
-                            " AND STATUS = 'CLOSED'";
-
-                ResultSet rs = stmt.executeQuery(q1);
-
-                if(rs.next())
-                {
-                    int total = rs.getInt(1);
-
-                    con.close();
-
-                    return total;
-                }
-
-                con.close();
-
-                return 0;
-            }
-            catch(Exception e)
-            {
-                e.printStackTrace();
-                return 0;
-            }
-        }
-        
-        public int TotalVacancyMethod()
-        {
-            try
-            {
-                Class.forName("oracle.jdbc.driver.OracleDriver");
-
-                Connection con = DriverManager.getConnection(
-                    "jdbc:oracle:thin:@localhost:1521:XE",
-                    "CAMPUSCONNECT",
-                    "campus123"
-                );
-
-                Statement stmt = con.createStatement();
-
-                String q1 = "SELECT NVL(SUM(VACANCY), 0) " +
-                            "FROM RECRUITMENT_DRIVE " +
-                            "WHERE COMPANY_ID = " + getCompanyId();
-
-                ResultSet rs = stmt.executeQuery(q1);
-
-                if(rs.next())
-                {
-                    int total = rs.getInt(1);
-
-                    con.close();
-
-                    return total;
-                }
-
-                con.close();
-
-                return 0;
-            }
-            catch(Exception e)
-            {
-                e.printStackTrace();
-                return 0;
-            }
-        }
-        
-        public int CampusDriveMethod()
-        {
-            try
-            {
-                Class.forName("oracle.jdbc.driver.OracleDriver");
-
-                Connection con = DriverManager.getConnection(
-                    "jdbc:oracle:thin:@localhost:1521:XE",
-                    "CAMPUSCONNECT",
-                    "campus123"
-                );
-
-                Statement stmt = con.createStatement();
-
-                String q1 = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE " +
-                            "WHERE COMPANY_ID = " + getCompanyId() +
-                            " AND DRIVE_TYPE = 'On Campus'";
-
-                ResultSet rs = stmt.executeQuery(q1);
-
-                if(rs.next())
-                {
-                    int total = rs.getInt(1);
-
-                    con.close();
-
-                    return total;
-                }
-
-                con.close();
-
-                return 0;
-            }
-            catch(Exception e)
-            {
-                e.printStackTrace();
-                return 0;
-            }
-        }
-        
-        public int DirectDriveMethod()
-        {
-            try
-            {
-                Class.forName("oracle.jdbc.driver.OracleDriver");
-
-                Connection con = DriverManager.getConnection(
-                    "jdbc:oracle:thin:@localhost:1521:XE",
-                    "CAMPUSCONNECT",
-                    "campus123"
-                );
-
-                Statement stmt = con.createStatement();
-
-                String q1 = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE " +
-                            "WHERE COMPANY_ID = " + getCompanyId() +
-                            " AND DRIVE_TYPE = 'Direct'";
-
-                ResultSet rs = stmt.executeQuery(q1);
-
-                if(rs.next())
-                {
-                    int total = rs.getInt(1);
-
-                    con.close();
-
-                    return total;
-                }
-
-                con.close();
-
-                return 0;
-            }
-            catch(Exception e)
-            {
-                e.printStackTrace();
-                return 0;
-            }
-        }
+        ps.close();
+        con.close();
     }
+    catch(Exception e)
+    {
+        e.printStackTrace();
+    }
+
+    return result;
+}
+}

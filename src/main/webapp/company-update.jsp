@@ -1,11 +1,14 @@
-<%@page import="com.campusconnect.bean.Company"%>
-
+<%@ page import="com.campusconnect.bean.Company" %>
+<%@ page contentType="application/json; charset=UTF-8" pageEncoding="UTF-8" %>
 <%
-    Integer companyId = (Integer)session.getAttribute("companyId");
+    request.setCharacterEncoding("UTF-8");
+    response.setHeader("Cache-Control", "no-store");
 
-    if(companyId == null)
-    {
-        response.sendRedirect("company-login.jsp");
+    Integer companyId = (Integer) session.getAttribute("companyId");
+
+    if (companyId == null) {
+        response.setStatus(401);
+        out.print("{\"success\":false,\"message\":\"Please sign in again.\"}");
         return;
     }
 
@@ -14,54 +17,37 @@
     String address = request.getParameter("address");
     String website = request.getParameter("website");
 
-    Company c = new Company();
-
-    c.setCompanyId(companyId);
-    c.setCompanyName(companyName);
-    c.setPhone(phone);
-    c.setAddress(address);
-    c.setWebsite(website);
-
-    boolean result = c.UpdateMethod();
-%>
-
-<html>
-
-<head>
-
-<title>Company Profile Update</title>
-
-</head>
-
-<body>
-
-<%
-    if(result)
-    {
-%>
-
-<h2>Company Profile Updated Successfully</h2>
-
-<p>Your company profile has been updated successfully.</p>
-
-<a href="company-profile.jsp">View Profile</a>
-
-<%
+    companyName = companyName == null ? "" : companyName.trim();
+    if (companyName.isEmpty() || "null".equalsIgnoreCase(companyName)) {
+        response.setStatus(400);
+        out.print("{\"success\":false,\"message\":\"Please enter a valid company name.\"}");
+        return;
     }
-    else
-    {
-%>
 
-<h2>Company Profile Update Failed</h2>
+    if (phone != null && "null".equalsIgnoreCase(phone.trim())) phone = "";
+    if (address != null && "null".equalsIgnoreCase(address.trim())) address = "";
+    if (website != null && "null".equalsIgnoreCase(website.trim())) website = "";
 
-<p>Unable to update company profile.</p>
+    try {
+        Company company = new Company();
+        company.setCompanyId(companyId);
+        company.setCompanyName(companyName);
+        company.setPhone(phone);
+        company.setAddress(address);
+        company.setWebsite(website);
 
-<a href="company-edit-profile.jsp">Try Again</a>
+        boolean updated = company.UpdateMethod();
 
-<%
+        if (updated) {
+            session.setAttribute("companyName", companyName);
+            out.print("{\"success\":true,\"message\":\"Company profile updated successfully.\"}");
+        } else {
+            response.setStatus(400);
+            out.print("{\"success\":false,\"message\":\"Unable to update company profile. Please try again.\"}");
+        }
+    } catch (Exception e) {
+        application.log("Company profile update failed.", e);
+        response.setStatus(500);
+        out.print("{\"success\":false,\"message\":\"An error occurred while updating the profile.\"}");
     }
 %>
-
-</body>
-
-</html>

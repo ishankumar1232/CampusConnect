@@ -61,6 +61,8 @@ public class CompanyDAO {
                 c.setAddress(rs.getString("ADDRESS"));
                 c.setWebsite(rs.getString("WEBSITE"));
                 c.setStatus(rs.getString("STATUS"));
+                c.setLogoUrl(rs.getString("LOGO_URL"));
+                c.setBannerUrl(rs.getString("BANNER_URL"));
             }
 
             con.close();
