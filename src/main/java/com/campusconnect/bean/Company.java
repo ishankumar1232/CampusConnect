@@ -71,16 +71,11 @@ public class Company {
 	    {
 	        Class.forName("oracle.jdbc.driver.OracleDriver");
 
-	        Connection con = DriverManager.getConnection(
-	            "jdbc:oracle:thin:@localhost:1521:XE",
-	            "CAMPUSCONNECT",
-	            "campus123"
-	        );
+	        Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "CAMPUSCONNECT", "campus123");
 
 	        Statement stmt = con.createStatement();
 
-	        String q1 = "SELECT * FROM COMPANY " +
-	                    "WHERE COMPANY_ID = " + companyId;
+	        String q1 = "SELECT * FROM COMPANY " +"WHERE COMPANY_ID = " + companyId;
 
 	        ResultSet rs = stmt.executeQuery(q1);
 
@@ -116,11 +111,7 @@ public class Company {
 	    {
 	        Class.forName("oracle.jdbc.driver.OracleDriver");
 
-	        Connection con = DriverManager.getConnection(
-	            "jdbc:oracle:thin:@localhost:1521:XE",
-	            "CAMPUSCONNECT",
-	            "campus123"
-	        );
+	        Connection con = DriverManager.getConnection( "jdbc:oracle:thin:@localhost:1521:XE", "CAMPUSCONNECT","campus123");
 
 	        Statement stmt = con.createStatement();
 

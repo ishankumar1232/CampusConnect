@@ -14,16 +14,21 @@
 
 
 <style>
-
-body{
-    font-family: Arial;
-    background:#f2f2f2;
+*{
+    margin:0;
+    padding:10px;
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
 }
+
 
 h2{
     text-align:center;
-    color:blue;
+    color:#0B3D91;
+    margin-bottom:25px;
+    font-size:34px;
 }
+
 
 table{
     border-collapse:collapse;
@@ -59,11 +64,31 @@ button{
     background:red;
 }
 
+.back-btn{
+    float:right;
+    display:inline-block;
+    padding:10px 20px;
+    background:#0B3D91;
+    color:white;
+    text-decoration:none;
+    border-radius:6px;
+    font-weight:bold;
+    margin-bottom:20px;
+}
+
+.back-btn:hover{
+    background:#072c69;
+}
 </style>
 
 </head>
 
 <body>
+
+<a href="<%=request.getContextPath()%>/DashboardServlet"
+class="back-btn">
+ Back to Dashboard
+</a>
 
 <h2>User Management</h2>
 

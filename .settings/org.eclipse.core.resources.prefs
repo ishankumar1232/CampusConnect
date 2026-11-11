@@ -21,3 +21,7 @@ encoding//src/main/webapp/student_college_view.jsp=UTF-8
 encoding//src/main/webapp/student_login.jsp=UTF-8
 encoding//src/main/webapp/student_profile.jsp=UTF-8
 encoding//src/main/webapp/student_register.jsp=UTF-8
+encoding//src/main/webapp/superadmin/collegeManagement.jsp=UTF-8
+encoding//src/main/webapp/superadmin/dashboard.jsp=UTF-8
+encoding//src/main/webapp/superadmin/monitorRecruitment.jsp=UTF-8
+encoding//src/main/webapp/superadmin/systemSettings.jsp=UTF-8

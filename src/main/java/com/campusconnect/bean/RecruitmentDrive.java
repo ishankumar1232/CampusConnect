@@ -16,6 +16,14 @@ public class RecruitmentDrive
     private double salary;
     private String deadline;
     private String status;
+    private String companyName;
+    private int applicationCount;
+    private int selectedCount;
+    private int placedCount;
+    private int applications;
+    private int selectedStudents;
+    private int placedStudents;
+
 
 
     public int getDriveId()
@@ -148,7 +156,68 @@ public class RecruitmentDrive
     {
         this.status = status;
     }
+    
+    public String getCompanyName() {
+        return companyName;
+    }
+    
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+    
+    public int getApplicationCount() {
+        return applicationCount;
+    }
 
+    public void setApplicationCount(int applicationCount) {
+        this.applicationCount = applicationCount;
+    }
+
+    public int getSelectedCount() {
+        return selectedCount;
+    }
+
+    public void setSelectedCount(int selectedCount) {
+        this.selectedCount = selectedCount;
+    }
+
+    public int getPlacedCount() {
+        return placedCount;
+    }
+
+    public void setPlacedCount(int placedCount) {
+        this.placedCount = placedCount;
+    }
+    
+ // ================= APPLICATIONS =================
+
+    public int getApplications() {
+        return applications;
+    }
+
+    public void setApplications(int applications) {
+        this.applications = applications;
+    }
+
+    // ================= SELECTED STUDENTS =================
+
+    public int getSelectedStudents() {
+        return selectedStudents;
+    }
+
+    public void setSelectedStudents(int selectedStudents) {
+        this.selectedStudents = selectedStudents;
+    }
+
+    // ================= PLACED STUDENTS =================
+
+    public int getPlacedStudents() {
+        return placedStudents;
+    }
+
+    public void setPlacedStudents(int placedStudents) {
+        this.placedStudents = placedStudents;
+    }
 
     public boolean InsertMethod()
     {
@@ -352,16 +421,11 @@ public class RecruitmentDrive
             {
                 Class.forName("oracle.jdbc.driver.OracleDriver");
 
-                Connection con = DriverManager.getConnection(
-                    "jdbc:oracle:thin:@localhost:1521:XE",
-                    "CAMPUSCONNECT",
-                    "campus123"
-                );
+                Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","CAMPUSCONNECT","campus123");
 
                 Statement stmt = con.createStatement();
 
-                String q1 = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE " +
-                            "WHERE COMPANY_ID = " + getCompanyId();
+                String q1 = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE " +"WHERE COMPANY_ID = " + getCompanyId();
 
                 ResultSet rs = stmt.executeQuery(q1);
 
@@ -391,17 +455,11 @@ public class RecruitmentDrive
             {
                 Class.forName("oracle.jdbc.driver.OracleDriver");
 
-                Connection con = DriverManager.getConnection(
-                    "jdbc:oracle:thin:@localhost:1521:XE",
-                    "CAMPUSCONNECT",
-                    "campus123"
-                );
+                Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","CAMPUSCONNECT", "campus123");
 
                 Statement stmt = con.createStatement();
 
-                String q1 = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE " +
-                            "WHERE COMPANY_ID = " + getCompanyId() +
-                            " AND STATUS = 'ACTIVE'";
+                String q1 = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE " + "WHERE COMPANY_ID = " + getCompanyId() + " AND STATUS = 'ACTIVE'";
 
                 ResultSet rs = stmt.executeQuery(q1);
 
@@ -431,17 +489,11 @@ public class RecruitmentDrive
             {
                 Class.forName("oracle.jdbc.driver.OracleDriver");
 
-                Connection con = DriverManager.getConnection(
-                    "jdbc:oracle:thin:@localhost:1521:XE",
-                    "CAMPUSCONNECT",
-                    "campus123"
-                );
+                Connection con = DriverManager.getConnection( "jdbc:oracle:thin:@localhost:1521:XE", "CAMPUSCONNECT", "campus123");
 
                 Statement stmt = con.createStatement();
 
-                String q1 = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE " +
-                            "WHERE COMPANY_ID = " + getCompanyId() +
-                            " AND STATUS = 'CLOSED'";
+                String q1 = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE " + "WHERE COMPANY_ID = " + getCompanyId() +" AND STATUS = 'CLOSED'";
 
                 ResultSet rs = stmt.executeQuery(q1);
 
@@ -471,17 +523,12 @@ public class RecruitmentDrive
             {
                 Class.forName("oracle.jdbc.driver.OracleDriver");
 
-                Connection con = DriverManager.getConnection(
-                    "jdbc:oracle:thin:@localhost:1521:XE",
-                    "CAMPUSCONNECT",
-                    "campus123"
+                Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE","CAMPUSCONNECT","campus123"
                 );
 
                 Statement stmt = con.createStatement();
 
-                String q1 = "SELECT NVL(SUM(VACANCY), 0) " +
-                            "FROM RECRUITMENT_DRIVE " +
-                            "WHERE COMPANY_ID = " + getCompanyId();
+                String q1 = "SELECT NVL(SUM(VACANCY), 0) " +"FROM RECRUITMENT_DRIVE " +"WHERE COMPANY_ID = " + getCompanyId();
 
                 ResultSet rs = stmt.executeQuery(q1);
 
@@ -511,17 +558,11 @@ public class RecruitmentDrive
             {
                 Class.forName("oracle.jdbc.driver.OracleDriver");
 
-                Connection con = DriverManager.getConnection(
-                    "jdbc:oracle:thin:@localhost:1521:XE",
-                    "CAMPUSCONNECT",
-                    "campus123"
-                );
+                Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "CAMPUSCONNECT", "campus123");
 
                 Statement stmt = con.createStatement();
 
-                String q1 = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE " +
-                            "WHERE COMPANY_ID = " + getCompanyId() +
-                            " AND DRIVE_TYPE = 'On Campus'";
+                String q1 = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE " +"WHERE COMPANY_ID = " + getCompanyId() + " AND DRIVE_TYPE = 'On Campus'";
 
                 ResultSet rs = stmt.executeQuery(q1);
 
@@ -551,17 +592,11 @@ public class RecruitmentDrive
             {
                 Class.forName("oracle.jdbc.driver.OracleDriver");
 
-                Connection con = DriverManager.getConnection(
-                    "jdbc:oracle:thin:@localhost:1521:XE",
-                    "CAMPUSCONNECT",
-                    "campus123"
-                );
+                Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "CAMPUSCONNECT", "campus123");
 
                 Statement stmt = con.createStatement();
 
-                String q1 = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE " +
-                            "WHERE COMPANY_ID = " + getCompanyId() +
-                            " AND DRIVE_TYPE = 'Direct'";
+                String q1 = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE " +"WHERE COMPANY_ID = " + getCompanyId() + " AND DRIVE_TYPE = 'Direct'";
 
                 ResultSet rs = stmt.executeQuery(q1);
 
@@ -585,3 +620,4 @@ public class RecruitmentDrive
             }
         }
     }
+

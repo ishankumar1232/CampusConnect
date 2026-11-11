@@ -17,6 +17,9 @@ public class Student {
     private Date admissionDate;
     private String status;
     private String profileImage;
+    private String placementStatus;
+    private String collegeName;
+    private String courseName;
 
     public Student() {
 
@@ -128,6 +131,37 @@ public class Student {
     public void setProfileImage(String profileImage) {
         this.profileImage = profileImage;
     }
+
+    public String getPlacementStatus() {
+    return placementStatus;
+    }
+
+    public void setPlacementStatus(String placementStatus) {
+    this.placementStatus = placementStatus;
+    }
+    
+ // ================= COLLEGE NAME =================
+
+    public String getCollegeName() {
+        return collegeName;
+    }
+
+    public void setCollegeName(String collegeName) {
+        this.collegeName = collegeName;
+    }
+
+    // ================= COURSE NAME =================
+
+    public String getCourseName() {
+        return courseName;
+    }
+
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
+    }
+
+    
+    
     // Student Registration
 
     public boolean InsertMethod() {

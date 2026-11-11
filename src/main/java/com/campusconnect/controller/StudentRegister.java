@@ -9,6 +9,8 @@ import jakarta.servlet.annotation.WebServlet;
 
 import com.campusconnect.bean.Student;
 
+import com.campusconnect.dao.SystemSettingDAO;
+import com.campusconnect.bean.SystemSetting;
  
 public class StudentRegister extends HttpServlet
 {
@@ -27,7 +29,40 @@ public class StudentRegister extends HttpServlet
         String address = req.getParameter("address");
 
         Connection con = null;
+        
+        try {
 
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+
+            con = DriverManager.getConnection(
+                    "jdbc:oracle:thin:@localhost:1521:XE",
+                    "CAMPUSCONNECT",
+                    "campus123");
+
+            PreparedStatement ps = con.prepareStatement(
+                "SELECT STUDENT_REGISTRATION FROM SYSTEM_SETTINGS WHERE SETTING_ID=1");
+
+            ResultSet rs = ps.executeQuery();
+
+            if(rs.next()){
+
+                if(rs.getString("STUDENT_REGISTRATION").equals("OFF")){
+
+                    pw.println("<h2>Student Registration is Disabled by Super Admin.</h2>");
+
+                    return;
+                }
+
+            }
+
+            rs.close();
+            ps.close();
+
+        } catch(Exception e){
+
+            e.printStackTrace();
+        }
+        
         try
         {
             if(admissionId == null ||

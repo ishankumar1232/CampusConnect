@@ -1,7 +1,7 @@
- package com.campusconnect.servlet;
+package com.campusconnect.servlet;
 
 import java.io.IOException;
-import java.io.PrintWriter;
+import java.net.URLEncoder;
 
 import com.campusconnect.bean.SuperAdmin;
 import com.campusconnect.dao.SuperAdminDAO;
@@ -14,11 +14,9 @@ import jakarta.servlet.http.HttpSession;
 
 public class SuperAdminLoginServlet extends HttpServlet {
 
-    public void doPost(HttpServletRequest req, HttpServletResponse res)
+    public void doPost(HttpServletRequest req,
+            HttpServletResponse res)
             throws IOException, ServletException {
-
-        res.setContentType("text/html");
-        PrintWriter out = res.getWriter();
 
         String email = req.getParameter("email");
         String password = req.getParameter("password");
@@ -28,12 +26,25 @@ public class SuperAdminLoginServlet extends HttpServlet {
 
         if (admin != null) {
 
+            // ================= LOGIN SUCCESS =================
+
             HttpSession session = req.getSession();
             session.setAttribute("admin", admin);
 
-            res.sendRedirect(req.getContextPath() + "/DashboardServlet");
+            res.sendRedirect(
+                    req.getContextPath() + "/DashboardServlet");
+
         } else {
-            out.println("<h2>Invalid Email or Password</h2>");
+
+            // ================= LOGIN FAILED =================
+
+            res.sendRedirect(
+                    req.getContextPath()
+                    + "/superadmin/login.jsp?error=invalid&email="
+                    + URLEncoder.encode(email, "UTF-8"));
+
         }
+
     }
+
 }
