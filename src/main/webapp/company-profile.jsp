@@ -795,7 +795,6 @@
 
 </head>
 
-<body>
 
 <div class="dashboard-wrapper">
 

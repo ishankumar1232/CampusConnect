@@ -1074,7 +1074,63 @@
 
                     </a>
 
-                </div>
+</head>
+
+
+
+
+
+<body>
+
+
+
+
+
+<!-- =========================================================
+
+     MAIN WRAPPER
+
+     ========================================================= -->
+
+
+
+<div class="dashboard-wrapper">
+
+
+
+
+
+    <!-- =====================================================
+
+         SIDEBAR
+
+         ===================================================== -->
+
+
+
+    <aside class="sidebar">
+
+
+
+
+
+        <!-- BRAND -->
+
+        <div class="sidebar-logo">
+
+
+
+            <div class="brand-name">
+
+                Campus<span>Connect</span>
+
+            </div>
+
+
+
+            <div class="brand-subtitle">
+
+                COMPANY PORTAL
 
                 <!-- INTERVIEWS -->
 
@@ -1134,7 +1190,6 @@
 
                         </span>
 
-                    </div>
 
                     <a href="company-offers.jsp">
 
@@ -1154,7 +1209,6 @@
 
             <section class="quick-actions">
 
-                <div class="section-heading">
 
                     <h2>
 
@@ -1170,7 +1224,7 @@
 
                     </p>
 
-                </div>
+                <i class="fa-solid fa-house"></i>
 
                 <div class="quick-grid">
 
@@ -1212,7 +1266,6 @@
 
                     </div>
 
-                    <!-- CREATE DRIVE -->
 
                     <div class="quick-card">
 
@@ -1288,7 +1341,6 @@
 
                     </div>
 
-                    <!-- REPORTS -->
 
                     <div class="quick-card">
 
@@ -1352,7 +1404,7 @@
 
                     </p>
 
-                </div>
+                    Create Drive
 
                                 <div class="activity-box">
 
@@ -1462,7 +1514,6 @@
 
 </div>
 
-<script>
 
 (function () {
 
@@ -1488,7 +1539,6 @@
 
         });
 
-    }
 
     controls.forEach(function (control) {
 
@@ -1530,6 +1580,5 @@
 
 </script>
 
-</body>
 
 </html>
