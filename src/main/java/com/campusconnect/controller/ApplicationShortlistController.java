@@ -1,8 +1,8 @@
+
 package com.campusconnect.controller;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
@@ -12,109 +12,109 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import com.campusconnect.util.DBConnection;
+
 public class ApplicationShortlistController extends HttpServlet {
 
-    public void doPost(HttpServletRequest req, HttpServletResponse res)
+    @Override
+    protected void doPost(HttpServletRequest req,
+                          HttpServletResponse res)
             throws IOException, ServletException {
 
-        HttpSession session = req.getSession();
+        HttpSession session = req.getSession(false);
 
-        Integer collegeId = (Integer) session.getAttribute("collegeId");
+        if (session == null) {
+            res.sendRedirect(req.getContextPath() +
+                    "/collegeAdminLogin.jsp");
+            return;
+        }
 
-        if(collegeId == null) {
-            res.sendRedirect("collegeAdminLogin.jsp");
+        Integer collegeId =
+                (Integer) session.getAttribute("collegeId");
+
+        if (collegeId == null) {
+            res.sendRedirect(req.getContextPath() +
+                    "/collegeAdminLogin.jsp");
             return;
         }
 
         String applicationId = req.getParameter("applicationId");
         String shortlistStatus = req.getParameter("shortlistStatus");
 
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+        if (applicationId == null || shortlistStatus == null) {
+            res.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                    "Missing application details.");
+            return;
+        }
 
-        try {
-
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-
-            con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
-            // Check that application belongs to this college
-            String checkSql =
+        String checkSql =
                 "SELECT A.APPLICATION_ID " +
                 "FROM APPLICATION A " +
-                "JOIN STUDENT S " +
-                "ON A.STUDENT_ID = S.STUDENT_ID " +
-                "WHERE A.APPLICATION_ID = ? " +
-                "AND S.COLLEGE_ID = ?";
+                "JOIN STUDENT S ON A.STUDENT_ID = S.STUDENT_ID " +
+                "WHERE A.APPLICATION_ID = ? AND S.COLLEGE_ID = ?";
 
-            ps = con.prepareStatement(checkSql);
+        String updateSql =
+                "UPDATE APPLICATION " +
+                "SET COLLEGE_SHORTLIST_STATUS = ? " +
+                "WHERE APPLICATION_ID = ?";
 
-            ps.setInt(1, Integer.parseInt(applicationId));
-            ps.setInt(2, collegeId);
+        try (Connection con = DBConnection.getConnection()) {
 
-            rs = ps.executeQuery();
+            if (con == null) {
+                throw new ServletException(
+                        "Unable to connect to database.");
+            }
 
-            if(rs.next()) {
+            boolean applicationFound;
 
-                rs.close();
-                ps.close();
+            try (PreparedStatement ps =
+                    con.prepareStatement(checkSql)) {
 
-                // Update shortlist status
-                String updateSql =
-                    "UPDATE APPLICATION " +
-                    "SET COLLEGE_SHORTLIST_STATUS = ? " +
-                    "WHERE APPLICATION_ID = ?";
+                ps.setInt(1, Integer.parseInt(applicationId));
+                ps.setInt(2, collegeId);
 
-                ps = con.prepareStatement(updateSql);
+                try (ResultSet rs = ps.executeQuery()) {
+                    applicationFound = rs.next();
+                }
+            }
+
+            if (!applicationFound) {
+                res.sendError(HttpServletResponse.SC_NOT_FOUND,
+                        "Application not found for this college.");
+                return;
+            }
+
+            try (PreparedStatement ps =
+                    con.prepareStatement(updateSql)) {
 
                 ps.setString(1, shortlistStatus);
                 ps.setInt(2, Integer.parseInt(applicationId));
 
-                ps.executeUpdate();
+                int updated = ps.executeUpdate();
 
-                ps.close();
+                if (updated > 0) {
+                    res.sendRedirect(req.getContextPath() +
+                            "/applicationManagement.jsp");
+                } else {
+                    res.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                            "Unable to update application.");
+                }
+            }
 
-                res.sendRedirect(
-                    req.getContextPath() +
-                    "/applicationManagement.jsp"
+        } catch (NumberFormatException e) {
+
+            res.sendError(HttpServletResponse.SC_BAD_REQUEST,
+                    "Invalid application ID.");
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            if (!res.isCommitted()) {
+                res.sendError(
+                        HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
+                        "An error occurred while updating application."
                 );
-
-            } else {
-
-                res.getWriter().println(
-                    "<h2>Application not found</h2>"
-                );
-            }
-
-        } catch(Exception e) {
-
-            res.getWriter().println(
-                "<h2>Error: " + e.getMessage() + "</h2>"
-            );
-
-        } finally {
-
-            if(rs != null) {
-                try {
-                    rs.close();
-                } catch(Exception e) {}
-            }
-
-            if(ps != null) {
-                try {
-                    ps.close();
-                } catch(Exception e) {}
-            }
-
-            if(con != null) {
-                try {
-                    con.close();
-                } catch(Exception e) {}
             }
         }
     }
