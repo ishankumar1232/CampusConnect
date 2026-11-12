@@ -2,6 +2,9 @@ package com.campusconnect.controller;
 
 import java.io.IOException;
 
+import com.campusconnect.bean.SystemSetting;
+import com.campusconnect.dao.SystemSettingDAO;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -17,6 +20,28 @@ public class CompanyServlet extends HttpServlet
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException
     {
+    	// ======================================
+    	// CHECK COMPANY REGISTRATION STATUS
+    	// ======================================
+
+    	SystemSettingDAO settingDAO = new SystemSettingDAO();
+
+    	SystemSetting setting = settingDAO.getSystemSettings();
+
+    	if (setting != null &&
+    	    "OFF".equalsIgnoreCase(setting.getCompanyRegistration())) {
+
+    	    response.setContentType("text/html");
+
+    	    response.getWriter().println("<html><body>");
+    	    response.getWriter().println("<h2>Company Registration Disabled</h2>");
+    	    response.getWriter().println("<p>Company Registration has been disabled by Super Admin.</p>");
+    	    response.getWriter().println("<a href='index.jsp'>Back</a>");
+    	    response.getWriter().println("</body></html>");
+
+    	    return;
+    	}
+    	
         String companyName = request.getParameter("companyName");
         String email = request.getParameter("email");
         String phone = request.getParameter("phone");

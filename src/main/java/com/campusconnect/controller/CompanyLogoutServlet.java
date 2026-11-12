@@ -26,3 +26,4 @@ public class CompanyLogoutServlet extends HttpServlet
         response.sendRedirect("company-login.jsp");
     }
 }
+

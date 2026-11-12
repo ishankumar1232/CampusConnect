@@ -10,16 +10,43 @@ import jakarta.servlet.http.HttpSession;
 
 import com.campusconnect.bean.Student;
 
-public class StudentLogin extends HttpServlet {
+import com.campusconnect.bean.SystemSetting;
+import com.campusconnect.dao.SystemSettingDAO; 
 
-    private static final long serialVersionUID = 1L;
+public class StudentLogin extends HttpServlet
+{
+    public void doPost(HttpServletRequest req, HttpServletResponse res)
+            throws IOException, ServletException
+    {
+        res.setContentType("text/html");
 
-    @Override
-    protected void doPost(HttpServletRequest req,
-                          HttpServletResponse res)
-            throws IOException, ServletException {
+        PrintWriter pw = res.getWriter();
+     // ======================================
+     // CHECK MAINTENANCE MODE
+     // ======================================
 
-        req.setCharacterEncoding("UTF-8");
+     SystemSettingDAO settingDAO = new SystemSettingDAO();
+
+     SystemSetting setting = settingDAO.getSystemSettings();
+
+     if (setting != null &&
+         "ON".equalsIgnoreCase(setting.getMaintenanceMode())) {
+
+         pw.println("<html>");
+         pw.println("<body>");
+
+         pw.println("<h2>System Under Maintenance</h2>");
+
+         pw.println("<p>");
+         pw.println("Student Login is temporarily unavailable.");
+         pw.println("</p>");
+
+         pw.println("</body>");
+         pw.println("</html>");
+
+         return;
+     }
+        
 
         String email = req.getParameter("email");
         String password = req.getParameter("password");

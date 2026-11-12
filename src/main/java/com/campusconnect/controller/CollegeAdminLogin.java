@@ -6,6 +6,9 @@ import jakarta.servlet.http.*;
 
 import com.campusconnect.bean.CollegeAdmin;
 
+import com.campusconnect.bean.SystemSetting;
+import com.campusconnect.dao.SystemSettingDAO;
+
 public class CollegeAdminLogin extends HttpServlet {
 
     public void doPost(HttpServletRequest req, HttpServletResponse res)
@@ -14,6 +17,32 @@ public class CollegeAdminLogin extends HttpServlet {
         res.setContentType("text/html");
         PrintWriter pw = res.getWriter();
 
+     // ======================================
+     // CHECK MAINTENANCE MODE
+     // ======================================
+
+     SystemSettingDAO settingDAO = new SystemSettingDAO();
+
+     SystemSetting setting = settingDAO.getSystemSettings();
+
+     if (setting != null &&
+         "ON".equalsIgnoreCase(setting.getMaintenanceMode())) {
+
+         pw.println("<html>");
+         pw.println("<body>");
+
+         pw.println("<h2>System Under Maintenance</h2>");
+
+         pw.println("<p>");
+         pw.println("College Admin Login is temporarily unavailable.");
+         pw.println("</p>");
+
+         pw.println("</body>");
+         pw.println("</html>");
+
+         return;
+     }
+        
         String email = req.getParameter("email");
         String password = req.getParameter("password");
 

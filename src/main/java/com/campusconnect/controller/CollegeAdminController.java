@@ -6,6 +6,9 @@ import jakarta.servlet.http.*;
 
 import com.campusconnect.bean.CollegeAdmin;
 
+import com.campusconnect.dao.SystemSettingDAO;
+import com.campusconnect.bean.SystemSetting;
+
 public class CollegeAdminController extends HttpServlet {
 
     public void doPost(HttpServletRequest req, HttpServletResponse res)
@@ -21,6 +24,34 @@ public class CollegeAdminController extends HttpServlet {
         String college = req.getParameter("collegeId");
 
         try {
+        	
+        	// ======================================
+        	// CHECK COLLEGE REGISTRATION STATUS
+        	// ======================================
+
+        	SystemSettingDAO settingDAO = new SystemSettingDAO();
+
+        	SystemSetting setting = settingDAO.getSystemSettings();
+
+        	if (setting != null &&
+        	    "OFF".equalsIgnoreCase(setting.getCollegeRegistration())) {
+
+        	    pw.println("<html>");
+        	    pw.println("<body>");
+
+        	    pw.println("<h2>College Registration Disabled</h2>");
+
+        	    pw.println("<p>");
+        	    pw.println("College Registration has been disabled by Super Admin.");
+        	    pw.println("</p>");
+
+        	    pw.println("<a href='index.jsp'>Back</a>");
+
+        	    pw.println("</body>");
+        	    pw.println("</html>");
+
+        	    return;
+        	}
 
             CollegeAdmin admin = new CollegeAdmin();
 

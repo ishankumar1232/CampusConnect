@@ -9,7 +9,7 @@ public class LoginTest {
         SuperAdminDAO dao = new SuperAdminDAO();
         
         //LOGIN  EMAIL AND PASSWORD 
-        SuperAdmin admin = dao.login("superadmin@gmail.com ", "superadmin123");
+        SuperAdmin admin = dao.login("superadmin@gmail.com", "superadmin123");
 
         if(admin!=null) {
 

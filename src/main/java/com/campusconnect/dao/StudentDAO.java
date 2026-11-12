@@ -10,148 +10,270 @@ import com.campusconnect.util.DBConnection;
 
 public class StudentDAO {
 
-    // Get All Students
+    // ==========================================
+    // GET ALL STUDENTS
+    // ==========================================
+
     public ArrayList<Student> getAllStudents() {
 
         ArrayList<Student> list = new ArrayList<Student>();
 
+        Connection con = null;
+        PreparedStatement ps = null;
+        ResultSet rs = null;
+
         try {
 
-            Connection con = DBConnection.getConnection();
+            con = DBConnection.getConnection();
 
-            String sql = "SELECT * FROM STUDENT";
+            String sql =
+                    "SELECT " +
+                    "S.STUDENT_ID, " +
+                    "S.COLLEGE_ID, " +
+                    "C.COLLEGE_NAME, " +
+                    "S.COURSE_ID, " +
+                    "CR.COURSE_NAME, " +
+                    "S.NAME, " +
+                    "S.EMAIL, " +
+                    "S.PHONE, " +
+                    "S.GENDER, " +
+                    "S.STATUS " +
+                    "FROM STUDENT S " +
+                    "LEFT JOIN COLLEGE C " +
+                    "ON S.COLLEGE_ID=C.COLLEGE_ID " +
+                    "LEFT JOIN COURSE CR " +
+                    "ON S.COURSE_ID=CR.COURSE_ID " +
+                    "ORDER BY S.STUDENT_ID";
 
-            PreparedStatement ps = con.prepareStatement(sql);
+            ps = con.prepareStatement(sql);
 
-            ResultSet rs = ps.executeQuery();
+            rs = ps.executeQuery();
 
             while (rs.next()) {
 
                 Student s = new Student();
 
                 s.setStudentId(rs.getInt("STUDENT_ID"));
+
                 s.setCollegeId(rs.getInt("COLLEGE_ID"));
+
+                s.setCollegeName(rs.getString("COLLEGE_NAME"));
+
                 s.setCourseId(rs.getInt("COURSE_ID"));
+
+                s.setCourseName(rs.getString("COURSE_NAME"));
+
                 s.setName(rs.getString("NAME"));
+
                 s.setEmail(rs.getString("EMAIL"));
+
                 s.setPhone(rs.getString("PHONE"));
+
                 s.setGender(rs.getString("GENDER"));
+
                 s.setStatus(rs.getString("STATUS"));
 
                 list.add(s);
+
             }
 
-            rs.close();
-            ps.close();
-            con.close();
+        }
+        catch(Exception e){
 
-        } catch (Exception e) {
             e.printStackTrace();
+
+        }
+        finally{
+
+            try{
+
+                if(rs!=null)
+                    rs.close();
+
+                if(ps!=null)
+                    ps.close();
+
+                if(con!=null)
+                    con.close();
+
+            }
+            catch(Exception e){
+
+                e.printStackTrace();
+
+            }
+
         }
 
         return list;
+
     }
 
-    // Activate Student
-    public boolean activateStudent(int id) {
+    // ==========================================
+    // ACTIVATE STUDENT
+    // ==========================================
 
-        boolean status = false;
+    public boolean activateStudent(int id){
 
-        try {
+        boolean flag=false;
 
-            Connection con = DBConnection.getConnection();
+        try{
 
-            String sql =
+            Connection con=DBConnection.getConnection();
+
+            String sql=
                     "UPDATE STUDENT SET STATUS='ACTIVE' WHERE STUDENT_ID=?";
 
-            PreparedStatement ps = con.prepareStatement(sql);
+            PreparedStatement ps=con.prepareStatement(sql);
 
-            ps.setInt(1, id);
+            ps.setInt(1,id);
 
-            if (ps.executeUpdate() > 0) {
-                status = true;
+            int x=ps.executeUpdate();
+
+            if(x>0){
+
+                flag=true;
+
             }
 
             ps.close();
+
             con.close();
 
-        } catch (Exception e) {
+        }
+        catch(Exception e){
+
             e.printStackTrace();
+
         }
 
-        return status;
+        return flag;
+
     }
 
-    // Deactivate Student
-    public boolean deactivateStudent(int id) {
+    // ==========================================
+    // DEACTIVATE STUDENT
+    // ==========================================
 
-        boolean status = false;
+    public boolean deactivateStudent(int id){
 
-        try {
+        boolean flag=false;
 
-            Connection con = DBConnection.getConnection();
+        try{
 
-            String sql =
+            Connection con=DBConnection.getConnection();
+
+            String sql=
                     "UPDATE STUDENT SET STATUS='INACTIVE' WHERE STUDENT_ID=?";
 
-            PreparedStatement ps = con.prepareStatement(sql);
+            PreparedStatement ps=con.prepareStatement(sql);
 
-            ps.setInt(1, id);
+            ps.setInt(1,id);
 
-            if (ps.executeUpdate() > 0) {
-                status = true;
+            int x=ps.executeUpdate();
+
+            if(x>0){
+
+                flag=true;
+
             }
 
             ps.close();
+
             con.close();
 
-        } catch (Exception e) {
+        }
+        catch(Exception e){
+
             e.printStackTrace();
+
         }
 
-        return status;
+        return flag;
+
     }
+ // ==========================================
+ // GET STUDENT BY ID
+ // ==========================================
 
-    // Get Student By ID
-    public Student getStudentById(int id) {
+ public Student getStudentById(int id) {
 
-        Student s = null;
+     Student s = null;
 
-        try {
+     Connection con = null;
+     PreparedStatement ps = null;
+     ResultSet rs = null;
 
-            Connection con = DBConnection.getConnection();
+     try {
 
-            String sql =
-                    "SELECT * FROM STUDENT WHERE STUDENT_ID=?";
+         con = DBConnection.getConnection();
 
-            PreparedStatement ps = con.prepareStatement(sql);
+         String sql =
+                 "SELECT " +
+                 "S.STUDENT_ID, " +
+                 "S.COLLEGE_ID, " +
+                 "C.COLLEGE_NAME, " +
+                 "S.COURSE_ID, " +
+                 "CR.COURSE_NAME, " +
+                 "S.NAME, " +
+                 "S.EMAIL, " +
+                 "S.PHONE, " +
+                 "S.GENDER, " +
+                 "S.STATUS " +
+                 "FROM STUDENT S " +
+                 "LEFT JOIN COLLEGE C " +
+                 "ON S.COLLEGE_ID = C.COLLEGE_ID " +
+                 "LEFT JOIN COURSE CR " +
+                 "ON S.COURSE_ID = CR.COURSE_ID " +
+                 "WHERE S.STUDENT_ID = ?";
 
-            ps.setInt(1, id);
+         ps = con.prepareStatement(sql);
 
-            ResultSet rs = ps.executeQuery();
+         ps.setInt(1, id);
 
-            if (rs.next()) {
+         rs = ps.executeQuery();
 
-                s = new Student();
+         if (rs.next()) {
 
-                s.setStudentId(rs.getInt("STUDENT_ID"));
-                s.setCollegeId(rs.getInt("COLLEGE_ID"));
-                s.setCourseId(rs.getInt("COURSE_ID"));
-                s.setName(rs.getString("NAME"));
-                s.setEmail(rs.getString("EMAIL"));
-                s.setPhone(rs.getString("PHONE"));
-                s.setGender(rs.getString("GENDER"));
-                s.setStatus(rs.getString("STATUS"));
-            }
+             s = new Student();
 
-            rs.close();
-            ps.close();
-            con.close();
+             s.setStudentId(rs.getInt("STUDENT_ID"));
+             s.setCollegeId(rs.getInt("COLLEGE_ID"));
+             s.setCollegeName(rs.getString("COLLEGE_NAME"));
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+             s.setCourseId(rs.getInt("COURSE_ID"));
+             s.setCourseName(rs.getString("COURSE_NAME"));
 
-        return s;
-    }
+             s.setName(rs.getString("NAME"));
+             s.setEmail(rs.getString("EMAIL"));
+             s.setPhone(rs.getString("PHONE"));
+             s.setGender(rs.getString("GENDER"));
+             s.setStatus(rs.getString("STATUS"));
+         }
+
+     } catch (Exception e) {
+
+         e.printStackTrace();
+
+     } finally {
+
+         try {
+
+             if (rs != null)
+                 rs.close();
+
+             if (ps != null)
+                 ps.close();
+
+             if (con != null)
+                 con.close();
+
+         } catch (Exception e) {
+
+             e.printStackTrace();
+         }
+     }
+
+     return s;
+ }
 }

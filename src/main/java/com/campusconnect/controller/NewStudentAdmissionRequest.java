@@ -7,7 +7,8 @@ import jakarta.servlet.http.*;
  
 import com.campusconnect.bean.Admission;
 
-
+import com.campusconnect.bean.SystemSetting;
+import com.campusconnect.dao.SystemSettingDAO;
  
 public class NewStudentAdmissionRequest
         extends HttpServlet
@@ -21,7 +22,34 @@ public class NewStudentAdmissionRequest
 
         PrintWriter pw =
             res.getWriter();
+        
+     // ======================================
+     // CHECK ADMISSION REQUEST STATUS
+     // ======================================
 
+     SystemSettingDAO settingDAO = new SystemSettingDAO();
+
+     SystemSetting setting = settingDAO.getSystemSettings();
+
+     if (setting != null &&
+         "OFF".equalsIgnoreCase(setting.getAdmissionRequest())) {
+
+         pw.println("<html>");
+         pw.println("<body>");
+
+         pw.println("<h2>Admission Request Disabled</h2>");
+
+         pw.println("<p>");
+         pw.println("Admission Request has been disabled by Super Admin.");
+         pw.println("</p>");
+
+         pw.println("<a href='index.jsp'>Back</a>");
+
+         pw.println("</body>");
+         pw.println("</html>");
+
+         return;
+     }
 
         String collegeId =
             req.getParameter("collegeId");

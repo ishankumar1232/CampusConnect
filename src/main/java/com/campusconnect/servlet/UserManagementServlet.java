@@ -24,8 +24,7 @@ public class UserManagementServlet extends HttpServlet {
 
         request.setAttribute("userList", list);
 
-        RequestDispatcher rd =
-                request.getRequestDispatcher("/superadmin/userManagement.jsp");
+        RequestDispatcher rd = request.getRequestDispatcher("/superadmin/userManagement.jsp");
 
         rd.forward(request, response);
     }
@@ -38,3 +37,4 @@ public class UserManagementServlet extends HttpServlet {
     }
 
 }
+

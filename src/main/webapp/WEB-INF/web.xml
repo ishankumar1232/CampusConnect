@@ -524,6 +524,19 @@
 </servlet-mapping>
 
 
+	<!-- system setting -->
+
+<servlet>
+    <servlet-name>SystemSettingsServlet</servlet-name>
+    <servlet-class>
+        com.campusconnect.servlet.SystemSettingsServlet
+    </servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>SystemSettingsServlet</servlet-name>
+    <url-pattern>/SystemSettingsServlet</url-pattern>
+</servlet-mapping>
 </web-app>
 
  
