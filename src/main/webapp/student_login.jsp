@@ -3,23 +3,17 @@
          pageEncoding="UTF-8" %>
 
 <!DOCTYPE html>
-
 <html lang="en">
 
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0">
 
 <title>Student Login | CampusConnect</title>
 
-
 <style>
-
-/* ================= GENERAL ================= */
-
 * {
     margin: 0;
     padding: 0;
@@ -36,9 +30,6 @@ body {
     padding: 30px;
 }
 
-
-/* ================= MAIN BOX ================= */
-
 .login-container {
     width: 990px;
     max-width: 100%;
@@ -47,28 +38,18 @@ body {
     border-radius: 22px;
     overflow: hidden;
     display: flex;
-    box-shadow: 0 20px 60px rgba(30, 60, 100, 0.15);
+    box-shadow: 0 20px 60px rgba(30,60,100,0.15);
 }
-
-
-/* ================= LEFT PANEL ================= */
 
 .left-panel {
     width: 48%;
-    background: linear-gradient(
-        145deg,
-        #174a9c,
-        #1769e0
-    );
+    background: linear-gradient(145deg, #174a9c, #1769e0);
     color: white;
     padding: 50px;
     display: flex;
     flex-direction: column;
     justify-content: center;
 }
-
-
-/* LOGO */
 
 .logo {
     font-size: 27px;
@@ -79,9 +60,6 @@ body {
 .logo span {
     color: #9dc9ff;
 }
-
-
-/* STUDENT ICON */
 
 .student-icon {
     width: 68px;
@@ -94,9 +72,6 @@ body {
     margin-bottom: 25px;
     position: relative;
 }
-
-
-/* CSS PERSON ICON */
 
 .student-icon::before {
     content: "";
@@ -119,9 +94,6 @@ body {
     bottom: 11px;
 }
 
-
-/* LEFT HEADING */
-
 .left-panel h1 {
     font-size: 38px;
     line-height: 1.2;
@@ -132,18 +104,12 @@ body {
     color: #a9d0ff;
 }
 
-
-/* LEFT DESCRIPTION */
-
 .left-panel > p {
     color: #dceaff;
     font-size: 14px;
     line-height: 1.8;
     max-width: 380px;
 }
-
-
-/* FEATURES */
 
 .features {
     margin-top: 30px;
@@ -157,9 +123,6 @@ body {
     font-size: 14px;
     color: #eef6ff;
 }
-
-
-/* CHECK ICON */
 
 .check {
     width: 23px;
@@ -182,9 +145,6 @@ body {
     transform: rotate(-45deg);
 }
 
-
-/* ================= RIGHT PANEL ================= */
-
 .right-panel {
     width: 52%;
     padding: 55px 60px;
@@ -193,17 +153,11 @@ body {
     justify-content: center;
 }
 
-
-/* TITLE */
-
 .right-panel h2 {
     color: #172f58;
     font-size: 32px;
     margin-bottom: 8px;
 }
-
-
-/* SUBTITLE */
 
 .subtitle {
     color: #7a8495;
@@ -212,15 +166,9 @@ body {
     line-height: 1.5;
 }
 
-
-/* REQUIRED */
-
 .required {
     color: #e53935;
 }
-
-
-/* ================= FORM ================= */
 
 .form-group {
     margin-bottom: 20px;
@@ -234,15 +182,9 @@ body {
     margin-bottom: 8px;
 }
 
-
-/* INPUT BOX */
-
 .input-wrapper {
     position: relative;
 }
-
-
-/* INPUT */
 
 .input-wrapper input {
     width: 100%;
@@ -267,11 +209,6 @@ body {
     color: #a2adbd;
 }
 
-
-/* ================= INPUT ICONS ================= */
-
-/* EMAIL ICON */
-
 .input-icon {
     position: absolute;
     left: 16px;
@@ -283,9 +220,6 @@ body {
     border-radius: 3px;
     pointer-events: none;
 }
-
-
-/* EMAIL ENVELOPE */
 
 .email-icon::after {
     content: "";
@@ -299,9 +233,6 @@ body {
     top: 0;
 }
 
-
-/* PASSWORD ICON */
-
 .password-icon {
     width: 17px;
     height: 14px;
@@ -309,9 +240,6 @@ body {
     border-radius: 3px;
     left: 17px;
 }
-
-
-/* PASSWORD LOCK */
 
 .password-icon::before {
     content: "";
@@ -325,9 +253,6 @@ body {
     top: -9px;
 }
 
-
-/* ================= OPTIONS ================= */
-
 .options {
     display: flex;
     justify-content: space-between;
@@ -336,9 +261,6 @@ body {
     margin-bottom: 25px;
     font-size: 13px;
 }
-
-
-/* REMEMBER */
 
 .remember {
     display: flex;
@@ -354,9 +276,6 @@ body {
     cursor: pointer;
 }
 
-
-/* FORGOT PASSWORD */
-
 .forgot {
     color: #1769e0;
     text-decoration: none;
@@ -366,9 +285,6 @@ body {
 .forgot:hover {
     text-decoration: underline;
 }
-
-
-/* ================= BUTTONS ================= */
 
 .buttons {
     display: flex;
@@ -411,9 +327,6 @@ body {
     background: #f5f8fc;
 }
 
-
-/* ================= BOTTOM LINKS ================= */
-
 .bottom-links {
     text-align: center;
     margin-top: 30px;
@@ -432,11 +345,7 @@ body {
     text-decoration: underline;
 }
 
-
-/* ================= RESPONSIVE ================= */
-
 @media(max-width: 800px) {
-
     body {
         padding: 15px;
     }
@@ -445,13 +354,16 @@ body {
         flex-direction: column;
     }
 
-    .left-panel {
+    .left-panel,
+    .right-panel {
         width: 100%;
+    }
+
+    .left-panel {
         padding: 35px;
     }
 
     .right-panel {
-        width: 100%;
         padding: 40px 35px;
     }
 
@@ -460,9 +372,7 @@ body {
     }
 }
 
-
 @media(max-width: 500px) {
-
     .left-panel h1 {
         font-size: 30px;
     }
@@ -477,105 +387,81 @@ body {
         gap: 12px;
     }
 }
-
 </style>
 
-
 <script>
+function validateForm() {
 
-function validateForm()
-{
+    var form = document.forms["loginForm"];
+    var email = form["email"].value.trim();
+    var password = form["password"].value;
 
-    var email =
-        document.forms["loginForm"]["email"].value;
-
-    var password =
-        document.forms["loginForm"]["password"].value;
-
-
-    /* ================= ALL BLANK ================= */
-
-    if((email == "" || email == null) &&
-       (password == "" || password == null))
-    {
+    if (email === "" && password === "") {
         alert("All mandatory fields are blank");
-
-        document.forms["loginForm"]["email"].focus();
-
+        form["email"].focus();
         return false;
     }
 
-
-    /* ================= EMAIL ================= */
-
-    if(email == "" || email == null)
-    {
+    if (email === "") {
         alert("Email is required");
-
-        document.forms["loginForm"]["email"].focus();
-
+        form["email"].focus();
         return false;
     }
 
+    var emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    var emailPattern =
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
-
-    if(!emailPattern.test(email))
-    {
+    if (!emailPattern.test(email)) {
         alert("Enter a valid Email ID");
-
-        document.forms["loginForm"]["email"].focus();
-
+        form["email"].focus();
         return false;
     }
 
-
-    /* ================= PASSWORD ================= */
-
-    if(password == "" || password == null)
-    {
+    if (password === "") {
         alert("Password is required");
-
-        document.forms["loginForm"]["password"].focus();
-
+        form["password"].focus();
         return false;
     }
-
 
     return true;
 }
 
+
+/* Show popup after invalid login redirect */
+window.addEventListener("DOMContentLoaded", function() {
+
+    var params = new URLSearchParams(window.location.search);
+
+    if (params.get("error") === "invalid") {
+        alert("Invalid Email or Password! Please try again.");
+
+        // Remove the error parameter so refreshing does not repeat the popup.
+        window.history.replaceState(
+            {},
+            document.title,
+            window.location.pathname
+        );
+    }
+});
 </script>
 
 </head>
 
-
 <body>
-
 
 <div class="login-container">
 
-
-    <!-- ================= LEFT SIDE ================= -->
-
     <div class="left-panel">
-
 
         <div class="logo">
             Campus<span>Connect</span>
         </div>
 
-
         <div class="student-icon"></div>
-
 
         <h1>
             Welcome Back,
             <span>Student!</span>
         </h1>
-
 
         <p>
             Access your student portal and manage your
@@ -583,248 +469,147 @@ function validateForm()
             from one place.
         </p>
 
-
         <div class="features">
 
-
             <div class="feature">
-
                 <div class="check"></div>
-
                 Manage your student profile
-
             </div>
 
-
             <div class="feature">
-
                 <div class="check"></div>
-
                 Track recruitment applications
-
             </div>
 
-
             <div class="feature">
-
                 <div class="check"></div>
-
                 Apply for placement drives
-
             </div>
-
 
             <div class="feature">
-
                 <div class="check"></div>
-
                 Track interviews and selections
-
             </div>
-
 
         </div>
-
 
     </div>
 
 
-
-    <!-- ================= RIGHT SIDE ================= -->
-
     <div class="right-panel">
 
-
-        <h2>
-            Student Sign In
-        </h2>
-
+        <h2>Student Sign In</h2>
 
         <p class="subtitle">
-
-            Sign in to continue to your
-            CampusConnect account.
-
+            Sign in to continue to your CampusConnect account.
         </p>
 
-
-        <p class="subtitle"
-           style="margin-top:-15px;">
-
+        <p class="subtitle" style="margin-top:-15px;">
             <span class="required">*</span>
             Indicates mandatory fields
-
         </p>
 
 
-
-        <form
-            name="loginForm"
-            method="post"
-            action="studentLogin"
-            onsubmit="return validateForm();">
-
-
-            <!-- ================= EMAIL ================= -->
+        <form name="loginForm"
+              method="post"
+              action="studentLogin"
+              onsubmit="return validateForm();">
 
             <div class="form-group">
 
-
                 <label>
-
                     Email ID
-
-                    <span class="required">
-                        *
-                    </span>
-
+                    <span class="required">*</span>
                 </label>
-
 
                 <div class="input-wrapper">
 
+                    <span class="input-icon email-icon"></span>
 
-                    <span
-                        class="input-icon email-icon">
-                    </span>
-
-
-                    <input
-                        type="email"
-                        name="email"
-                        placeholder="Enter your email">
-
+                    <input type="email"
+                           name="email"
+                           placeholder="Enter your email"
+                           autocomplete="username"
+                           required>
 
                 </div>
 
-
             </div>
 
-
-
-            <!-- ================= PASSWORD ================= -->
 
             <div class="form-group">
 
-
                 <label>
-
                     Password
-
-                    <span class="required">
-                        *
-                    </span>
-
+                    <span class="required">*</span>
                 </label>
-
 
                 <div class="input-wrapper">
 
+                    <span class="input-icon password-icon"></span>
 
-                    <span
-                        class="input-icon password-icon">
-                    </span>
-
-
-                    <input
-                        type="password"
-                        name="password"
-                        placeholder="Enter your password">
-
+                    <input type="password"
+                           name="password"
+                           placeholder="Enter your password"
+                           autocomplete="current-password"
+                           required>
 
                 </div>
 
-
             </div>
 
-
-
-            <!-- ================= OPTIONS ================= -->
 
             <div class="options">
 
-
                 <label class="remember">
 
-                    <input
-                        type="checkbox"
-                        name="remember">
+                    <input type="checkbox" name="remember">
 
                     Remember me
 
                 </label>
 
-
-                <a
-                    href="forgot_password.jsp"
-                    class="forgot">
-
+                <a href="forgot_password.jsp" class="forgot">
                     Forgot Password?
-
                 </a>
-
 
             </div>
 
-
-
-            <!-- ================= BUTTONS ================= -->
 
             <div class="buttons">
 
+                <input type="submit"
+                       value="Sign In"
+                       class="signin-button">
 
-                <input
-                    type="submit"
-                    value="Sign In"
-                    class="signin-button">
-
-
-                <input
-                    type="reset"
-                    value="Reset"
-                    class="reset-button">
-
+                <input type="reset"
+                       value="Reset"
+                       class="reset-button">
 
             </div>
-
 
         </form>
 
 
-
-        <!-- ================= BOTTOM ================= -->
-
         <div class="bottom-links">
-
 
             New student?
 
             <a href="new_student_colleges.jsp">
-
                 Start Admission
-
             </a>
-
 
             <br>
 
-
             <a href="index.jsp">
-
                 Back to CampusConnect
-
             </a>
-
 
         </div>
 
-
     </div>
-
 
 </div>
 
-
 </body>
-
 </html>

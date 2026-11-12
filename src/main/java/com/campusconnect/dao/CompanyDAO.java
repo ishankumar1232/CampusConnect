@@ -1,3 +1,4 @@
+
 package com.campusconnect.dao;
 
 import java.sql.*;
@@ -8,27 +9,27 @@ import com.campusconnect.util.DBConnection;
 
 public class CompanyDAO {
 
-    // krishna METHOD
+    // ==========================================
+    // COMPANY REGISTRATION METHOD
+    // ==========================================
     public boolean insertCompany(Company c) {
-        try {
-            Connection con = DBConnection.getConnection();
-            Statement stmt = con.createStatement();
 
-            String q1 = "INSERT INTO COMPANY " +
-                        "(COMPANY_ID, COMPANY_NAME, EMAIL, PHONE, PASSWORD, ADDRESS, WEBSITE, STATUS) " +
-                        "VALUES (COMPANY_SEQ.NEXTVAL, '" +
-                        c.getCompanyName() + "', '" +
-                        c.getEmail() + "', '" +
-                        c.getPhone() + "', '" +
-                        c.getPassword() + "', '" +
-                        c.getAddress() + "', '" +
-                        c.getWebsite() + "', '" +
-                        c.getStatus() + "')";
+        String sql = "INSERT INTO COMPANY " +
+                     "(COMPANY_ID, COMPANY_NAME, EMAIL, PHONE, PASSWORD, ADDRESS, WEBSITE, STATUS) " +
+                     "VALUES (COMPANY_SEQ.NEXTVAL, ?, ?, ?, ?, ?, ?, ?)";
 
-            int x = stmt.executeUpdate(q1);
-            con.close();
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-            return x > 0;
+            ps.setString(1, c.getCompanyName());
+            ps.setString(2, c.getEmail());
+            ps.setString(3, c.getPhone());
+            ps.setString(4, c.getPassword());
+            ps.setString(5, c.getAddress());
+            ps.setString(6, c.getWebsite());
+            ps.setString(7, c.getStatus());
+
+            return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -36,34 +37,44 @@ public class CompanyDAO {
         }
     }
 
-    // krishna METHOD
+
+    // ==========================================
+    // COMPANY LOGIN METHOD
+    // ==========================================
     public Company loginCompany(String email, String password) {
+
         Company c = null;
 
-        try {
-            Connection con = DBConnection.getConnection();
-            Statement stmt = con.createStatement();
+        String sql = "SELECT COMPANY_ID, COMPANY_NAME, EMAIL, PHONE, PASSWORD, " +
+                     "ADDRESS, WEBSITE, STATUS, LOGO, BANNER " +
+                     "FROM COMPANY WHERE EMAIL = ? AND PASSWORD = ?";
 
-            String q1 = "SELECT * FROM COMPANY " +
-                        "WHERE EMAIL = '" + email + "' " +
-                        "AND PASSWORD = '" + password + "'";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
-            ResultSet rs = stmt.executeQuery(q1);
+            ps.setString(1, email);
+            ps.setString(2, password);
 
-            if (rs.next()) {
-                c = new Company();
+            try (ResultSet rs = ps.executeQuery()) {
 
-                c.setCompanyId(rs.getInt("COMPANY_ID"));
-                c.setCompanyName(rs.getString("COMPANY_NAME"));
-                c.setEmail(rs.getString("EMAIL"));
-                c.setPhone(rs.getString("PHONE"));
-                c.setPassword(rs.getString("PASSWORD"));
-                c.setAddress(rs.getString("ADDRESS"));
-                c.setWebsite(rs.getString("WEBSITE"));
-                c.setStatus(rs.getString("STATUS"));
+                if (rs.next()) {
+
+                    c = new Company();
+
+                    c.setCompanyId(rs.getInt("COMPANY_ID"));
+                    c.setCompanyName(rs.getString("COMPANY_NAME"));
+                    c.setEmail(rs.getString("EMAIL"));
+                    c.setPhone(rs.getString("PHONE"));
+                    c.setPassword(rs.getString("PASSWORD"));
+                    c.setAddress(rs.getString("ADDRESS"));
+                    c.setWebsite(rs.getString("WEBSITE"));
+                    c.setStatus(rs.getString("STATUS"));
+
+                    // Correct Oracle column names
+                    c.setLogoUrl(rs.getString("LOGO"));
+                    c.setBannerUrl(rs.getString("BANNER"));
+                }
             }
-
-            con.close();
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -72,18 +83,21 @@ public class CompanyDAO {
         return c;
     }
 
-    // SUPER ADMIN METHOD
+
+    // ==========================================
+    // SUPER ADMIN - GET ALL COMPANIES
+    // ==========================================
     public ArrayList<Company> getAllCompanies() {
+
         ArrayList<Company> list = new ArrayList<>();
+        String sql = "SELECT * FROM COMPANY";
 
-        try {
-            Connection con = DBConnection.getConnection();
-
-            String sql = "SELECT * FROM COMPANY";
-            PreparedStatement ps = con.prepareStatement(sql);
-            ResultSet rs = ps.executeQuery();
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
 
             while (rs.next()) {
+
                 Company c = new Company();
 
                 c.setCompanyId(rs.getInt("COMPANY_ID"));
@@ -98,8 +112,6 @@ public class CompanyDAO {
                 list.add(c);
             }
 
-            con.close();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -107,57 +119,44 @@ public class CompanyDAO {
         return list;
     }
 
-    // SUPER ADMIN METHOD
+
+    // ==========================================
+    // SUPER ADMIN - APPROVE COMPANY
+    // ==========================================
     public boolean approveCompany(int companyId) {
-        boolean status = false;
 
-        try {
-            Connection con = DBConnection.getConnection();
+        String sql = "UPDATE COMPANY SET STATUS='Approved' WHERE COMPANY_ID=?";
 
-            String sql = "UPDATE COMPANY SET STATUS='Approved' WHERE COMPANY_ID=?";
-            PreparedStatement ps = con.prepareStatement(sql);
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, companyId);
-
-            int i = ps.executeUpdate();
-
-            if (i > 0) {
-                status = true;
-            }
-
-            con.close();
+            return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
-
-        return status;
     }
 
-    // SUPER ADMIN METHOD
+
+    // ==========================================
+    // SUPER ADMIN - REJECT COMPANY
+    // ==========================================
     public boolean rejectCompany(int companyId) {
-        boolean status = false;
 
-        try {
-            Connection con = DBConnection.getConnection();
+        String sql = "UPDATE COMPANY SET STATUS='Rejected' WHERE COMPANY_ID=?";
 
-            String sql = "UPDATE COMPANY SET STATUS='Rejected' WHERE COMPANY_ID=?";
-            PreparedStatement ps = con.prepareStatement(sql);
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, companyId);
-
-            int i = ps.executeUpdate();
-
-            if (i > 0) {
-                status = true;
-            }
-
-            con.close();
+            return ps.executeUpdate() > 0;
 
         } catch (Exception e) {
             e.printStackTrace();
+            return false;
         }
-
-        return status;
     }
+
 }

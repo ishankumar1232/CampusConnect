@@ -15,7 +15,7 @@
       content="width=device-width, initial-scale=1.0">
 
 <title>CampusConnect | One Campus. Everything Connected.</title>
-
+<link rel="icon" href="data:,">
 
 
 <script>

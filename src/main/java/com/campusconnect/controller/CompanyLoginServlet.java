@@ -1,3 +1,4 @@
+
 package com.campusconnect.controller;
 
 import java.io.IOException;
@@ -15,7 +16,7 @@ import com.campusconnect.dao.CompanyDAO;
 import com.campusconnect.bean.SystemSetting;
 import com.campusconnect.dao.SystemSettingDAO;
 
-@WebServlet("/CompanyLoginServlet")
+ 
 public class CompanyLoginServlet extends HttpServlet
 {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -47,22 +48,45 @@ public class CompanyLoginServlet extends HttpServlet
         String email = request.getParameter("email");
         String password = request.getParameter("password");
 
+        // DAO object
         CompanyDAO dao = new CompanyDAO();
 
+        // Check company login
         Company c = dao.loginCompany(email, password);
 
-        if(c != null)
-        {
+        if (c != null) {
+
+            // Create session
             HttpSession session = request.getSession();
 
+            // Store company details
             session.setAttribute("companyId", c.getCompanyId());
             session.setAttribute("companyName", c.getCompanyName());
             session.setAttribute("email", c.getEmail());
 
+            // Get logo and banner paths from database
+            String logoPath = c.getLogoUrl();
+            String bannerPath = c.getBannerUrl();
+
+            // Use default images if paths are empty
+            if (logoPath == null || logoPath.trim().isEmpty()) {
+                logoPath = "images/company/default-logo.png";
+            }
+
+            if (bannerPath == null || bannerPath.trim().isEmpty()) {
+                bannerPath = "images/company/default-banner.png";
+            }
+
+            // Store image paths in session
+            session.setAttribute("companyLogo", logoPath);
+            session.setAttribute("companyBanner", bannerPath);
+
+            // Redirect to company dashboard
             response.sendRedirect("company-dashboard.jsp");
-        }
-        else
-        {
+
+        } else {
+
+            // Login failed
             response.sendRedirect("login-failure.jsp");
         }
     }

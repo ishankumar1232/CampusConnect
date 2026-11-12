@@ -1,10 +1,9 @@
-<%@page import="com.campusconnect.bean.RecruitmentDrive"%>
-
+<%@ page import="com.campusconnect.bean.RecruitmentDrive" %>
 <%
-    Integer companyId = (Integer)session.getAttribute("companyId");
+    request.setCharacterEncoding("UTF-8");
 
-    if(companyId == null)
-    {
+    Integer companyId = (Integer) session.getAttribute("companyId");
+    if (companyId == null) {
         response.sendRedirect("company-login.jsp");
         return;
     }
@@ -21,68 +20,49 @@
     String deadline = request.getParameter("deadline");
     String status = request.getParameter("status");
 
+    boolean hasMissingValue = driveId == null || driveType == null ||
+            jobTitle == null || description == null || vacancy == null ||
+            eligibilityCgpa == null || requiredBranch == null ||
+            requiredSkills == null || salary == null || deadline == null ||
+            status == null;
 
-    RecruitmentDrive r = new RecruitmentDrive();
-
-    r.setDriveId(Integer.parseInt(driveId));
-    r.setCompanyId(companyId);
-
-    r.setDriveType(driveType);
-    r.setJobTitle(jobTitle);
-    r.setDescription(description);
-    r.setVacancy(Integer.parseInt(vacancy));
-    r.setEligibilityCgpa(Double.parseDouble(eligibilityCgpa));
-    r.setRequiredBranch(requiredBranch);
-    r.setRequiredSkills(requiredSkills);
-    r.setSalary(Double.parseDouble(salary));
-    r.setDeadline(deadline);
-    r.setStatus(status);
-
-
-    boolean result = r.UpdateMethod();
-%>
-
-<html>
-
-<head>
-
-<title>Update Recruitment Drive</title>
-
-</head>
-
-<body>
-
-<%
-    if(result)
-    {
-%>
-
-<h2>Recruitment Drive Updated Successfully</h2>
-
-<p>The recruitment drive has been updated successfully.</p>
-
-<a href="view-recruitment-drives.jsp">
-View Recruitment Drives
-</a>
-
-<%
+    if (hasMissingValue) {
+        session.setAttribute("driveUpdateMessage",
+                "Some required details were missing. The drive was not updated.");
+        response.sendRedirect("view-recruitment-drives.jsp");
+        return;
     }
-    else
-    {
-%>
 
-<h2>Recruitment Drive Update Failed</h2>
+    try {
+        RecruitmentDrive drive = new RecruitmentDrive();
+        drive.setDriveId(Integer.parseInt(driveId.trim()));
+        drive.setCompanyId(companyId);
+        drive.setDriveType(driveType.trim());
+        drive.setJobTitle(jobTitle.trim());
+        drive.setDescription(description.trim());
+        drive.setVacancy(Integer.parseInt(vacancy.trim()));
+        drive.setEligibilityCgpa(Double.parseDouble(eligibilityCgpa.trim()));
+        drive.setRequiredBranch(requiredBranch.trim());
+        drive.setRequiredSkills(requiredSkills.trim());
+        drive.setSalary(Double.parseDouble(salary.trim()));
+        drive.setDeadline(deadline.trim());
+        drive.setStatus(status.trim());
 
-<p>Unable to update the recruitment drive.</p>
+        boolean updated = drive.UpdateMethod();
 
-<a href="view-recruitment-drives.jsp">
-Back to Recruitment Drives
-</a>
-
-<%
+        if (updated) {
+            session.setAttribute("driveUpdateMessage",
+                    "Recruitment drive updated successfully.");
+        } else {
+            session.setAttribute("driveUpdateMessage",
+                    "Recruitment drive could not be updated. Please try again.");
+        }
+    } catch (Exception e) {
+        application.log("Recruitment drive update failed.", e);
+        session.setAttribute("driveUpdateMessage",
+                "The update could not be completed. Check the details and try again.");
     }
+
+    response.sendRedirect("view-recruitment-drives.jsp");
+    return;
 %>
-
-</body>
-
-</html>
