@@ -2,34 +2,52 @@
 
 <%@ page import="java.sql.Connection,java.sql.PreparedStatement,java.sql.ResultSet,java.util.ArrayList,java.util.HashMap,java.util.List,java.util.Map,com.campusconnect.util.DBConnection" %>
 
-
-
 <%!
+
     private String safeCompanyImagePath(String path, String fallback) {
+
         if (path == null || path.trim().isEmpty()) {
+
             return fallback;
+
         }
 
         String safePath = path.trim().replace('\\', '/');
+
         while (safePath.startsWith("/")) {
+
             safePath = safePath.substring(1);
+
         }
 
         if (safePath.isEmpty() || safePath.startsWith("//") || safePath.contains(":")
+
                 || safePath.contains("..") || safePath.indexOf('\\') >= 0) {
+
             return fallback;
+
         }
+
         return safePath;
+
     }
 
     private String dashboardEscape(String value) {
+
         if (value == null) return "";
+
         return value.replace("&", "&amp;")
+
                 .replace("<", "&lt;")
+
                 .replace(">", "&gt;")
+
                 .replace("\"", "&quot;")
+
                 .replace("'", "&#39;");
+
     }
+
 %>
 
 <%
@@ -40,21 +58,15 @@
 
     // =========================================================
 
-
-
     String companyName = (String) session.getAttribute("companyName");
 
     String email = (String) session.getAttribute("email");
-
-
 
     String companyLogo = (String) session.getAttribute("companyLogo");
 
     String companyBanner = (String) session.getAttribute("companyBanner");
 
     Integer companyId = (Integer) session.getAttribute("companyId");
-
-
 
     if (companyId == null) {
 
@@ -64,17 +76,11 @@
 
     }
 
-
-
-
-
     // =========================================================
 
     // DEFAULT VALUES
 
     // =========================================================
-
-
 
     if (companyName == null || companyName.trim().equals("")) {
 
@@ -82,29 +88,25 @@
 
     }
 
-
-
     if (email == null) {
 
         email = "";
 
     }
 
-
-
     String companyLogoFallback = "images/company/default-logo.png";
+
     String companyBannerFallback = "images/company/default-banner.png";
 
     companyLogo = safeCompanyImagePath(companyLogo, companyLogoFallback);
+
     companyBanner = safeCompanyImagePath(companyBanner, companyBannerFallback);
 
     String contextPath = request.getContextPath();
+
     String companyLogoUrl = contextPath + "/" + companyLogo;
+
     String companyBannerUrl = contextPath + "/" + companyBanner;
-
-
-
-
 
     // =========================================================
 
@@ -112,11 +114,7 @@
 
     // =========================================================
 
-
-
     String companyInitial = companyName.substring(0, 1).toUpperCase();
-
-
 
     int pendingApplications = 0;
 
@@ -157,100 +155,142 @@
     int actionCount = pendingApplications + pendingOffers;
 
     int totalDrives = 0;
+
     int totalApplications = 0;
+
     int scheduledInterviews = 0;
+
     int totalOffers = 0;
+
     boolean dashboardDataError = false;
+
     List<Map<String, Object>> recentDrives = new ArrayList<Map<String, Object>>();
 
     try (Connection connection = DBConnection.getConnection()) {
+
         try (PreparedStatement ps = connection.prepareStatement(
+
                 "SELECT COUNT(*) FROM RECRUITMENT_DRIVE WHERE COMPANY_ID = ?")) {
+
             ps.setInt(1, companyId.intValue());
+
             try (ResultSet rs = ps.executeQuery()) {
+
                 if (rs.next()) totalDrives = rs.getInt(1);
+
             }
+
         }
 
         String recentDriveSql = "SELECT DRIVE_ID, DRIVE_TYPE, JOB_TITLE, VACANCY, DEADLINE, STATUS " +
+
                 "FROM (SELECT DRIVE_ID, DRIVE_TYPE, JOB_TITLE, VACANCY, DEADLINE, STATUS " +
+
                 "FROM RECRUITMENT_DRIVE WHERE COMPANY_ID = ? ORDER BY DRIVE_ID DESC) " +
+
                 "WHERE ROWNUM <= 5";
+
         try (PreparedStatement ps = connection.prepareStatement(recentDriveSql)) {
+
             ps.setInt(1, companyId.intValue());
+
             try (ResultSet rs = ps.executeQuery()) {
+
                 while (rs.next()) {
+
                     Map<String, Object> drive = new HashMap<String, Object>();
+
                     drive.put("id", rs.getInt("DRIVE_ID"));
+
                     drive.put("type", rs.getString("DRIVE_TYPE"));
+
                     drive.put("title", rs.getString("JOB_TITLE"));
+
                     drive.put("vacancy", rs.getInt("VACANCY"));
+
                     drive.put("deadline", rs.getDate("DEADLINE"));
+
                     drive.put("status", rs.getString("STATUS"));
+
                     recentDrives.add(drive);
+
                 }
+
             }
+
         }
 
         try (PreparedStatement ps = connection.prepareStatement(
+
                 "SELECT COUNT(*) FROM APPLICATION A JOIN RECRUITMENT_DRIVE D " +
+
                 "ON D.DRIVE_ID = A.DRIVE_ID WHERE D.COMPANY_ID = ?")) {
+
             ps.setInt(1, companyId.intValue());
+
             try (ResultSet rs = ps.executeQuery()) {
+
                 if (rs.next()) totalApplications = rs.getInt(1);
+
             }
+
         }
 
         try (PreparedStatement ps = connection.prepareStatement(
+
                 "SELECT COUNT(*) FROM INTERVIEW I JOIN APPLICATION A " +
+
                 "ON A.APPLICATION_ID = I.APPLICATION_ID JOIN RECRUITMENT_DRIVE D " +
+
                 "ON D.DRIVE_ID = A.DRIVE_ID WHERE D.COMPANY_ID = ? " +
+
                 "AND UPPER(TRIM(I.STATUS)) = 'SCHEDULED'")) {
+
             ps.setInt(1, companyId.intValue());
+
             try (ResultSet rs = ps.executeQuery()) {
+
                 if (rs.next()) scheduledInterviews = rs.getInt(1);
+
             }
+
         }
 
         try (PreparedStatement ps = connection.prepareStatement(
+
                 "SELECT COUNT(*) FROM OFFER WHERE COMPANY_ID = ?")) {
+
             ps.setInt(1, companyId.intValue());
+
             try (ResultSet rs = ps.executeQuery()) {
+
                 if (rs.next()) totalOffers = rs.getInt(1);
+
             }
+
         }
+
     } catch (Exception e) {
+
         dashboardDataError = true;
+
         application.log("Unable to load company dashboard activity for companyId=" + companyId, e);
+
     }
 
 %>
 
-
-
-
-
 <!DOCTYPE html>
-
-
 
 <html lang="en">
 
-
-
 <head>
 
-
-
     <meta charset="UTF-8">
-
-
 
     <meta name="viewport"
 
           content="width=device-width, initial-scale=1.0">
-
-
 
     <title>
 
@@ -258,21 +298,15 @@
 
     </title>
 
-
-
     <!-- Font Awesome -->
 
     <link rel="stylesheet"
 
-          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
-
-
+          href="https\://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <link rel="stylesheet"
 
           href="css/company-dashboard.css?v=11">
-
-
 
     <style>
 
@@ -346,53 +380,29 @@
 
     </style>
 
-
-
 </head>
 
-
-
-
-
 <body>
-
-
-
-
 
 <!-- =========================================================
 
      MAIN WRAPPER
 
-     ========================================================= -->
-
-
+     \========================================================= -->
 
 <div class="dashboard-wrapper">
-
-
-
-
 
     <!-- =====================================================
 
          SIDEBAR
 
-         ===================================================== -->
-
-
+         \===================================================== -->
 
     <aside class="sidebar">
-
-
-
-
 
         <!-- BRAND -->
 
         <div class="sidebar-logo">
-
-
 
             <div class="brand-name">
 
@@ -400,35 +410,19 @@
 
             </div>
 
-
-
             <div class="brand-subtitle">
 
                 COMPANY PORTAL
 
             </div>
 
-
-
         </div>
-
-
-
-
 
         <!-- SIDEBAR CONTENT -->
 
-
-
         <div class="sidebar-content">
 
-
-
-
-
             <!-- ================= OVERVIEW ================= -->
-
-
 
             <div class="menu-section-title">
 
@@ -436,19 +430,11 @@
 
             </div>
 
-
-
-
-
             <a href="company-dashboard.jsp"
 
                class="menu-item active">
 
-
-
                 <i class="fa-solid fa-house"></i>
-
-
 
                 <span>
 
@@ -456,23 +442,13 @@
 
                 </span>
 
-
-
             </a>
-
-
-
-
 
             <a href="company-profile.jsp"
 
                class="menu-item">
 
-
-
                 <i class="fa-solid fa-building"></i>
-
-
 
                 <span>
 
@@ -480,17 +456,9 @@
 
                 </span>
 
-
-
             </a>
 
-
-
-
-
             <!-- ================= RECRUITMENT ================= -->
-
-
 
             <div class="menu-section-title">
 
@@ -498,19 +466,11 @@
 
             </div>
 
-
-
-
-
             <a href="recruitment-drive.jsp"
 
                class="menu-item">
 
-
-
                 <i class="fa-solid fa-plus"></i>
-
-
 
                 <span>
 
@@ -518,23 +478,13 @@
 
                 </span>
 
-
-
             </a>
-
-
-
-
 
             <a href="view-recruitment-drives.jsp"
 
                class="menu-item">
 
-
-
                 <i class="fa-solid fa-briefcase"></i>
-
-
 
                 <span>
 
@@ -542,23 +492,13 @@
 
                 </span>
 
-
-
             </a>
-
-
-
-
 
             <a href="company-applicants.jsp"
 
                class="menu-item">
 
-
-
                 <i class="fa-solid fa-users"></i>
-
-
 
                 <span>
 
@@ -566,23 +506,13 @@
 
                 </span>
 
-
-
             </a>
-
-
-
-
 
             <a href="company-shortlisted.jsp"
 
                class="menu-item">
 
-
-
                 <i class="fa-solid fa-star"></i>
-
-
 
                 <span>
 
@@ -590,23 +520,13 @@
 
                 </span>
 
-
-
             </a>
-
-
-
-
 
             <a href="company-interviews.jsp"
 
                class="menu-item">
 
-
-
                 <i class="fa-regular fa-square"></i>
-
-
 
                 <span>
 
@@ -614,23 +534,13 @@
 
                 </span>
 
-
-
             </a>
-
-
-
-
 
             <a href="company-offers.jsp"
 
                class="menu-item">
 
-
-
                 <i class="fa-regular fa-gem"></i>
-
-
 
                 <span>
 
@@ -638,17 +548,9 @@
 
                 </span>
 
-
-
             </a>
 
-
-
-
-
             <!-- ================= ANALYTICS ================= -->
-
-
 
             <div class="menu-section-title">
 
@@ -656,19 +558,11 @@
 
             </div>
 
-
-
-
-
             <a href="company-reports.jsp"
 
                class="menu-item">
 
-
-
                 <i class="fa-solid fa-chart-column"></i>
-
-
 
                 <span>
 
@@ -676,23 +570,13 @@
 
                 </span>
 
-
-
             </a>
-
-
-
-
 
             <a href="company-analytics.jsp"
 
                class="menu-item">
 
-
-
                 <i class="fa-solid fa-chart-line"></i>
-
-
 
                 <span>
 
@@ -700,39 +584,19 @@
 
                 </span>
 
-
-
             </a>
-
-
-
-
 
         </div>
 
-
-
-
-
         <!-- ================= BOTTOM MENU ================= -->
 
-
-
         <div class="sidebar-bottom">
-
-
-
-
 
             <a href="company-settings.jsp"
 
                class="menu-item">
 
-
-
                 <i class="fa-solid fa-gear"></i>
-
-
 
                 <span>
 
@@ -740,23 +604,13 @@
 
                 </span>
 
-
-
             </a>
-
-
-
-
 
             <a href="CompanyLogoutServlet"
 
                class="menu-item logout">
 
-
-
                 <i class="fa-solid fa-right-from-bracket"></i>
-
-
 
                 <span>
 
@@ -764,63 +618,31 @@
 
                 </span>
 
-
-
             </a>
-
-
-
-
 
         </div>
 
-
-
-
-
     </aside>
-
-
-
-
-
-
 
     <!-- =====================================================
 
          MAIN CONTENT
 
-         ===================================================== -->
-
-
+         \===================================================== -->
 
     <main class="main-content">
-
-
-
-
 
         <!-- =================================================
 
              TOP HEADER
 
-             ================================================= -->
-
-
+             \================================================= -->
 
         <header class="top-header">
 
-
-
-
-
             <!-- PAGE TITLE -->
 
-
-
             <div class="page-title">
-
-
 
                 <div class="portal-label">
 
@@ -828,35 +650,19 @@
 
                 </div>
 
-
-
                 <h1>
 
                     Dashboard
 
                 </h1>
 
-
-
             </div>
-
-
-
-
 
             <!-- HEADER RIGHT -->
 
-
-
             <div class="header-right">
 
-
-
-
-
                 <!-- NOTIFICATION -->
-
-
 
                 <div class="topbar-control">
 
@@ -906,53 +712,25 @@
 
                 </div>
 
-
-
-
-
                 <div class="header-divider"></div>
 
-
-
-
-
                 <!-- COMPANY ACCOUNT -->
-
-
 
                 <div class="topbar-control">
 
                 <button type="button" class="company-account account-trigger" id="accountButton" aria-label="Company account menu" aria-haspopup="true" aria-expanded="false" aria-controls="accountMenu">
 
-
-
-
-
                     <!-- INITIAL CIRCLE -->
-
-
 
                     <span class="profile-circle">
 
-
-
                         <%= companyInitial %>
-
-
 
                     </span>
 
-
-
-
-
                     <!-- COMPANY DETAILS -->
 
-
-
                     <span class="profile-info">
-
-
 
                         <strong>
 
@@ -960,31 +738,19 @@
 
                         </strong>
 
-
-
                         <span>
 
                             <%= email %>
 
                         </span>
 
-
-
                     </span>
-
-
-
-
 
                     <span class="profile-arrow">
 
                         ⌄
 
                     </span>
-
-
-
-
 
                 </button>
 
@@ -1002,139 +768,67 @@
 
                 </div>
 
-
-
-
-
             </div>
 
-
-
-
-
         </header>
-
-
-
-
-
-
 
         <!-- =================================================
 
              PAGE BODY
 
-             ================================================= -->
-
-
+             \================================================= -->
 
         <div class="page-body">
-
-
-
-
 
             <!-- =================================================
 
                  HERO BANNER
 
-                 ================================================= -->
-
-
+                 \================================================= -->
 
             <section class="hero-banner">
 
-
-
-
-
                 <!-- RIGHT SIDE COMPANY IMAGE -->
 
-
-
                 <div class="hero-image">
-
-
 
                     <img src="<%= companyBannerUrl %>"
 
                          alt="<%= companyName %> Banner">
 
-
-
                     <div class="image-overlay"></div>
-
-
 
                 </div>
 
-
-
-
-
                 <!-- HERO CONTENT -->
-
-
 
                 <div class="hero-left">
 
-
-
-
-
                     <!-- COMPANY LOGO -->
 
-
-
                     <div class="hero-logo">
-
-
 
                         <img src="<%= companyLogoUrl %>"
 
                              alt="<%= companyName %> Logo">
 
-
-
                     </div>
-
-
-
-
 
                     <!-- HERO TEXT -->
 
-
-
                     <div class="hero-content">
-
-
-
-
 
                         <div class="hero-small-title">
 
-
-
                             GOOD TO SEE YOU AGAIN,
-
-
 
                         </div>
 
-
-
-
-
                         <h2>
-
-
 
                             Welcome back,
 
                             <%= companyName %>
-
-
 
                             <span class="wave">
 
@@ -1142,17 +836,9 @@
 
                             </span>
 
-
-
                         </h2>
 
-
-
-
-
                         <p>
-
-
 
                             Together let's build the next generation
 
@@ -1162,99 +848,47 @@
 
                             all in one place.
 
-
-
                         </p>
-
-
-
-
 
                         <!-- BUTTONS -->
 
-
-
                         <div class="hero-buttons">
-
-
-
-
 
                             <a href="recruitment-drive.jsp"
 
                                class="hero-btn primary-btn">
 
-
-
                                 <span>＋</span>
-
-
 
                                 Create Recruitment Drive
 
-
-
                             </a>
-
-
-
-
 
                             <a href="view-recruitment-drives.jsp"
 
                                class="hero-btn secondary-btn">
 
-
-
                                 View All Drives
-
-
 
                             </a>
 
-
-
-
-
                         </div>
-
-
-
-
 
                     </div>
 
-
-
-
-
                 </div>
-
-
-
-
 
                 <!-- =================================================
 
                      HERO FEATURES
 
-                     ================================================= -->
-
-
+                     \================================================= -->
 
                 <div class="hero-features">
 
-
-
-
-
                     <!-- HIRE -->
 
-
-
                     <div class="feature-item">
-
-
 
                         <div class="feature-icon">
 
@@ -1262,11 +896,7 @@
 
                         </div>
 
-
-
                         <div>
-
-
 
                             <strong>
 
@@ -1274,33 +904,19 @@
 
                             </strong>
 
-
-
                             <span>
 
                                 Top Talent
 
                             </span>
 
-
-
                         </div>
-
-
 
                     </div>
 
-
-
-
-
                     <!-- BUILD -->
 
-
-
                     <div class="feature-item">
-
-
 
                         <div class="feature-icon">
 
@@ -1308,11 +924,7 @@
 
                         </div>
 
-
-
                         <div>
-
-
 
                             <strong>
 
@@ -1320,33 +932,19 @@
 
                             </strong>
 
-
-
                             <span>
 
                                 Stronger Teams
 
                             </span>
 
-
-
                         </div>
-
-
 
                     </div>
 
-
-
-
-
                     <!-- SHAPE -->
 
-
-
                     <div class="feature-item">
-
-
 
                         <div class="feature-icon">
 
@@ -1354,11 +952,7 @@
 
                         </div>
 
-
-
                         <div>
-
-
 
                             <strong>
 
@@ -1366,47 +960,27 @@
 
                             </strong>
 
-
-
                             <span>
 
                                 A Better Tomorrow
 
                             </span>
 
-
-
                         </div>
-
-
 
                     </div>
 
-
-
-
-
                 </div>
-
-
-
-
 
                 <!-- =================================================
 
                      COMPANY QUOTE
 
-                     ================================================= -->
-
-
+                     \================================================= -->
 
                 <div class="hero-quote">
 
-
-
                     <p>
-
-
 
                         "Building a more inclusive,
 
@@ -1414,61 +988,29 @@
 
                         through the power of people."
 
-
-
                     </p>
-
-
 
                     <strong>
 
-
-
                         — <%= companyName %>
-
-
 
                     </strong>
 
-
-
                 </div>
 
-
-
-
-
             </section>
-
-
-
-
-
-
 
             <!-- =================================================
 
                  STATISTICS
 
-                 ================================================= -->
-
-
+                 \================================================= -->
 
             <section class="stats-grid">
 
-
-
-
-
                 <!-- TOTAL DRIVES -->
 
-
-
                 <div class="stat-card">
-
-
-
-
 
                     <div class="stat-icon blue">
 
@@ -1476,13 +1018,7 @@
 
                     </div>
 
-
-
-
-
                     <div class="stat-info">
-
-
 
                         <strong>
 
@@ -1490,53 +1026,25 @@
 
                         </strong>
 
-
-
                         <span>
 
                             Total Drives
 
                         </span>
 
-
-
                     </div>
-
-
-
-
 
                     <a href="view-recruitment-drives.jsp">
 
-
-
                         View all →
-
-
 
                     </a>
 
-
-
-
-
                 </div>
-
-
-
-
-
-
 
                 <!-- APPLICATIONS -->
 
-
-
                 <div class="stat-card">
-
-
-
-
 
                     <div class="stat-icon blue">
 
@@ -1544,13 +1052,7 @@
 
                     </div>
 
-
-
-
-
                     <div class="stat-info">
-
-
 
                         <strong>
 
@@ -1558,53 +1060,25 @@
 
                         </strong>
 
-
-
                         <span>
 
                             Total Applications
 
                         </span>
 
-
-
                     </div>
-
-
-
-
 
                     <a href="company-applicants.jsp">
 
-
-
                         View all →
-
-
 
                     </a>
 
-
-
-
-
                 </div>
-
-
-
-
-
-
 
                 <!-- INTERVIEWS -->
 
-
-
                 <div class="stat-card">
-
-
-
-
 
                     <div class="stat-icon blue">
 
@@ -1612,13 +1086,7 @@
 
                     </div>
 
-
-
-
-
                     <div class="stat-info">
-
-
 
                         <strong>
 
@@ -1626,53 +1094,25 @@
 
                         </strong>
 
-
-
                         <span>
 
                             Interviews Scheduled
 
                         </span>
 
-
-
                     </div>
-
-
-
-
 
                     <a href="company-interviews.jsp">
 
-
-
                         View all →
-
-
 
                     </a>
 
-
-
-
-
                 </div>
-
-
-
-
-
-
 
                 <!-- OFFERS -->
 
-
-
                 <div class="stat-card">
-
-
-
-
 
                     <div class="stat-icon green">
 
@@ -1680,13 +1120,7 @@
 
                     </div>
 
-
-
-
-
                     <div class="stat-info">
-
-
 
                         <strong>
 
@@ -1694,75 +1128,39 @@
 
                         </strong>
 
-
-
                         <span>
 
                             Offers Made
 
                         </span>
 
-
-
                     </div>
-
-
-
-
 
                     <a href="company-offers.jsp">
 
-
-
                         View all →
-
-
 
                     </a>
 
-
-
-
-
                 </div>
 
-
-
-
-
             </section>
-
-
-
-
-
-
 
             <!-- =================================================
 
                  QUICK ACTIONS
 
-                 ================================================= -->
-
-
+                 \================================================= -->
 
             <section class="quick-actions">
 
-
-
-
-
                 <div class="section-heading">
-
-
 
                     <h2>
 
                         Quick Actions
 
                     </h2>
-
-
 
                     <p>
 
@@ -1772,29 +1170,13 @@
 
                     </p>
 
-
-
                 </div>
-
-
-
-
 
                 <div class="quick-grid">
 
-
-
-
-
                     <!-- COMPANY PROFILE -->
 
-
-
                     <div class="quick-card">
-
-
-
-
 
                         <div class="quick-icon">
 
@@ -1802,13 +1184,7 @@
 
                         </div>
 
-
-
-
-
                         <div class="quick-content">
-
-
 
                             <h3>
 
@@ -1816,11 +1192,7 @@
 
                             </h3>
 
-
-
                             <p>
-
-
 
                                 View and update your company
 
@@ -1828,47 +1200,21 @@
 
                                 and contact preferences.
 
-
-
                             </p>
-
-
 
                             <a href="company-profile.jsp">
 
-
-
                                 Open →
-
-
 
                             </a>
 
-
-
                         </div>
-
-
-
-
 
                     </div>
 
-
-
-
-
-
-
                     <!-- CREATE DRIVE -->
 
-
-
                     <div class="quick-card">
-
-
-
-
 
                         <div class="quick-icon">
 
@@ -1876,13 +1222,7 @@
 
                         </div>
 
-
-
-
-
                         <div class="quick-content">
-
-
 
                             <h3>
 
@@ -1890,11 +1230,7 @@
 
                             </h3>
 
-
-
                             <p>
-
-
 
                                 Set up a new drive with role
 
@@ -1902,47 +1238,21 @@
 
                                 and application deadlines.
 
-
-
                             </p>
-
-
 
                             <a href="recruitment-drive.jsp">
 
-
-
                                 Open →
-
-
 
                             </a>
 
-
-
                         </div>
-
-
-
-
 
                     </div>
 
-
-
-
-
-
-
                     <!-- RECRUITMENT DRIVES -->
 
-
-
                     <div class="quick-card">
-
-
-
-
 
                         <div class="quick-icon">
 
@@ -1950,13 +1260,7 @@
 
                         </div>
 
-
-
-
-
                         <div class="quick-content">
-
-
 
                             <h3>
 
@@ -1964,11 +1268,7 @@
 
                             </h3>
 
-
-
                             <p>
-
-
 
                                 Track every drive you've
 
@@ -1976,47 +1276,21 @@
 
                                 applications as they arrive.
 
-
-
                             </p>
-
-
 
                             <a href="view-recruitment-drives.jsp">
 
-
-
                                 Open →
-
-
 
                             </a>
 
-
-
                         </div>
-
-
-
-
 
                     </div>
 
-
-
-
-
-
-
                     <!-- REPORTS -->
 
-
-
                     <div class="quick-card">
-
-
-
-
 
                         <div class="quick-icon">
 
@@ -2024,13 +1298,7 @@
 
                         </div>
 
-
-
-
-
                         <div class="quick-content">
-
-
 
                             <h3>
 
@@ -2038,11 +1306,7 @@
 
                             </h3>
 
-
-
                             <p>
-
-
 
                                 Review hiring outcomes, drive
 
@@ -2050,67 +1314,31 @@
 
                                 with detailed reports.
 
-
-
                             </p>
-
-
 
                             <a href="company-reports.jsp">
 
-
-
                                 Open →
-
-
 
                             </a>
 
-
-
                         </div>
-
-
-
-
 
                     </div>
 
-
-
-
-
                 </div>
 
-
-
-
-
             </section>
-
-
-
-
-
-
 
             <!-- =================================================
 
                  RECRUITMENT ACTIVITY
 
-                 ================================================= -->
-
-
+                 \================================================= -->
 
             <section class="activity-section">
 
-
-
-
-
                 <div class="section-heading">
-
-
 
                     <h2>
 
@@ -2118,93 +1346,121 @@
 
                     </h2>
 
-
-
                     <p>
 
                         A live summary of your drives and applicants
 
                     </p>
 
-
-
                 </div>
-
-
-
-
 
                                 <div class="activity-box">
+
                     <% if (dashboardDataError) { %>
+
                         <div class="activity-empty activity-error">
+
                             <i aria-hidden="true">!</i>
+
                             <h3>Recruitment activity is temporarily unavailable</h3>
+
                             <p>Please refresh the dashboard in a moment.</p>
+
                             <a href="company-dashboard.jsp" class="activity-button">Refresh dashboard</a>
+
                         </div>
+
                     <% } else if (totalDrives == 0) { %>
+
                         <div class="activity-empty">
+
                             <i aria-hidden="true">▤</i>
+
                             <h3>No recruitment drives yet</h3>
+
                             <p>Create your first drive to start tracking recruitment activity here.</p>
+
                             <a href="recruitment-drive.jsp" class="activity-button">＋ Create Recruitment Drive</a>
+
                         </div>
+
                     <% } else { %>
+
                         <div class="activity-list">
+
                             <div class="activity-list-header">
+
                                 <div>
+
                                     <h3>Latest recruitment drives</h3>
+
                                     <p>Showing your 5 most recently created drives</p>
+
                                 </div>
+
                                 <a href="view-recruitment-drives.jsp">View all drives <span aria-hidden="true">→</span></a>
+
                             </div>
+
                             <% for (Map<String, Object> drive : recentDrives) {
+
                                 String driveTitle = (String) drive.get("title");
+
                                 String driveType = (String) drive.get("type");
+
                                 String driveStatus = (String) drive.get("status");
+
                                 java.sql.Date driveDeadline = (java.sql.Date) drive.get("deadline");
+
                                 if (driveTitle == null || driveTitle.trim().isEmpty()) driveTitle = "Untitled drive";
+
                                 if (driveType == null || driveType.trim().isEmpty()) driveType = "Recruitment drive";
+
                                 if (driveStatus == null || driveStatus.trim().isEmpty()) driveStatus = "UNKNOWN";
+
                                 String deadlineLabel = driveDeadline == null ? "No deadline set" :
+
                                         new java.text.SimpleDateFormat("dd MMM yyyy").format(driveDeadline);
+
                             %>
+
                                 <article class="activity-row">
+
                                     <div class="activity-row-icon" aria-hidden="true">↗</div>
+
                                     <div class="activity-row-content">
+
                                         <div class="activity-row-title">
+
                                             <h4><%= dashboardEscape(driveTitle) %></h4>
+
                                             <span class="activity-status <%= "CLOSED".equalsIgnoreCase(driveStatus) ? "closed" : "active" %>"><%= dashboardEscape(driveStatus) %></span>
+
                                         </div>
+
                                         <p><%= dashboardEscape(driveType) %> <span>·</span> <%= drive.get("vacancy") %> vacancies <span>·</span> Deadline <%= deadlineLabel %></p>
+
                                     </div>
+
                                     <a class="activity-manage" href="edit-recruitment-drive.jsp?driveId=<%= drive.get("id") %>">Manage <span aria-hidden="true">→</span></a>
+
                                 </article>
+
                             <% } %>
+
                         </div>
+
                     <% } %>
+
                 </div>
+
 </section>
-
-
-
-
 
         </div>
 
-
-
-
-
     </main>
 
-
-
-
-
 </div>
-
-
 
 <script>
 
@@ -2274,12 +1530,6 @@
 
 </script>
 
-
-
-
-
 </body>
-
-
 
 </html>

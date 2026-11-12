@@ -1,3 +1,4 @@
+
 package com.campusconnect.bean;
 
 import java.sql.Connection;
@@ -19,49 +20,109 @@ public class Company {
     private String status;
     private String logoUrl;
     private String bannerUrl;
+    private String description;
 
-    public int getCompanyId() { return companyId; }
-    public void setCompanyId(int companyId) { this.companyId = companyId; }
-
-    public String getCompanyName() { return companyName; }
-    public void setCompanyName(String companyName) { this.companyName = companyName; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
-
-    public String getPassword() { return password; }
-    public void setPassword(String password) { this.password = password; }
-
-    public String getAddress() { return address; }
-    public void setAddress(String address) { this.address = address; }
-
-    public String getWebsite() { return website; }
-    public void setWebsite(String website) { this.website = website; }
-
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
-
-    public String getLogoUrl() { return logoUrl; }
-    public void setLogoUrl(String logoUrl) { this.logoUrl = logoUrl; }
-
-    public String getBannerUrl() { return bannerUrl; }
-    public void setBannerUrl(String bannerUrl) { this.bannerUrl = bannerUrl; }
-
-    private Connection getConnection() throws Exception {
-        Class.forName("oracle.jdbc.driver.OracleDriver");
-        return DriverManager.getConnection(
-            "jdbc:oracle:thin:@localhost:1521:XE",
-            "CAMPUSCONNECT",
-            "campus123"
-        );
+    public int getCompanyId() {
+        return companyId;
     }
 
+    public void setCompanyId(int companyId) {
+        this.companyId = companyId;
+    }
+
+    public String getCompanyName() {
+        return companyName;
+    }
+
+    public void setCompanyName(String companyName) {
+        this.companyName = companyName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
+    }
+
+    public String getWebsite() {
+        return website;
+    }
+
+    public void setWebsite(String website) {
+        this.website = website;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public String getLogoUrl() {
+        return logoUrl;
+    }
+
+    public void setLogoUrl(String logoUrl) {
+        this.logoUrl = logoUrl;
+    }
+
+    public String getBannerUrl() {
+        return bannerUrl;
+    }
+
+    public void setBannerUrl(String bannerUrl) {
+        this.bannerUrl = bannerUrl;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    private Connection getConnection() throws Exception {
+        Connection con = com.campusconnect.util.DBConnection.getConnection();
+        if (con == null) {
+            throw new SQLException("Unable to establish database connection.");
+        }
+        return con;
+    }
+
+    // Fetch Company Details
     public boolean SelectMethod() {
+
         String sql = "SELECT COMPANY_NAME, EMAIL, PHONE, ADDRESS, " +
-                     "WEBSITE, STATUS, LOGO_URL, BANNER_URL " +
+                     "WEBSITE, STATUS, LOGO, BANNER, DESCRIPTION " +
                      "FROM COMPANY WHERE COMPANY_ID = ?";
 
         try (Connection con = getConnection();
@@ -70,6 +131,7 @@ public class Company {
             stmt.setInt(1, companyId);
 
             try (ResultSet rs = stmt.executeQuery()) {
+
                 if (!rs.next()) {
                     return false;
                 }
@@ -77,54 +139,64 @@ public class Company {
                 companyName = rs.getString("COMPANY_NAME");
                 email = rs.getString("EMAIL");
                 phone = rs.getString("PHONE");
-
                 address = rs.getString("ADDRESS");
                 website = rs.getString("WEBSITE");
                 status = rs.getString("STATUS");
-                logoUrl = rs.getString("LOGO_URL");
-                bannerUrl = rs.getString("BANNER_URL");
+                logoUrl = rs.getString("LOGO");
+                bannerUrl = rs.getString("BANNER");
+                description = rs.getString("DESCRIPTION");
+
                 return true;
             }
+
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
 
+    // Update Company Details
     public boolean UpdateMethod() {
-        if (companyName == null) {
-            return false;
-        }
 
-        String cleanName = companyName.trim();
-        if (cleanName.isEmpty() || "null".equalsIgnoreCase(cleanName)) {
+        if (companyName == null ||
+            companyName.trim().isEmpty()) {
             return false;
         }
 
         String sql = "UPDATE COMPANY SET COMPANY_NAME = ?, PHONE = ?, " +
-                     "ADDRESS = ?, WEBSITE = ? WHERE COMPANY_ID = ?";
+                     "ADDRESS = ?, WEBSITE = ?, DESCRIPTION = ? " +
+                     "WHERE COMPANY_ID = ?";
 
         try (Connection con = getConnection();
              PreparedStatement stmt = con.prepareStatement(sql)) {
 
-            stmt.setString(1, cleanName);
+            stmt.setString(1, companyName.trim());
             setOptionalString(stmt, 2, phone);
             setOptionalString(stmt, 3, address);
             setOptionalString(stmt, 4, website);
-            stmt.setInt(5, companyId);
+            setOptionalString(stmt, 5, description);
+            stmt.setInt(6, companyId);
 
             return stmt.executeUpdate() > 0;
+
         } catch (Exception e) {
             e.printStackTrace();
             return false;
         }
     }
 
-    private void setOptionalString(PreparedStatement stmt, int index,
-                                  String value) throws SQLException {
-        if (value == null || value.trim().isEmpty() ||
+    private void setOptionalString(
+        PreparedStatement stmt,
+        int index,
+        String value
+    ) throws SQLException {
+
+        if (value == null ||
+            value.trim().isEmpty() ||
             "null".equalsIgnoreCase(value.trim())) {
+
             stmt.setNull(index, Types.VARCHAR);
+
         } else {
             stmt.setString(index, value.trim());
         }
