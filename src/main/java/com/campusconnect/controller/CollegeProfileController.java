@@ -3,7 +3,6 @@ package com.campusconnect.controller;
 import java.io.File;
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
@@ -14,8 +13,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 
+import com.campusconnect.util.DBConnection;
+
 public class CollegeProfileController extends HttpServlet
 {
+    protected void doGet(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException
+    {
+        res.sendRedirect(req.getContextPath() + "/collegeProfile.jsp");
+    }
+
     protected void doPost(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException
     {
@@ -35,6 +42,16 @@ public class CollegeProfileController extends HttpServlet
         String state = req.getParameter("state");
         String email = req.getParameter("email");
         String phone = req.getParameter("phone");
+        String defaultFeeStr = req.getParameter("defaultAdmissionFee");
+
+        double defaultAdmissionFee = 50000.0;
+        if(defaultFeeStr != null && !defaultFeeStr.trim().isEmpty()) {
+            try {
+                defaultAdmissionFee = Double.parseDouble(defaultFeeStr.trim());
+            } catch(NumberFormatException nfe) {
+                defaultAdmissionFee = 50000.0;
+            }
+        }
 
         Connection con = null;
         PreparedStatement ps = null;
@@ -42,14 +59,7 @@ public class CollegeProfileController extends HttpServlet
 
         try
         {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-
-            con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
+            con = DBConnection.getConnection();
             con.setAutoCommit(false);
 
             // Get old image names
@@ -74,7 +84,6 @@ public class CollegeProfileController extends HttpServlet
             rs.close();
             ps.close();
 
-
             // Create folder
             String uploadPath =
                 getServletContext().getRealPath("/")
@@ -87,7 +96,6 @@ public class CollegeProfileController extends HttpServlet
             {
                 uploadDir.mkdirs();
             }
-
 
             // Logo upload
             Part logoPart = req.getPart("logo");
@@ -115,7 +123,6 @@ public class CollegeProfileController extends HttpServlet
                 logoPart.write(logoFile.getAbsolutePath());
             }
 
-
             // Cover upload
             Part coverPart = req.getPart("cover");
 
@@ -142,7 +149,6 @@ public class CollegeProfileController extends HttpServlet
                 coverPart.write(coverFile.getAbsolutePath());
             }
 
-
             // Update database
             String updateSql =
                 "UPDATE COLLEGE SET " +
@@ -153,7 +159,8 @@ public class CollegeProfileController extends HttpServlet
                 "EMAIL=?, " +
                 "PHONE=?, " +
                 "LOGO_IMAGE=?, " +
-                "COVER_IMAGE=? " +
+                "COVER_IMAGE=?, " +
+                "DEFAULT_ADMISSION_FEE=? " +
                 "WHERE COLLEGE_ID=?";
 
             ps = con.prepareStatement(updateSql);
@@ -166,7 +173,8 @@ public class CollegeProfileController extends HttpServlet
             ps.setString(6, phone);
             ps.setString(7, logoImage);
             ps.setString(8, coverImage);
-            ps.setInt(9, collegeId);
+            ps.setDouble(9, defaultAdmissionFee);
+            ps.setInt(10, collegeId);
 
             ps.executeUpdate();
 

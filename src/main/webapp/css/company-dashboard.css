@@ -335,17 +335,18 @@ a {
     position: relative;
     z-index: 2;
     height: 100%;
-    width: 72%;
+    max-width: 50%;
+    min-width: 0;
     display: flex;
     align-items: center;
-    gap: 25px;
-    padding: 35px 38px;
+    gap: 24px;
+    padding: 30px 36px;
 }
 
 .hero-logo {
-    width: 105px;
-    height: 105px;
-    min-width: 105px;
+    width: 100px;
+    height: 100px;
+    min-width: 100px;
     border-radius: 18px;
     overflow: hidden;
     background: #ffffff;
@@ -362,13 +363,13 @@ a {
 }
 
 .hero-content {
-    max-width: 560px;
+    max-width: 380px;
     min-width: 0;
     color: #ffffff;
 }
 
 .hero-small-title {
-    margin-bottom: 11px;
+    margin-bottom: 9px;
     color: #8bc5ff;
     font-size: 11px;
     font-weight: 800;
@@ -377,17 +378,17 @@ a {
 
 .hero-content h2 {
     color: #ffffff;
-    font-size: 30px;
+    font-size: 28px;
     line-height: 1.25;
     font-weight: 800;
 }
 
 .hero-content p {
-    max-width: 510px;
-    margin-top: 13px;
+    max-width: 380px;
+    margin-top: 10px;
     color: #d6e8fa;
     font-size: 13px;
-    line-height: 1.8;
+    line-height: 1.6;
 }
 
 .wave {
@@ -399,7 +400,7 @@ a {
     align-items: center;
     gap: 12px;
     flex-wrap: wrap;
-    margin-top: 20px;
+    margin-top: 18px;
 }
 
 .hero-btn {
@@ -442,45 +443,68 @@ a {
     position: absolute;
     z-index: 3;
     top: 50%;
-    right: 31%;
+    right: 250px;
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
-    gap: 17px;
+    gap: 11px;
 }
 
 .feature-item {
     display: flex;
     align-items: center;
     gap: 12px;
+    padding: 8px 16px;
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.12);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     color: #ffffff;
+    white-space: nowrap;
+    transition: transform 0.2s ease, background 0.2s ease;
+}
+
+.feature-item:hover {
+    background: rgba(255, 255, 255, 0.18);
+    transform: translateX(-3px);
 }
 
 .feature-icon {
-    width: 34px;
-    height: 34px;
-    border-radius: 10px;
-    background: rgba(255,255,255,0.16);
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: 9px;
+    background: rgba(255, 255, 255, 0.18);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 13px;
+    color: #ffffff;
 }
 
 .feature-text {
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 2px;
 }
 
-.feature-text strong {
-    font-size: 12px;
+.feature-text strong,
+.feature-item strong {
+    display: block;
+    font-size: 13px;
     font-weight: 700;
+    color: #ffffff;
+    line-height: 1.2;
 }
 
-.feature-text span {
-    font-size: 10px;
+.feature-text span,
+.feature-item span {
+    display: block;
+    font-size: 11px;
     color: #c4def6;
+    line-height: 1.2;
 }
 
 /* =========================================================
@@ -921,12 +945,30 @@ a {
     }
 
     .hero-left {
-        width: 76%;
-        padding: 30px;
+        max-width: 48%;
+        padding: 25px 28px;
+    }
+
+    .hero-content {
+        max-width: 350px;
+    }
+
+    .hero-content p {
+        max-width: 330px;
+    }
+
+    .hero-features {
+        right: 220px;
+        gap: 9px;
+    }
+
+    .feature-item {
+        padding: 7px 13px;
+        gap: 10px;
     }
 
     .hero-content h2 {
-        font-size: 27px;
+        font-size: 25px;
     }
 
     .stats-grid,
@@ -1291,181 +1333,5 @@ a {
 
     .quick-card {
         min-height: auto;
-    }
-}
-
-
-    .activity-list-header {
-        align-items: flex-start;
-        flex-direction: column;
-    }
-
-    .activity-row {
-        flex-wrap: wrap;
-    }
-
-    .activity-row-content {
-        width: calc(100% - 50px);
-    }
-
-    .activity-manage {
-        margin-left: 44px;
-    }
-
-}
-
-/* =========================================================
-   FINAL LAYOUT FIXES - COMPANY DASHBOARD
-   ========================================================= */
-
-.dashboard-wrapper,
-.main-content,
-.page-body {
-    min-width: 0;
-}
-
-.hero-banner {
-    height: auto;
-    min-height: 310px;
-    isolation: isolate;
-}
-
-.hero-left {
-    display: grid;
-    grid-template-columns: 108px minmax(0, 1fr);
-    align-items: center;
-    gap: 25px;
-    width: 72%;
-    min-height: 310px;
-    height: auto;
-    padding: 30px 35px;
-}
-
-.hero-logo {
-    width: 108px;
-    height: 108px;
-    min-width: 108px;
-    margin: 0;
-}
-
-.hero-content {
-    width: 100%;
-    min-width: 0;
-    max-width: 560px;
-}
-
-.hero-content h2 {
-    overflow-wrap: anywhere;
-    font-size: clamp(21px, 2vw, 30px);
-}
-
-.hero-buttons {
-    flex-wrap: wrap;
-}
-
-.stats-grid,
-.quick-grid {
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
-@media (max-width: 1400px) {
-
-    .hero-left {
-        width: 76%;
-        gap: 20px;
-        padding: 28px;
-    }
-}
-
-
-@media (max-width: 700px) {
-
-    .sidebar {
-        position: relative;
-
-}
-
-@media (max-width: 1150px) {
-
-    .hero-left {
-        width: 100%;
-    }
-
-    .hero-features,
-    .hero-quote {
-        display: none;
-    }
-
-    .top-header {
-        height: auto;
-
-@media (max-width: 900px) {
-
-    .hero-left {
-        grid-template-columns: 80px minmax(0, 1fr);
-        width: 100%;
-        min-height: 290px;
-        padding: 25px;
-    }
-
-    .hero-logo {
-        width: 80px;
-        height: 80px;
-        min-width: 80px;
-    }
-
-    .stats-grid,
-    .quick-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-    }
-
-}
-
-@media (max-width: 700px) {
-
-    .sidebar {
-        display: none;
-    }
-
-    .main-content {
-        margin-left: 0;
-        width: 100%;
-    }
-
-    .hero-left {
-        grid-template-columns: 1fr;
-        width: 100%;
-        min-height: 0;
-        padding: 25px 20px;
-    }
-
-    .hero-logo {
-        width: 65px;
-        height: 65px;
-        min-width: 65px;
-    }
-
-    .hero-content {
-        width: 100%;
-        max-width: 100%;
-    }
-
-}
-
-@media (max-width: 420px) {
-
-    .stats-grid,
-    .quick-grid {
-        grid-template-columns: 1fr;
-    }
-
-    .feature-item {
-        margin-bottom: 12px;
-    }
-
-    .hero-quote {
-        position: absolute;
-
-        width: calc(100% - 40px);
     }
 }

@@ -54,7 +54,7 @@
                 companyLogoName.contains("tata consultancy")) {
             companyLogo = "images/company/tcs-logo.png";
         } else {
-            companyLogo = "images/company/tcs-logo.png";
+            companyLogo = "images/company/default-logo.png";
         }
     }
 

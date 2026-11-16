@@ -1,4 +1,5 @@
 
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.sql.*" %>
 <%@ page import="com.campusconnect.util.DBConnection" %>
 
@@ -49,11 +50,12 @@
     String phone = "";
     String address = "";
     String website = "";
+    String description = "";
     String status = "";
     String logo = "";
     String banner = "";
 
-    String sql = "SELECT COMPANY_NAME, EMAIL, PHONE, ADDRESS, WEBSITE, " +
+    String sql = "SELECT COMPANY_NAME, EMAIL, PHONE, ADDRESS, WEBSITE, DESCRIPTION, " +
                  "STATUS, LOGO, BANNER FROM COMPANY WHERE COMPANY_ID = ?";
 
     try (Connection con = DBConnection.getConnection();
@@ -69,6 +71,8 @@
                 phone = rs.getString("PHONE");
                 address = rs.getString("ADDRESS");
                 website = rs.getString("WEBSITE");
+                description = rs.getString("DESCRIPTION");
+                if (description == null) description = "";
                 status = rs.getString("STATUS");
                 logo = rs.getString("LOGO");
                 banner = rs.getString("BANNER");
@@ -422,7 +426,6 @@
     </style>
 </head>
 
-
 <body>
 
 <header class="top-header">
@@ -476,7 +479,6 @@
 
     </div>
 
-
     <!-- EDIT FORM -->
 
     <div class="form-card">
@@ -514,7 +516,6 @@
 
                     </div>
 
-
                     <!-- COMPANY NAME -->
 
                     <div class="form-group">
@@ -529,7 +530,6 @@
 
                     </div>
 
-
                     <!-- EMAIL -->
 
                     <div class="form-group">
@@ -541,7 +541,6 @@
                                readonly>
 
                     </div>
-
 
                     <!-- PHONE -->
 
@@ -556,7 +555,6 @@
 
                     </div>
 
-
                     <!-- ADDRESS -->
 
                     <div class="form-group full-width">
@@ -567,7 +565,6 @@
                                   maxlength="200"><%= escapeHtml(address) %></textarea>
 
                     </div>
-
 
                     <!-- WEBSITE -->
 
@@ -582,6 +579,17 @@
 
                     </div>
 
+                    <!-- DESCRIPTION -->
+
+                    <div class="form-group full-width">
+
+                        <label>Company Description</label>
+
+                        <textarea name="description"
+                                  rows="3"
+                                  maxlength="1000"><%= escapeHtml(description) %></textarea>
+
+                    </div>
 
                     <!-- STATUS -->
 
@@ -594,7 +602,6 @@
                         </div>
 
                     </div>
-
 
                     <!-- LOGO UPLOAD -->
 
@@ -633,7 +640,6 @@
                         </div>
 
                     </div>
-
 
                     <!-- BANNER UPLOAD -->
 
@@ -676,7 +682,6 @@
 
                 </div>
 
-
                 <!-- BUTTONS -->
 
                 <div class="button-area">
@@ -713,7 +718,6 @@
 
 </div>
 
-
 <script>
 
     const form = document.getElementById("companyEditForm");
@@ -739,7 +743,6 @@
 
     });
 
-
     // Banner preview
 
     document.getElementById("bannerFile").addEventListener("change", function() {
@@ -758,7 +761,6 @@
             '<img src="' + URL.createObjectURL(file) + '" alt="Banner Preview">';
 
     });
-
 
     // Form submission
 

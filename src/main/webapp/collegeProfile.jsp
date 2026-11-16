@@ -7,13 +7,11 @@
     Integer collegeId =
         (Integer) session.getAttribute("collegeId");
 
-
     if(collegeId == null)
     {
         response.sendRedirect("collegeAdminLogin.jsp");
         return;
     }
-
 
     String collegeName = "";
     String address = "";
@@ -25,12 +23,11 @@
 
     String logoImage = "";
     String coverImage = "";
-
+    double defaultAdmissionFee = 50000.0;
 
     Connection con = null;
     PreparedStatement ps = null;
     ResultSet rs = null;
-
 
     try
     {
@@ -38,7 +35,6 @@
         Class.forName(
             "oracle.jdbc.driver.OracleDriver"
         );
-
 
         con = DriverManager.getConnection(
 
@@ -50,21 +46,19 @@
 
         );
 
-
         String sql =
 
             "SELECT COLLEGE_NAME, ADDRESS, CITY, STATE, " +
-            "EMAIL, PHONE, STATUS, LOGO_IMAGE, COVER_IMAGE " +
+            "EMAIL, PHONE, STATUS, LOGO_IMAGE, COVER_IMAGE, " +
+            "NVL(DEFAULT_ADMISSION_FEE, 50000) AS DEFAULT_ADMISSION_FEE " +
             "FROM COLLEGE " +
             "WHERE COLLEGE_ID=?";
-
 
         ps = con.prepareStatement(sql);
 
         ps.setInt(1, collegeId);
 
         rs = ps.executeQuery();
-
 
         if(rs.next())
         {
@@ -96,6 +90,14 @@
             coverImage =
                 rs.getString("COVER_IMAGE");
 
+            defaultAdmissionFee =
+                rs.getDouble("DEFAULT_ADMISSION_FEE");
+
+            if(defaultAdmissionFee <= 0)
+            {
+                defaultAdmissionFee = 50000.0;
+            }
+
         }
 
     }
@@ -123,7 +125,6 @@
             }
         }
 
-
         if(ps != null)
         {
             try
@@ -134,7 +135,6 @@
             {
             }
         }
-
 
         if(con != null)
         {
@@ -151,7 +151,6 @@
 
 %>
 
-
 <!DOCTYPE html>
 
 <html>
@@ -161,7 +160,7 @@
 <meta charset="UTF-8">
 
 <title>College Profile</title>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 <style>
 
@@ -179,7 +178,6 @@
 
 }
 
-
 body {
 
     font-family: Arial, sans-serif;
@@ -189,7 +187,6 @@ body {
     color: #173b5c;
 
 }
-
 
 /* =====================================================
    HEADER
@@ -218,7 +215,6 @@ body {
 
 }
 
-
 .header-left {
 
     display: flex;
@@ -228,7 +224,6 @@ body {
     gap: 15px;
 
 }
-
 
 .header-icon {
 
@@ -251,7 +246,6 @@ body {
 
 }
 
-
 .header-title {
 
     font-size: 29px;
@@ -259,7 +253,6 @@ body {
     font-weight: bold;
 
 }
-
 
 .header-subtitle {
 
@@ -270,7 +263,6 @@ body {
     font-size: 13px;
 
 }
-
 
 /* =====================================================
    CONTAINER
@@ -286,7 +278,6 @@ body {
 
 }
 
-
 /* =====================================================
    BACK
 ===================================================== */
@@ -296,7 +287,6 @@ body {
     margin-bottom: 18px;
 
 }
-
 
 .back a {
 
@@ -320,13 +310,11 @@ body {
 
 }
 
-
 .back a:hover {
 
     background: #e7f3fc;
 
 }
-
 
 /* =====================================================
    COLLEGE COVER
@@ -351,7 +339,6 @@ body {
 
 }
 
-
 .college-cover img.cover {
 
     width: 100%;
@@ -361,7 +348,6 @@ body {
     object-fit: cover;
 
 }
-
 
 .cover-overlay {
 
@@ -378,7 +364,6 @@ body {
         );
 
 }
-
 
 /* =====================================================
    COVER CONTENT
@@ -402,7 +387,6 @@ body {
 
 }
 
-
 .college-logo {
 
     width: 130px;
@@ -423,7 +407,6 @@ body {
         0 4px 15px rgba(0,0,0,0.25);
 
 }
-
 
 .college-logo-fallback {
 
@@ -454,7 +437,6 @@ body {
 
 }
 
-
 .cover-name {
 
     font-size: 31px;
@@ -465,7 +447,6 @@ body {
 
 }
 
-
 .cover-location {
 
     font-size: 15px;
@@ -473,7 +454,6 @@ body {
     color: #d8e9f4;
 
 }
-
 
 .cover-status {
 
@@ -495,7 +475,6 @@ body {
 
 }
 
-
 /* =====================================================
    MAIN GRID
 ===================================================== */
@@ -512,7 +491,6 @@ body {
     margin-top: 22px;
 
 }
-
 
 /* =====================================================
    CARD
@@ -533,7 +511,6 @@ body {
 
 }
 
-
 .card-title {
 
     display: flex;
@@ -551,7 +528,6 @@ body {
     margin-bottom: 20px;
 
 }
-
 
 .card-icon {
 
@@ -573,7 +549,6 @@ body {
 
 }
 
-
 /* =====================================================
    IMAGE PREVIEW
 ===================================================== */
@@ -589,7 +564,6 @@ body {
     margin-bottom: 10px;
 
 }
-
 
 .logo-preview {
 
@@ -613,7 +587,6 @@ body {
 
 }
 
-
 .cover-preview {
 
     width: 100%;
@@ -628,7 +601,6 @@ body {
 
 }
 
-
 .preview-block {
 
     text-align: center;
@@ -636,7 +608,6 @@ body {
     margin-bottom: 24px;
 
 }
-
 
 .info-box {
 
@@ -656,7 +627,6 @@ body {
 
 }
 
-
 /* =====================================================
    FORM
 ===================================================== */
@@ -672,7 +642,6 @@ body {
 
 }
 
-
 .form-group {
 
     display: flex;
@@ -681,13 +650,11 @@ body {
 
 }
 
-
 .form-group.full {
 
     grid-column: 1 / -1;
 
 }
-
 
 label {
 
@@ -700,7 +667,6 @@ label {
     margin-bottom: 7px;
 
 }
-
 
 input {
 
@@ -722,7 +688,6 @@ input {
 
 }
 
-
 input:focus {
 
     border-color: #1685ed;
@@ -732,7 +697,6 @@ input:focus {
 
 }
 
-
 input[type="file"] {
 
     padding: 9px;
@@ -740,7 +704,6 @@ input[type="file"] {
     background: #f8fafc;
 
 }
-
 
 .file-note {
 
@@ -751,7 +714,6 @@ input[type="file"] {
     font-size: 11px;
 
 }
-
 
 /* =====================================================
    BUTTON
@@ -766,7 +728,6 @@ input[type="file"] {
     justify-content: flex-end;
 
 }
-
 
 .update-btn {
 
@@ -796,13 +757,11 @@ input[type="file"] {
 
 }
 
-
 .update-btn:hover {
 
     background: #086dbd;
 
 }
-
 
 /* =====================================================
    STATUS CARD
@@ -831,7 +790,6 @@ input[type="file"] {
 
 }
 
-
 .status-left {
 
     display: flex;
@@ -841,7 +799,6 @@ input[type="file"] {
     gap: 10px;
 
 }
-
 
 .status-icon {
 
@@ -863,7 +820,6 @@ input[type="file"] {
 
 }
 
-
 .status-label {
 
     color: #65798a;
@@ -871,7 +827,6 @@ input[type="file"] {
     font-size: 13px;
 
 }
-
 
 .status-value {
 
@@ -882,7 +837,6 @@ input[type="file"] {
     font-size: 13px;
 
 }
-
 
 /* =====================================================
    RESPONSIVE
@@ -899,7 +853,6 @@ input[type="file"] {
 
 }
 
-
 @media(max-width: 650px)
 {
 
@@ -909,13 +862,11 @@ input[type="file"] {
 
     }
 
-
     .header-title {
 
         font-size: 22px;
 
     }
-
 
     .container {
 
@@ -923,13 +874,11 @@ input[type="file"] {
 
     }
 
-
     .college-cover {
 
         height: 330px;
 
     }
-
 
     .cover-content {
 
@@ -941,7 +890,6 @@ input[type="file"] {
 
     }
 
-
     .college-logo,
     .college-logo-fallback {
 
@@ -951,13 +899,11 @@ input[type="file"] {
 
     }
 
-
     .cover-name {
 
         font-size: 21px;
 
     }
-
 
     .form-grid {
 
@@ -965,13 +911,11 @@ input[type="file"] {
 
     }
 
-
     .form-group.full {
 
         grid-column: auto;
 
     }
-
 
     .status-box {
 
@@ -989,9 +933,7 @@ input[type="file"] {
 
 </head>
 
-
 <body>
-
 
 <!-- =====================================================
      HEADER
@@ -999,14 +941,11 @@ input[type="file"] {
 
 <div class="header">
 
-
     <div class="header-left">
-
 
         <div class="header-icon">
             🏫
         </div>
-
 
         <div>
 
@@ -1020,13 +959,9 @@ input[type="file"] {
 
         </div>
 
-
     </div>
 
-
 </div>
-
-
 
 <!-- =====================================================
      CONTAINER
@@ -1034,27 +969,23 @@ input[type="file"] {
 
 <div class="container">
 
-
     <!-- BACK -->
 
     <div class="back">
 
         <a href="collegeAdminDashboard.jsp">
 
-            ← Back to Dashboard
+            <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
 
         </a>
 
     </div>
-
-
 
     <!-- =================================================
          COVER
     ================================================== -->
 
     <div class="college-cover">
-
 
         <%
 
@@ -1065,13 +996,11 @@ input[type="file"] {
 
         %>
 
-
             <img
                 src="college_images/<%=coverImage%>"
                 class="cover"
                 alt="College Cover"
             >
-
 
         <%
 
@@ -1083,13 +1012,11 @@ input[type="file"] {
 
         %>
 
-
             <img
                 src="images/college-banner.jpg"
                 class="cover"
                 alt="College Cover"
             >
-
 
         <%
 
@@ -1097,12 +1024,9 @@ input[type="file"] {
 
         %>
 
-
         <div class="cover-overlay"></div>
 
-
         <div class="cover-content">
-
 
             <%
 
@@ -1113,13 +1037,11 @@ input[type="file"] {
 
             %>
 
-
                 <img
                     src="college_images/<%=logoImage%>"
                     class="college-logo"
                     alt="College Logo"
                 >
-
 
             <%
 
@@ -1131,13 +1053,11 @@ input[type="file"] {
 
             %>
 
-
                 <div class="college-logo-fallback">
 
                     CC
 
                 </div>
-
 
             <%
 
@@ -1145,9 +1065,7 @@ input[type="file"] {
 
             %>
 
-
             <div>
-
 
                 <div class="cover-name">
 
@@ -1155,13 +1073,11 @@ input[type="file"] {
 
                 </div>
 
-
                 <div class="cover-location">
 
                     📍 <%=city%>, <%=state%>
 
                 </div>
-
 
                 <%
 
@@ -1172,13 +1088,11 @@ input[type="file"] {
 
                 %>
 
-
                     <div class="cover-status">
 
                         ✓ APPROVED
 
                     </div>
-
 
                 <%
 
@@ -1189,7 +1103,6 @@ input[type="file"] {
                     {
 
                 %>
-
 
                     <div
                         class="cover-status"
@@ -1203,23 +1116,17 @@ input[type="file"] {
 
                     </div>
 
-
                 <%
 
                     }
 
                 %>
 
-
             </div>
-
 
         </div>
 
-
     </div>
-
-
 
     <!-- =================================================
          MAIN GRID
@@ -1227,13 +1134,11 @@ input[type="file"] {
 
     <div class="main-grid">
 
-
         <!-- =================================================
              BRANDING CARD
         ================================================== -->
 
         <div class="card">
-
 
             <div class="card-title">
 
@@ -1245,19 +1150,15 @@ input[type="file"] {
 
             </div>
 
-
-
             <!-- LOGO PREVIEW -->
 
             <div class="preview-block">
-
 
                 <div class="preview-title">
 
                     College Logo
 
                 </div>
-
 
                 <%
 
@@ -1268,13 +1169,11 @@ input[type="file"] {
 
                 %>
 
-
                     <img
                         src="college_images/<%=logoImage%>"
                         class="logo-preview"
                         alt="College Logo"
                     >
-
 
                 <%
 
@@ -1286,13 +1185,11 @@ input[type="file"] {
 
                 %>
 
-
                     <img
                         src="images/college-logo.png"
                         class="logo-preview"
                         alt="College Logo"
                     >
-
 
                 <%
 
@@ -1300,22 +1197,17 @@ input[type="file"] {
 
                 %>
 
-
             </div>
-
-
 
             <!-- COVER PREVIEW -->
 
             <div class="preview-block">
-
 
                 <div class="preview-title">
 
                     College Banner
 
                 </div>
-
 
                 <%
 
@@ -1326,13 +1218,11 @@ input[type="file"] {
 
                 %>
 
-
                     <img
                         src="college_images/<%=coverImage%>"
                         class="cover-preview"
                         alt="College Banner"
                     >
-
 
                 <%
 
@@ -1344,13 +1234,11 @@ input[type="file"] {
 
                 %>
 
-
                     <img
                         src="images/college-banner.jpg"
                         class="cover-preview"
                         alt="College Banner"
                     >
-
 
                 <%
 
@@ -1358,10 +1246,7 @@ input[type="file"] {
 
                 %>
 
-
             </div>
-
-
 
             <div class="info-box">
 
@@ -1376,17 +1261,13 @@ input[type="file"] {
 
             </div>
 
-
         </div>
-
-
 
         <!-- =================================================
              PROFILE FORM
         ================================================== -->
 
         <div class="card">
-
 
             <div class="card-title">
 
@@ -1398,17 +1279,13 @@ input[type="file"] {
 
             </div>
 
-
-
             <form
                 action="CollegeProfileController"
                 method="post"
                 enctype="multipart/form-data"
             >
 
-
                 <div class="form-grid">
-
 
                     <!-- LOGO -->
 
@@ -1418,13 +1295,11 @@ input[type="file"] {
                             🖼️ College Logo
                         </label>
 
-
                         <input
                             type="file"
                             name="logo"
                             accept="image/*"
                         >
-
 
                         <div class="file-note">
 
@@ -1433,8 +1308,6 @@ input[type="file"] {
                         </div>
 
                     </div>
-
-
 
                     <!-- COVER -->
 
@@ -1444,13 +1317,11 @@ input[type="file"] {
                             🌄 College Banner
                         </label>
 
-
                         <input
                             type="file"
                             name="cover"
                             accept="image/*"
                         >
-
 
                         <div class="file-note">
 
@@ -1460,8 +1331,6 @@ input[type="file"] {
 
                     </div>
 
-
-
                     <!-- COLLEGE NAME -->
 
                     <div class="form-group full">
@@ -1469,7 +1338,6 @@ input[type="file"] {
                         <label>
                             🏫 College Name
                         </label>
-
 
                         <input
                             type="text"
@@ -1480,8 +1348,6 @@ input[type="file"] {
 
                     </div>
 
-
-
                     <!-- ADDRESS -->
 
                     <div class="form-group full">
@@ -1489,7 +1355,6 @@ input[type="file"] {
                         <label>
                             📍 Address
                         </label>
-
 
                         <input
                             type="text"
@@ -1500,8 +1365,6 @@ input[type="file"] {
 
                     </div>
 
-
-
                     <!-- CITY -->
 
                     <div class="form-group">
@@ -1509,7 +1372,6 @@ input[type="file"] {
                         <label>
                             🏙️ City
                         </label>
-
 
                         <input
                             type="text"
@@ -1520,8 +1382,6 @@ input[type="file"] {
 
                     </div>
 
-
-
                     <!-- STATE -->
 
                     <div class="form-group">
@@ -1529,7 +1389,6 @@ input[type="file"] {
                         <label>
                             🗺️ State
                         </label>
-
 
                         <input
                             type="text"
@@ -1540,8 +1399,6 @@ input[type="file"] {
 
                     </div>
 
-
-
                     <!-- EMAIL -->
 
                     <div class="form-group">
@@ -1549,7 +1406,6 @@ input[type="file"] {
                         <label>
                             📧 Email
                         </label>
-
 
                         <input
                             type="email"
@@ -1560,8 +1416,6 @@ input[type="file"] {
 
                     </div>
 
-
-
                     <!-- PHONE -->
 
                     <div class="form-group">
@@ -1569,7 +1423,6 @@ input[type="file"] {
                         <label>
                             📞 Phone
                         </label>
-
 
                         <input
                             type="text"
@@ -1580,10 +1433,30 @@ input[type="file"] {
 
                     </div>
 
+                    <!-- DEFAULT ADMISSION FEE -->
+
+                    <div class="form-group">
+
+                        <label>
+                            💰 Default Admission Fee (₹)
+                        </label>
+
+                        <input
+                            type="number"
+                            name="defaultAdmissionFee"
+                            value="<%=String.format("%.0f", defaultAdmissionFee)%>"
+                            min="0"
+                            step="500"
+                            required
+                        >
+
+                        <div class="file-note">
+                            College-decided base fee for all new admissions
+                        </div>
+
+                    </div>
 
                 </div>
-
-
 
                 <div class="button-area">
 
@@ -1598,16 +1471,11 @@ input[type="file"] {
 
                 </div>
 
-
             </form>
-
 
         </div>
 
-
     </div>
-
-
 
     <!-- =================================================
          STATUS
@@ -1615,14 +1483,11 @@ input[type="file"] {
 
     <div class="status-box">
 
-
         <div class="status-left">
-
 
             <div class="status-icon">
                 ✓
             </div>
-
 
             <div>
 
@@ -1636,9 +1501,7 @@ input[type="file"] {
 
             </div>
 
-
         </div>
-
 
         <div>
 
@@ -1649,12 +1512,9 @@ input[type="file"] {
 
         </div>
 
-
     </div>
 
-
 </div>
-
 
 </body>
 

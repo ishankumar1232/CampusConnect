@@ -22,8 +22,9 @@
     }
 
     private boolean isOnCampus(String driveType) {
-        return driveType != null &&
-               driveType.trim().toUpperCase().contains("ON CAMPUS");
+        if (driveType == null) return false;
+        String t = driveType.trim().toUpperCase();
+        return t.contains("ON CAMPUS") || (t.contains("CAMPUS") && !t.contains("OFF"));
     }
 %>
 
@@ -223,7 +224,7 @@
 
         String statsSql =
                 "SELECT COUNT(*), " +
-                "       NVL(SUM(CASE WHEN UPPER(NVL(A.STATUS,'PENDING')) = 'PENDING' " +
+                "       NVL(SUM(CASE WHEN UPPER(NVL(A.STATUS,'PENDING')) IN ('PENDING', 'APPLIED', 'AWAITING REVIEW') " +
                 "                   THEN 1 ELSE 0 END), 0), " +
                 "       NVL(SUM(CASE WHEN UPPER(A.STATUS) = 'SHORTLISTED' " +
                 "                   THEN 1 ELSE 0 END), 0), " +
@@ -256,6 +257,7 @@
                 "       S.NAME, " +
                 "       S.EMAIL, " +
                 "       S.PHONE, " +
+                "       COL.COLLEGE_NAME, " +
                 "       R.DRIVE_ID, " +
                 "       R.DRIVE_TYPE, " +
                 "       R.JOB_TITLE, " +
@@ -264,6 +266,7 @@
                 "       A.COLLEGE_SHORTLIST_STATUS " +
                 "FROM APPLICATION A " +
                 "JOIN STUDENT S ON A.STUDENT_ID = S.STUDENT_ID " +
+                "LEFT JOIN COLLEGE COL ON S.COLLEGE_ID = COL.COLLEGE_ID " +
                 "JOIN RECRUITMENT_DRIVE R ON A.DRIVE_ID = R.DRIVE_ID " +
                 "WHERE R.COMPANY_ID = ? " +
                 "ORDER BY A.APPLICATION_ID DESC";
@@ -718,6 +721,35 @@
             color: #4289d5;
         }
 
+        .status-na {
+            background: #f1f5f9;
+            color: #64748b;
+            border: 1px solid #cbd5e1;
+        }
+
+        .drive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .drive-badge.on-campus {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+        }
+
+        .drive-badge.off-campus {
+            background: #f0fdfa;
+            border: 1px solid #99f6e4;
+            color: #0f766e;
+        }
+
         /* ================= ACTIONS ================= */
 
         .action-buttons {
@@ -761,6 +793,35 @@
 
         .revoke-button:hover {
             background: #59636e;
+        }
+
+        .view-button {
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .view-button:hover {
+            background: #1d4ed8;
+            color: white;
+        }
+
+        .student-name-link {
+            color: #0f172a;
+            font-weight: 750;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: color 0.15s ease;
+        }
+
+        .student-name-link:hover {
+            color: #2563eb;
+            text-decoration: underline;
         }
 
         .action-current {
@@ -1162,6 +1223,15 @@
                             <option value="REJECTED">Rejected</option>
 
                         </select>
+
+                        <select id="driveFilter"
+                                aria-label="Filter by drive type">
+
+                            <option value="">All drive types</option>
+                            <option value="on-campus">On Campus</option>
+                            <option value="off-campus">Off Campus</option>
+
+                        </select>
                     </div>
 
                     <span class="result-count"
@@ -1200,6 +1270,7 @@
                         String studentName = rs.getString("NAME");
                         String studentEmail = rs.getString("EMAIL");
                         String phone = rs.getString("PHONE");
+                        String collegeName = rs.getString("COLLEGE_NAME");
                         String jobTitle = rs.getString("JOB_TITLE");
                         String driveType = rs.getString("DRIVE_TYPE");
                         Date appliedDate = rs.getDate("APPLIED_DATE");
@@ -1207,7 +1278,7 @@
                         String collegeStatus =
                                 rs.getString("COLLEGE_SHORTLIST_STATUS");
 
-                        if (status == null || status.trim().isEmpty()) {
+                        if (status == null || status.trim().isEmpty() || "APPLIED".equalsIgnoreCase(status) || "AWAITING REVIEW".equalsIgnoreCase(status)) {
                             status = "PENDING";
                         }
 
@@ -1265,7 +1336,7 @@
                         }
 %>
 
-                        <tr class="applicant-row">
+                        <tr class="applicant-row" data-drive="<%= onCampus ? "on-campus" : "off-campus" %>" data-status="<%= esc(status) %>">
 
                             <td>
                                 <strong>#<%= applicationId %></strong>
@@ -1273,11 +1344,20 @@
 
                             <td>
                                 <div class="student-name">
-                                    <%= esc(studentName) %>
+                                    <a href="company-candidate-details.jsp?appId=<%= applicationId %>"
+                                       class="student-name-link"
+                                       title="Click to view <%= esc(studentName) %>'s full dossier and resume">
+                                        <%= esc(studentName) %>
+                                        <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:10px; opacity:0.6;"></i>
+                                    </a>
                                 </div>
 
                                 <div class="student-email">
                                     <%= esc(studentEmail) %>
+                                </div>
+
+                                <div class="student-college" style="font-size: 11px; color: #176fe5; margin-top: 3px; font-weight: 600;">
+                                    <i class="fa-solid fa-graduation-cap"></i> <%= esc(collegeName != null && !collegeName.trim().isEmpty() ? collegeName : "Independent / Off-Campus") %>
                                 </div>
                             </td>
 
@@ -1292,7 +1372,15 @@
                             </td>
 
                             <td>
-                                <%= esc(driveType) %>
+                                <% if (onCampus) { %>
+                                    <span class="drive-badge on-campus">
+                                        <i class="fa-solid fa-building-columns"></i> On-Campus
+                                    </span>
+                                <% } else { %>
+                                    <span class="drive-badge off-campus">
+                                        <i class="fa-solid fa-globe"></i> Off-Campus
+                                    </span>
+                                <% } %>
                             </td>
 
                             <td>
@@ -1306,13 +1394,24 @@
                             </td>
 
                             <td>
-                                <span class="status <%= collegeStatusClass %>">
-                                    <%= esc(collegeStatus) %>
-                                </span>
+                                <% if (onCampus) { %>
+                                    <span class="status <%= collegeStatusClass %>">
+                                        <%= esc(collegeStatus) %>
+                                    </span>
+                                <% } else { %>
+                                    <span class="status status-na" style="background:#f1f5f9; color:#64748b; border:1px solid #cbd5e1; font-weight:600;">
+                                        <i class="fa-solid fa-minus"></i> N/A (Direct)
+                                    </span>
+                                <% } %>
                             </td>
 
                             <td>
                                 <div class="action-buttons">
+                                    <a href="company-candidate-details.jsp?appId=<%= applicationId %>"
+                                       class="action-button view-button"
+                                       title="View <%= esc(studentName) %>'s full academics, skills & resume">
+                                        <i class="fa-solid fa-file-lines"></i> View Details
+                                    </a>
 
 <%
                                 /*
@@ -1329,14 +1428,14 @@
 
                                         if ("REJECTED".equalsIgnoreCase(collegeStatus)) {
 %>
-                                            <span class="action-blocked">
-                                                Rejected by college
+                                            <span class="action-blocked" style="color:#dc2626; font-weight:600;">
+                                                <i class="fa-solid fa-ban"></i> Rejected by College
                                             </span>
 <%
                                         } else {
 %>
-                                            <span class="action-waiting">
-                                                Waiting for college approval
+                                            <span class="action-waiting" style="color:#d97706; font-weight:600;">
+                                                <i class="fa-regular fa-clock"></i> Waiting for College Shortlist
                                             </span>
 <%
                                         }
@@ -1345,7 +1444,7 @@
 %>
                                         <form method="post"
                                               action="company-applicants.jsp"
-                                              onsubmit="return confirm('Approve this applicant for the next recruitment stage?');">
+                                              onsubmit="return confirm('Approve college-shortlisted applicant <%= esc(studentName) %> for interview scheduling?');">
 
                                             <input type="hidden"
                                                    name="applicationId"
@@ -1357,13 +1456,13 @@
 
                                             <button class="action-button approve-button"
                                                     type="submit">
-                                                Approve
+                                                <i class="fa-solid fa-check"></i> Approve
                                             </button>
                                         </form>
 
                                         <form method="post"
                                               action="company-applicants.jsp"
-                                              onsubmit="return confirm('Reject this applicant?');">
+                                              onsubmit="return confirm('Reject applicant <%= esc(studentName) %>?');">
 
                                             <input type="hidden"
                                                    name="applicationId"
@@ -1375,16 +1474,20 @@
 
                                             <button class="action-button reject-button"
                                                     type="submit">
-                                                Reject
+                                                <i class="fa-solid fa-xmark"></i> Reject
                                             </button>
                                         </form>
+
+                                        <span class="drive-note" style="color:#2563eb; font-weight:600;">
+                                            <i class="fa-solid fa-circle-check"></i> College Shortlisted
+                                        </span>
 
                                     <%
                                     } else if ("SHORTLISTED".equalsIgnoreCase(status)) {
                                     %>
                                         <form method="post"
                                               action="company-applicants.jsp"
-                                              onsubmit="return confirm('Revoke the company approval and return this applicant to Pending?');">
+                                              onsubmit="return confirm('Revoke company approval for <%= esc(studentName) %>?');">
 
                                             <input type="hidden"
                                                    name="applicationId"
@@ -1396,12 +1499,12 @@
 
                                             <button class="action-button revoke-button"
                                                     type="submit">
-                                                Revoke Approval
+                                                <i class="fa-solid fa-rotate-left"></i> Revoke
                                             </button>
                                         </form>
 
-                                        <span class="action-current">
-                                            Company approved
+                                        <span class="action-current" style="color:#059669; font-weight:700;">
+                                            <i class="fa-solid fa-circle-check"></i> Approved
                                         </span>
 
                                     <%
@@ -1409,7 +1512,7 @@
                                     %>
                                         <form method="post"
                                               action="company-applicants.jsp"
-                                              onsubmit="return confirm('Reconsider this rejected applicant and return to Pending?');">
+                                              onsubmit="return confirm('Reconsider <%= esc(studentName) %> and return to Pending?');">
 
                                             <input type="hidden"
                                                    name="applicationId"
@@ -1421,12 +1524,12 @@
 
                                             <button class="action-button approve-button"
                                                     type="submit">
-                                                Reconsider
+                                                <i class="fa-solid fa-rotate-left"></i> Reconsider
                                             </button>
                                         </form>
 
-                                        <span class="action-current">
-                                            Company rejected
+                                        <span class="action-current" style="color:#dc2626; font-weight:700;">
+                                            <i class="fa-solid fa-circle-xmark"></i> Rejected
                                         </span>
 <%
                                     }
@@ -1438,7 +1541,7 @@
 %>
                                         <form method="post"
                                               action="company-applicants.jsp"
-                                              onsubmit="return confirm('Approve this applicant?');">
+                                              onsubmit="return confirm('Shortlist <%= esc(studentName) %> for your recruitment drive?');">
 
                                             <input type="hidden"
                                                    name="applicationId"
@@ -1449,14 +1552,15 @@
                                                    value="APPROVE">
 
                                             <button class="action-button approve-button"
-                                                    type="submit">
-                                                Approve
+                                                    type="submit"
+                                                    title="Directly shortlist this off-campus candidate">
+                                                <i class="fa-solid fa-user-check"></i> Shortlist Candidate
                                             </button>
                                         </form>
 
                                         <form method="post"
                                               action="company-applicants.jsp"
-                                              onsubmit="return confirm('Reject this applicant?');">
+                                              onsubmit="return confirm('Reject applicant <%= esc(studentName) %>?');">
 
                                             <input type="hidden"
                                                    name="applicationId"
@@ -1467,13 +1571,14 @@
                                                    value="REJECT">
 
                                             <button class="action-button reject-button"
-                                                    type="submit">
-                                                Reject
+                                                    type="submit"
+                                                    title="Reject this candidate">
+                                                <i class="fa-solid fa-user-xmark"></i> Reject
                                             </button>
                                         </form>
 
-                                        <span class="drive-note">
-                                            Company final decision
+                                        <span class="drive-note" style="color:#0f766e; font-weight:600;">
+                                            <i class="fa-solid fa-bolt"></i> Company Direct Decision
                                         </span>
 
 <%
@@ -1481,7 +1586,7 @@
 %>
                                         <form method="post"
                                               action="company-applicants.jsp"
-                                              onsubmit="return confirm('Revoke the company approval and return this applicant to Pending?');">
+                                              onsubmit="return confirm('Revoke shortlisting for <%= esc(studentName) %>?');">
 
                                             <input type="hidden"
                                                    name="applicationId"
@@ -1493,12 +1598,12 @@
 
                                             <button class="action-button revoke-button"
                                                     type="submit">
-                                                Revoke Approval
+                                                <i class="fa-solid fa-rotate-left"></i> Revoke
                                             </button>
                                         </form>
 
-                                        <span class="action-current">
-                                            Approved by company
+                                        <span class="action-current" style="color:#059669; font-weight:700;">
+                                            <i class="fa-solid fa-circle-check"></i> Shortlisted by Company
                                         </span>
 
 <%
@@ -1506,7 +1611,7 @@
 %>
                                         <form method="post"
                                               action="company-applicants.jsp"
-                                              onsubmit="return confirm('Reconsider this rejected applicant and return to Pending?');">
+                                              onsubmit="return confirm('Reconsider <%= esc(studentName) %> and return to Pending?');">
 
                                             <input type="hidden"
                                                    name="applicationId"
@@ -1518,12 +1623,12 @@
 
                                             <button class="action-button approve-button"
                                                     type="submit">
-                                                Reconsider
+                                                <i class="fa-solid fa-rotate-left"></i> Reconsider
                                             </button>
                                         </form>
 
-                                        <span class="action-current">
-                                            Rejected by company
+                                        <span class="action-current" style="color:#dc2626; font-weight:700;">
+                                            <i class="fa-solid fa-circle-xmark"></i> Rejected by Company
                                         </span>
 <%
                                     }
@@ -1595,6 +1700,7 @@
 
     const search = document.getElementById("applicantSearch");
     const statusFilter = document.getElementById("statusFilter");
+    const driveFilter = document.getElementById("driveFilter");
     const rows = Array.from(document.querySelectorAll(".applicant-row"));
     const count = document.getElementById("resultCount");
     const noMatches = document.getElementById("filterEmpty");
@@ -1602,7 +1708,8 @@
     function filterApplicants() {
 
         const query = search.value.trim().toLowerCase();
-        const status = statusFilter.value;
+        const status = (statusFilter.value || "").toUpperCase();
+        const drive = (driveFilter ? driveFilter.value : "").toLowerCase();
         let visible = 0;
 
         rows.forEach(function (row) {
@@ -1611,13 +1718,19 @@
                 row.textContent.toLowerCase().includes(query);
 
             const rowStatus =
-                row.cells[6].textContent.trim().toUpperCase();
+                (row.dataset.status || row.cells[6].textContent).trim().toUpperCase();
+
+            const rowDrive =
+                (row.dataset.drive || "").toLowerCase();
 
             const matchesStatus =
                 !status || rowStatus === status;
 
+            const matchesDrive =
+                !drive || rowDrive === drive;
+
             const show =
-                matchesText && matchesStatus;
+                matchesText && matchesStatus && matchesDrive;
 
             row.style.display =
                 show ? "" : "none";
@@ -1638,6 +1751,7 @@
 
     search.addEventListener("input", filterApplicants);
     statusFilter.addEventListener("change", filterApplicants);
+    if (driveFilter) driveFilter.addEventListener("change", filterApplicants);
 
     filterApplicants();
 

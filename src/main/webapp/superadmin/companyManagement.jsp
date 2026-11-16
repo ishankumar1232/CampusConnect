@@ -1,273 +1,282 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.ArrayList" %>
 <%@ page import="com.campusconnect.bean.Company" %>
+<%@ page import="com.campusconnect.bean.SuperAdmin" %>
+<%@ page import="com.campusconnect.dao.CompanyDAO" %>
 
 <%
-ArrayList<Company> list =
-(ArrayList<Company>)request.getAttribute("companyList");
+    SuperAdmin admin = (SuperAdmin) session.getAttribute("admin");
+    if (admin == null) {
+        response.sendRedirect(request.getContextPath() + "/superadmin/login.jsp");
+        return;
+    }
+
+    ArrayList<Company> list = (ArrayList<Company>) request.getAttribute("companyList");
+    if (list == null) {
+        CompanyDAO dao = new CompanyDAO();
+        list = dao.getAllCompanies();
+    }
+
+    int totalCompanies = 0;
+    int approvedCount = 0;
+    int pendingCount = 0;
+    int rejectedCount = 0;
+
+    if (list != null) {
+        totalCompanies = list.size();
+        for (Company c : list) {
+            String st = c.getStatus() != null ? c.getStatus().toUpperCase() : "";
+            if ("APPROVED".equals(st)) approvedCount++;
+            else if ("PENDING".equals(st)) pendingCount++;
+            else if ("REJECTED".equals(st)) rejectedCount++;
+        }
+    }
+
+    String success = request.getParameter("success");
+    String error = request.getParameter("error");
+    request.setAttribute("activeNav", "companies");
 %>
 
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recruiting Companies | CampusConnect</title>
 
-<title>Company Management</title>
-
-<style>
-
-*{
-    margin:0;
-    padding:10px;
-    box-sizing:border-box;
-    font-family:Arial,Helvetica,sans-serif;
-    
-
-}
-
-body{
-    background:#eef2f7;
-}
-
-.container{
-    width:95%;
-    margin:30px auto;
-}
-
-h2{
-    text-align:center;
-    color:#0B3D91;
-    margin-bottom:25px;
-    font-size:34px;
-}
-
-.back-btn{
-    float:right;
-    display:inline-block;
-    padding:10px 20px;
-    background:#0B3D91;
-    color:white;
-    text-decoration:none;
-    border-radius:6px;
-    font-weight:bold;
-    margin-bottom:20px;
-}
-
-.back-btn:hover{
-    background:#072c69;
-}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-    background:white;
-    border-radius:10px;
-    overflow:hidden;
-    box-shadow:0 5px 15px rgba(0,0,0,.15);
-}
-
-th{
-    background:#0B3D91;
-    color:white;
-    padding:14px;
-    font-size:16px;
-}
-
-td{
-    padding:14px;
-    text-align:center;
-    border-bottom:1px solid #ddd;
-}
-
-tr:nth-child(even){
-    background:#f8f9fa;
-}
-
-tr:hover{
-    background:#e8f0ff;
-}
-
-.approved{
-    background:#28a745;
-    color:white;
-    padding:6px 12px;
-    border-radius:20px;
-    font-size:13px;
-    font-weight:bold;
-}
-
-.pending{
-    background:#ff9800;
-    color:white;
-    padding:6px 12px;
-    border-radius:20px;
-    font-size:13px;
-    font-weight:bold;
-}
-
-.rejected{
-    background:#dc3545;
-    color:white;
-    padding:6px 12px;
-    border-radius:20px;
-    font-size:13px;
-    font-weight:bold;
-}
-
-.btnApprove{
-    background:#198754;
-    color:white;
-    padding:8px 15px;
-    text-decoration:none;
-    border-radius:6px;
-    font-size:14px;
-    font-weight:bold;
-}
-
-.btnApprove:hover{
-    background:#146c43;
-}
-
-.btnReject{
-    background:#dc3545;
-    color:white;
-    padding:8px 15px;
-    text-decoration:none;
-    border-radius:6px;
-    font-size:14px;
-    font-weight:bold;
-}
-
-.btnReject:hover{
-    background:#b02a37;
-}
-
-</style>
-
+<!-- Google Fonts & FontAwesome -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="<%=request.getContextPath()%>/css/superadmin-dashboard.css">
 </head>
-
 <body>
 
-<a href="<%=request.getContextPath()%>/DashboardServlet"
-class="back-btn">
-&lt; Back to Dashboard
-</a>
+<!-- Navigation Include -->
+<%@ include file="superAdminNav.jsp" %>
 
-<h2 align="center">Company Management</h2>
+<!-- Main Content -->
+<main class="main">
 
-<div style="clear:both;"></div>
+    <!-- Page Toolbar -->
+    <div class="page-toolbar">
+        <div class="page-title-block">
+            <h1>Corporate Recruiters & Companies</h1>
+            <p>Verify corporate onboarding requests, monitor hiring partners, and audit recruitment opportunities.</p>
+        </div>
+    </div>
 
-<table>
+    <!-- Feedback Alerts -->
+    <% if ("approved".equalsIgnoreCase(success)) { %>
+        <div class="alert alert-success">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Recruiting company account verified and approved. Company can now schedule campus placement drives.</span>
+        </div>
+    <% } else if ("rejected".equalsIgnoreCase(success)) { %>
+        <div class="alert alert-warning">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Company account has been rejected or suspended.</span>
+        </div>
+    <% } else if (error != null) { %>
+        <div class="alert alert-danger">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>Action could not be completed. Please verify database connection.</span>
+        </div>
+    <% } %>
 
-<tr>
+    <!-- KPI Metric Cards -->
+    <div class="stats-grid">
+        <div class="kpi-card">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-title">Total Recruiters</span>
+                    <div class="kpi-value"><%=totalCompanies%></div>
+                </div>
+                <div class="kpi-icon purple"><i class="fa-solid fa-building"></i></div>
+            </div>
+            <div class="kpi-subtext">Hiring organizations registered</div>
+        </div>
 
-    <th>ID</th>
-    <th>Name</th>
-    <th>Email</th>
-    <th>Phone</th>
-    <th>Website</th>
-    <th>Status</th>
-    <th>Approve</th>
-    <th>Reject</th>
+        <div class="kpi-card">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-title">Verified & Active</span>
+                    <div class="kpi-value" style="color: #16a34a;"><%=approvedCount%></div>
+                </div>
+                <div class="kpi-icon green"><i class="fa-solid fa-shield-check"></i></div>
+            </div>
+            <div class="kpi-subtext">Authorized to post drives & hire</div>
+        </div>
 
-</tr>
+        <div class="kpi-card">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-title">Pending Verification</span>
+                    <div class="kpi-value" style="color: #d97706;"><%=pendingCount%></div>
+                </div>
+                <div class="kpi-icon orange"><i class="fa-solid fa-hourglass-half"></i></div>
+            </div>
+            <div class="kpi-subtext">Awaiting administrative approval</div>
+        </div>
 
-<%
+        <div class="kpi-card">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-title">Rejected Accounts</span>
+                    <div class="kpi-value" style="color: #dc2626;"><%=rejectedCount%></div>
+                </div>
+                <div class="kpi-icon red"><i class="fa-solid fa-ban"></i></div>
+            </div>
+            <div class="kpi-subtext">Declined or deactivated partners</div>
+        </div>
+    </div>
 
-if(list!=null){
+    <!-- Content Card with Live Search & Filter -->
+    <div class="content-card">
+        <div class="content-card-header">
+            <div class="content-card-title">
+                <i class="fa-solid fa-building" style="color: #2563eb;"></i>
+                <span>Corporate Partners Directory (<span id="visibleCompCount"><%=totalCompanies%></span>)</span>
+            </div>
+            <div class="filter-bar">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="compSearch" placeholder="Search by name, email, website..." onkeyup="filterCompanyTable()">
+                </div>
+                <select id="compStatusFilter" class="filter-select" onchange="filterCompanyTable()">
+                    <option value="">All Statuses</option>
+                    <option value="APPROVED">Verified Only</option>
+                    <option value="PENDING">Pending Only</option>
+                    <option value="REJECTED">Rejected Only</option>
+                </select>
+            </div>
+        </div>
 
-for(Company c:list){
+        <div class="table-responsive">
+            <table class="data-table" id="companyTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Company Name</th>
+                        <th>Contact Email</th>
+                        <th>Phone</th>
+                        <th>Website</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Administrative Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%
+                    if (list != null && !list.isEmpty()) {
+                        for (Company c : list) {
+                            String rawStatus = c.getStatus() != null ? c.getStatus().trim() : "Pending";
+                            String badgeClass = "badge-pending";
+                            if ("Approved".equalsIgnoreCase(rawStatus)) badgeClass = "badge-approved";
+                            else if ("Rejected".equalsIgnoreCase(rawStatus)) badgeClass = "badge-rejected";
+                    %>
+                    <tr data-status="<%=rawStatus.toUpperCase()%>">
+                        <td><strong>#<%=c.getCompanyId()%></strong></td>
+                        <td>
+                            <a href="${pageContext.request.contextPath}/CompanyDetailsServlet?id=<%=c.getCompanyId()%>"
+                               style="font-weight: 700; color: #2563eb; display: flex; align-items: center; gap: 8px;">
+                                <i class="fa-solid fa-building" style="font-size: 13px; color: #64748b;"></i>
+                                <span><%=c.getCompanyName()%></span>
+                            </a>
+                        </td>
+                        <td>
+                            <a href="mailto:<%=c.getEmail()%>" style="color: #64748b; font-size: 13px;">
+                                <i class="fa-regular fa-envelope" style="margin-right: 4px;"></i>
+                                <%=c.getEmail() != null ? c.getEmail() : "N/A"%>
+                            </a>
+                        </td>
+                        <td><%=c.getPhone() != null && !c.getPhone().isEmpty() ? c.getPhone() : "N/A"%></td>
+                        <td>
+                            <% if (c.getWebsite() != null && !c.getWebsite().trim().isEmpty()) { %>
+                                <a href="<%=c.getWebsite().startsWith("http") ? c.getWebsite() : "https://" + c.getWebsite()%>" target="_blank" style="color: #2563eb; font-size: 13px;">
+                                    <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px; margin-right: 4px;"></i>
+                                    Visit
+                                </a>
+                            <% } else { %>
+                                <span style="color: var(--text-muted); font-size: 13px;">N/A</span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <span class="badge <%=badgeClass%>"><%=rawStatus%></span>
+                        </td>
+                        <td style="text-align: right;">
+                            <div style="display: inline-flex; gap: 6px;">
+                                <a href="${pageContext.request.contextPath}/CompanyDetailsServlet?id=<%=c.getCompanyId()%>"
+                                   class="btn btn-outline btn-sm" title="View Full Profile & Drives">
+                                    <i class="fa-solid fa-eye"></i>
+                                    <span>Details</span>
+                                </a>
+                                <% if (!"Approved".equalsIgnoreCase(rawStatus)) { %>
+                                    <a href="${pageContext.request.contextPath}/ApproveCompanyServlet?id=<%=c.getCompanyId()%>"
+                                       class="btn btn-success btn-sm"
+                                       title="Approve Company"
+                                       onclick="return confirm('Approve <%=c.getCompanyName()%> for recruitment?');">
+                                        <i class="fa-solid fa-check"></i>
+                                        <span>Verify</span>
+                                    </a>
+                                <% } %>
+                                <% if (!"Rejected".equalsIgnoreCase(rawStatus)) { %>
+                                    <a href="${pageContext.request.contextPath}/RejectCompanyServlet?id=<%=c.getCompanyId()%>"
+                                       class="btn btn-danger btn-sm"
+                                       title="Reject Company"
+                                       onclick="return confirm('Reject / suspend <%=c.getCompanyName()%>?');">
+                                        <i class="fa-solid fa-xmark"></i>
+                                        <span>Reject</span>
+                                    </a>
+                                <% } %>
+                            </div>
+                        </td>
+                    </tr>
+                    <%
+                        }
+                    } else {
+                    %>
+                    <tr>
+                        <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                            <i class="fa-solid fa-building" style="font-size: 28px; margin-bottom: 10px; display: block;"></i>
+                            No recruiting companies currently registered on the platform.
+                        </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-%>
+</main>
 
-<tr>
+<footer class="footer">
+    &copy; CampusConnect Platform. Super Administrator Control Center.
+</footer>
 
-<td><%=c.getCompanyId()%></td>
+<script>
+function filterCompanyTable() {
+    const search = document.getElementById('compSearch').value.toLowerCase();
+    const status = document.getElementById('compStatusFilter').value.toUpperCase();
+    const rows = document.querySelectorAll('#companyTable tbody tr');
+    let visible = 0;
 
-<td><%=c.getCompanyName()%></td>
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const rowStatus = row.getAttribute('data-status') || '';
+        const matchesSearch = text.includes(search);
+        const matchesStatus = !status || rowStatus === status;
 
-<td><%=c.getEmail()%></td>
+        if (matchesSearch && matchesStatus) {
+            row.style.display = '';
+            visible++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
 
-<td><%=c.getPhone()%></td>
-
-<td><%=c.getWebsite()%></td>
-
-<td>
-
-<%
-if(c.getStatus().equalsIgnoreCase("Approved")){
-%>
-
-<span class="approved">APPROVED</span>
-
-<%
+    const countElem = document.getElementById('visibleCompCount');
+    if (countElem) countElem.innerText = visible;
 }
-else if(c.getStatus().equalsIgnoreCase("Pending")){
-%>
-
-<span class="pending">PENDING</span>
-
-<%
-}
-else{
-%>
-
-<span class="rejected">REJECTED</span>
-
-<%
-}
-%>
-
-</td>
-
-<!-- APPROVE COLUMN -->
-
-<td>
-
-
-
-<a class="btnApprove"
-href="<%=request.getContextPath()%>/ApproveCompanyServlet?id=<%=c.getCompanyId()%>">
-Approve
-</a>
-
-</td>
-
-<!-- REJECT COLUMN -->
-<td>
-<a class="btnReject"
-href="<%=request.getContextPath()%>/RejectCompanyServlet?id=<%=c.getCompanyId()%>">
-Reject
-</a>
-</td>
-
-</tr>
-
-<%
-
-}
-
-}
-
-else{
-
-%>
-
-<tr>
-
-<td colspan="8">
-No Company Records Found
-</td>
-
-</tr>
-
-<%
-
-}
-
-%>
-
-</table>
+</script>
 
 </body>
-
 </html>

@@ -9,9 +9,7 @@ import com.campusconnect.util.DBConnection;
 
 public class CompanyDAO {
 
-    // ==========================================
     // COMPANY REGISTRATION METHOD
-    // ==========================================
     public boolean insertCompany(Company c) {
 
         String sql = "INSERT INTO COMPANY " +
@@ -37,10 +35,7 @@ public class CompanyDAO {
         }
     }
 
-
-    // ==========================================
     // COMPANY LOGIN METHOD
-    // ==========================================
     public Company loginCompany(String email, String password) {
 
         Company c = null;
@@ -83,10 +78,7 @@ public class CompanyDAO {
         return c;
     }
 
-
-    // ==========================================
     // SUPER ADMIN - GET ALL COMPANIES
-    // ==========================================
     public ArrayList<Company> getAllCompanies() {
 
         ArrayList<Company> list = new ArrayList<>();
@@ -119,10 +111,7 @@ public class CompanyDAO {
         return list;
     }
 
-
-    // ==========================================
     // SUPER ADMIN - APPROVE COMPANY
-    // ==========================================
     public boolean approveCompany(int companyId) {
 
         String sql = "UPDATE COMPANY SET STATUS='Approved' WHERE COMPANY_ID=?";
@@ -139,10 +128,7 @@ public class CompanyDAO {
         }
     }
 
-
-    // ==========================================
     // SUPER ADMIN - REJECT COMPANY
-    // ==========================================
     public boolean rejectCompany(int companyId) {
 
         String sql = "UPDATE COMPANY SET STATUS='Rejected' WHERE COMPANY_ID=?";
@@ -157,6 +143,56 @@ public class CompanyDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    // GET COMPANY BY ID
+    public Company getCompanyById(int companyId) {
+        Company comp = null;
+        String sql = "SELECT COMPANY_ID, COMPANY_NAME, EMAIL, PHONE, PASSWORD, ADDRESS, WEBSITE, STATUS, LOGO, BANNER, DESCRIPTION FROM COMPANY WHERE COMPANY_ID = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, companyId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    comp = new Company();
+                    comp.setCompanyId(rs.getInt("COMPANY_ID"));
+                    comp.setCompanyName(rs.getString("COMPANY_NAME"));
+                    comp.setEmail(rs.getString("EMAIL"));
+                    comp.setPhone(rs.getString("PHONE"));
+                    comp.setPassword(rs.getString("PASSWORD"));
+                    comp.setAddress(rs.getString("ADDRESS"));
+                    comp.setWebsite(rs.getString("WEBSITE"));
+                    comp.setStatus(rs.getString("STATUS"));
+                    comp.setLogo(rs.getString("LOGO"));
+                    comp.setBanner(rs.getString("BANNER"));
+                    comp.setDescription(rs.getString("DESCRIPTION"));
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return comp;
+    }
+
+    // UPDATE COMPANY PROFILE
+    public boolean updateCompany(Company c) {
+        boolean updated = false;
+        String sql = "UPDATE COMPANY SET COMPANY_NAME = ?, EMAIL = ?, PHONE = ?, ADDRESS = ?, WEBSITE = ?, STATUS = ?, DESCRIPTION = ? WHERE COMPANY_ID = ?";
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, c.getCompanyName());
+            ps.setString(2, c.getEmail());
+            ps.setString(3, c.getPhone() != null ? c.getPhone() : "");
+            ps.setString(4, c.getAddress() != null ? c.getAddress() : "");
+            ps.setString(5, c.getWebsite() != null ? c.getWebsite() : "");
+            ps.setString(6, c.getStatus() != null ? c.getStatus() : "Approved");
+            ps.setString(7, c.getDescription() != null ? c.getDescription() : "");
+            ps.setInt(8, c.getCompanyId());
+            updated = (ps.executeUpdate() > 0);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return updated;
     }
 
 }

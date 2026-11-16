@@ -16,15 +16,12 @@ import com.campusconnect.dao.CompanyDAO;
 import com.campusconnect.bean.SystemSetting;
 import com.campusconnect.dao.SystemSettingDAO;
 
- 
 public class CompanyLoginServlet extends HttpServlet
 {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException
     {
-    	// ======================================
     	// CHECK MAINTENANCE MODE
-    	// ======================================
 
     	SystemSettingDAO settingDAO = new SystemSettingDAO();
 
@@ -56,6 +53,12 @@ public class CompanyLoginServlet extends HttpServlet
 
         if (c != null) {
 
+            // Check if Company is approved
+            if (!"Approved".equalsIgnoreCase(c.getStatus()) && !"ACTIVE".equalsIgnoreCase(c.getStatus())) {
+                response.sendRedirect("company-login.jsp?error=not_approved");
+                return;
+            }
+
             // Create session
             HttpSession session = request.getSession();
 
@@ -68,13 +71,39 @@ public class CompanyLoginServlet extends HttpServlet
             String logoPath = c.getLogoUrl();
             String bannerPath = c.getBannerUrl();
 
-            // Use default images if paths are empty
-            if (logoPath == null || logoPath.trim().isEmpty()) {
-                logoPath = "images/company/default-logo.png";
+            String cName = c.getCompanyName() != null ? c.getCompanyName().toLowerCase() : "";
+
+            // Use name-matched images for demo accounts, or empty if new registered company
+            if (logoPath == null || logoPath.trim().isEmpty() ||
+                (logoPath.contains("tcs-logo.png") && !cName.contains("tcs") && !cName.contains("tata consultancy")) ||
+                logoPath.contains("default-logo.png")) {
+                if (cName.contains("infosys")) {
+                    logoPath = "images/company/infosys-logo.png";
+                } else if (cName.contains("google")) {
+                    logoPath = "images/company/google-logo.png";
+                } else if (cName.contains("meta")) {
+                    logoPath = "images/company/meta-logo.png";
+                } else if (cName.contains("tcs") || cName.contains("tata consultancy")) {
+                    logoPath = "images/company/tcs-logo.png";
+                } else {
+                    logoPath = "";
+                }
             }
 
-            if (bannerPath == null || bannerPath.trim().isEmpty()) {
-                bannerPath = "images/company/default-banner.png";
+            if (bannerPath == null || bannerPath.trim().isEmpty() ||
+                (bannerPath.contains("tcs-banner.png") && !cName.contains("tcs") && !cName.contains("tata consultancy")) ||
+                bannerPath.contains("default-banner.png")) {
+                if (cName.contains("infosys")) {
+                    bannerPath = "images/company/infosys-dashboard.png";
+                } else if (cName.contains("google")) {
+                    bannerPath = "images/company/google-dashboard.png";
+                } else if (cName.contains("meta")) {
+                    bannerPath = "images/company/meta-banner.png";
+                } else if (cName.contains("tcs") || cName.contains("tata consultancy")) {
+                    bannerPath = "images/company/tcs-banner.png";
+                } else {
+                    bannerPath = "";
+                }
             }
 
             // Store image paths in session

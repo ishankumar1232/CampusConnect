@@ -23,6 +23,7 @@
 <meta charset="UTF-8">
 
 <title>Recruitment Management</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 <style>
 
@@ -112,7 +113,7 @@ tr:hover {
 <div class="container">
 
     <a href="collegeAdminDashboard.jsp" class="back">
-        ← Back to Dashboard
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
     </a>
 
     <div class="card">

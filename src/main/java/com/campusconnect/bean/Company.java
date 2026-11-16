@@ -6,7 +6,10 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 import java.sql.Types;
+
+import com.campusconnect.util.DBConnection;
 
 public class Company {
 
@@ -18,6 +21,10 @@ public class Company {
     private String address;
     private String website;
     private String status;
+    private String logoUrl;
+    private String bannerUrl;
+    private String description;
+
 	public int getCompanyId() {
 		return companyId;
 	}
@@ -67,79 +74,108 @@ public class Company {
 		this.status = status;
 	}
 
-	
+	public String getLogoUrl() {
+		return logoUrl;
+	}
+	public void setLogoUrl(String logoUrl) {
+		this.logoUrl = logoUrl;
+	}
+	public String getLogo() {
+		return logoUrl;
+	}
+	public void setLogo(String logo) {
+		this.logoUrl = logo;
+	}
+
+	public String getBannerUrl() {
+		return bannerUrl;
+	}
+	public void setBannerUrl(String bannerUrl) {
+		this.bannerUrl = bannerUrl;
+	}
+	public String getBanner() {
+		return bannerUrl;
+	}
+	public void setBanner(String banner) {
+		this.bannerUrl = banner;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
 	public boolean SelectMethod()
 	{
-	    try
+	    try (Connection con = DBConnection.getConnection())
 	    {
-	        Class.forName("oracle.jdbc.driver.OracleDriver");
+	        if (con == null) return false;
 
-	        Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "CAMPUSCONNECT", "campus123");
-
-	        Statement stmt = con.createStatement();
-
-	        String q1 = "SELECT * FROM COMPANY " +"WHERE COMPANY_ID = " + companyId;
-
-	        ResultSet rs = stmt.executeQuery(q1);
-
-	        if(rs.next())
+	        String q1 = "SELECT * FROM COMPANY WHERE COMPANY_ID = ?";
+	        try (PreparedStatement ps = con.prepareStatement(q1))
 	        {
-	            companyName = rs.getString("COMPANY_NAME");
-	            email = rs.getString("EMAIL");
-	            phone = rs.getString("PHONE");
-	            address = rs.getString("ADDRESS");
-	            website = rs.getString("WEBSITE");
-	            status = rs.getString("STATUS");
-
-	            con.close();
-
-	            return true;
-	        }
-	        else
-	        {
-	            con.close();
-
-	            return false;
+	            ps.setInt(1, companyId);
+	            try (ResultSet rs = ps.executeQuery())
+	            {
+	                if(rs.next())
+	                {
+	                    companyName = rs.getString("COMPANY_NAME");
+	                    email = rs.getString("EMAIL");
+	                    phone = rs.getString("PHONE");
+	                    address = rs.getString("ADDRESS");
+	                    website = rs.getString("WEBSITE");
+	                    status = rs.getString("STATUS");
+	                    logoUrl = rs.getString("LOGO");
+	                    bannerUrl = rs.getString("BANNER");
+	                    description = rs.getString("DESCRIPTION");
+	                    return true;
+	                }
+	                else
+	                {
+	                    return false;
+	                }
+	            }
 	        }
 	    }
 	    catch(Exception e)
 	    {
+	        e.printStackTrace();
 	        return false;
 	    }
 	}
-	
+
 	public boolean UpdateMethod()
 	{
-	    try
+	    try (Connection con = DBConnection.getConnection())
 	    {
-	        Class.forName("oracle.jdbc.driver.OracleDriver");
-
-	        Connection con = DriverManager.getConnection( "jdbc:oracle:thin:@localhost:1521:XE", "CAMPUSCONNECT","campus123");
-
-	        Statement stmt = con.createStatement();
+	        if (con == null) return false;
 
 	        String q1 = "UPDATE COMPANY SET " +
-	                    "COMPANY_NAME = '" + companyName + "', " +
-	                    "PHONE = '" + phone + "', " +
-	                    "ADDRESS = '" + address + "', " +
-	                    "WEBSITE = '" + website + "' " +
-	                    "WHERE COMPANY_ID = " + companyId;
+	                    "COMPANY_NAME = ?, " +
+	                    "PHONE = ?, " +
+	                    "ADDRESS = ?, " +
+	                    "WEBSITE = ?, " +
+	                    "DESCRIPTION = ? " +
+	                    "WHERE COMPANY_ID = ?";
 
-	        int x = stmt.executeUpdate(q1);
-
-	        con.close();
-
-	        if(x > 0)
+	        try (PreparedStatement ps = con.prepareStatement(q1))
 	        {
-	            return true;
-	        }
-	        else
-	        {
-	            return false;
+	            ps.setString(1, companyName);
+	            ps.setString(2, phone);
+	            ps.setString(3, address);
+	            ps.setString(4, website);
+	            ps.setString(5, description);
+	            ps.setInt(6, companyId);
+
+	            int x = ps.executeUpdate();
+	            return x > 0;
 	        }
 	    }
 	    catch(Exception e)
 	    {
+	        e.printStackTrace();
 	        return false;
 	    }
 	}

@@ -7,9 +7,21 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.WebServlet;
 
- 
+import com.campusconnect.util.DBConnection;
+
 public class FeePaymentServlet extends HttpServlet
 {
+    public void doGet(HttpServletRequest req, HttpServletResponse res)
+            throws IOException, ServletException
+    {
+        String admissionId = req.getParameter("admissionId");
+        if(admissionId != null && !admissionId.trim().isEmpty()) {
+            res.sendRedirect("fee_payment.jsp?admissionId=" + admissionId.trim());
+        } else {
+            res.sendRedirect("new_student_colleges.jsp");
+        }
+    }
+
     public void doPost(HttpServletRequest req, HttpServletResponse res)
             throws IOException, ServletException
     {
@@ -32,39 +44,44 @@ public class FeePaymentServlet extends HttpServlet
                 return;
             }
 
+            // Validate Payment Amount
+            double amount = 50000.00;
+            String amtParam = req.getParameter("amount");
+            if(amtParam != null && !amtParam.trim().isEmpty()) {
+                try {
+                    double parsed = Double.parseDouble(amtParam.trim());
+                    if(parsed <= 0) {
+                        out.println("<h2>Invalid Payment Amount</h2>");
+                        return;
+                    }
+                    amount = parsed;
+                } catch(NumberFormatException e) {
+                    out.println("<h2>Invalid Payment Amount</h2>");
+                    return;
+                }
+            }
 
             // Database Connection
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-
-            con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
+            con = DBConnection.getConnection();
             con.setAutoCommit(false);
 
-
-            // Check Admission Status
+            // Check Admission Status & Decided Fee
             String checkSql =
-                "SELECT STATUS " +
-                "FROM ADMISSION " +
-                "WHERE ADMISSION_ID=?";
-
+                "SELECT A.STATUS, NVL(A.ADMISSION_FEE, NVL(C.DEFAULT_ADMISSION_FEE, 50000)) AS DECIDED_FEE " +
+                "FROM ADMISSION A " +
+                "JOIN COLLEGE C ON A.COLLEGE_ID = C.COLLEGE_ID " +
+                "WHERE A.ADMISSION_ID=?";
 
             PreparedStatement checkPs =
                 con.prepareStatement(checkSql);
-
 
             checkPs.setInt(
                 1,
                 Integer.parseInt(admissionId)
             );
 
-
             ResultSet rs =
                 checkPs.executeQuery();
-
 
             // Admission Not Found
             if(!rs.next())
@@ -89,14 +106,15 @@ public class FeePaymentServlet extends HttpServlet
                 return;
             }
 
-
             String admissionStatus =
                 rs.getString("STATUS");
-
+            double decidedFee = rs.getDouble("DECIDED_FEE");
+            if(decidedFee > 0) {
+                amount = decidedFee;
+            }
 
             rs.close();
             checkPs.close();
-
 
             // Payment only for APPROVED admission
             if(!"APPROVED".equalsIgnoreCase(admissionStatus))
@@ -126,7 +144,6 @@ public class FeePaymentServlet extends HttpServlet
                 return;
             }
 
-
             // Generate Transaction ID
             if(transactionId == null ||
                transactionId.trim().equals(""))
@@ -134,11 +151,6 @@ public class FeePaymentServlet extends HttpServlet
                 transactionId =
                     "TXN" + System.currentTimeMillis();
             }
-
-
-            // Admission Fee
-            double amount = 50000.00;
-
 
             // Insert Payment
             String paymentSql =
@@ -150,39 +162,32 @@ public class FeePaymentServlet extends HttpServlet
                 "(FEE_PAYMENT_SEQ.NEXTVAL, ?, ?, " +
                 "SYSDATE, ?, ?, 'SUCCESS')";
 
-
             PreparedStatement paymentPs =
                 con.prepareStatement(paymentSql);
-
 
             paymentPs.setInt(
                 1,
                 Integer.parseInt(admissionId)
             );
 
-
             paymentPs.setDouble(
                 2,
                 amount
             );
-
 
             paymentPs.setString(
                 3,
                 paymentMethod
             );
 
-
             paymentPs.setString(
                 4,
                 transactionId
             );
 
-
             paymentPs.executeUpdate();
 
             paymentPs.close();
-
 
             // Update Admission Status
             String updateSql =
@@ -190,25 +195,20 @@ public class FeePaymentServlet extends HttpServlet
                 "SET STATUS='CONFIRMED' " +
                 "WHERE ADMISSION_ID=?";
 
-
             PreparedStatement updatePs =
                 con.prepareStatement(updateSql);
-
 
             updatePs.setInt(
                 1,
                 Integer.parseInt(admissionId)
             );
 
-
             updatePs.executeUpdate();
 
             updatePs.close();
 
-
             // Commit
             con.commit();
-
 
             /*
              * IMPORTANT
@@ -241,7 +241,6 @@ public class FeePaymentServlet extends HttpServlet
             {
             }
 
-
             out.println("<html>");
 
             out.println("<head>");
@@ -252,26 +251,21 @@ public class FeePaymentServlet extends HttpServlet
 
             out.println("</head>");
 
-
             out.println("<body>");
 
             out.println("<h2>Payment Error</h2>");
-
 
             out.println(
                 "<p>" + e.getMessage() + "</p>"
             );
 
-
             out.println("<br>");
-
 
             out.println(
                 "<a href='fee_payment.jsp?admissionId="
                 + admissionId
                 + "'>Try Again</a>"
             );
-
 
             out.println("</body>");
 

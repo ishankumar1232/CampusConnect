@@ -23,9 +23,7 @@ public class NewStudentAdmissionRequest
         PrintWriter pw =
             res.getWriter();
         
-     // ======================================
      // CHECK ADMISSION REQUEST STATUS
-     // ======================================
 
      SystemSettingDAO settingDAO = new SystemSettingDAO();
 
@@ -66,12 +64,10 @@ public class NewStudentAdmissionRequest
         String courseId =
             req.getParameter("courseId");
 
-
         try
         {
             Admission a =
                 new Admission();
-
 
             a.setCollegeId(
                 Integer.parseInt(collegeId)
@@ -87,16 +83,13 @@ public class NewStudentAdmissionRequest
                 Integer.parseInt(courseId)
             );
 
-
             boolean x =
                 a.InsertMethod();
-
 
             if(x)
             {
                 int admissionId =
                     a.getAdmissionId();
-
 
                 /*
                  * Send generated Admission ID
@@ -122,7 +115,6 @@ public class NewStudentAdmissionRequest
                     "collegeId",
                     collegeId
                 );
-
 
                 RequestDispatcher rd =
                     req.getRequestDispatcher(

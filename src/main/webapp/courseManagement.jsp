@@ -1,3 +1,4 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.sql.*" %>
 
 <%
@@ -15,6 +16,7 @@
 <head>
 
     <title>Course Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
 
@@ -118,15 +120,13 @@
     Course Management
 </div>
 
-
 <div class="back">
 
     <a href="collegeAdminDashboard.jsp">
-        ← Back to Dashboard
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
     </a>
 
 </div>
-
 
 <!-- Add Course -->
 
@@ -139,7 +139,6 @@
         <input type="hidden"
                name="action"
                value="add">
-
 
         <select name="departmentId" required>
 
@@ -199,12 +198,10 @@
 
         </select>
 
-
         <input type="text"
                name="courseName"
                placeholder="Course Name"
                required>
-
 
         <button type="submit">
             Add Course
@@ -213,7 +210,6 @@
     </form>
 
 </div>
-
 
 <!-- Course List -->
 

@@ -1,22 +1,17 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.sql.ResultSet" %>
 
 <%@ page import="com.campusconnect.bean.RecruitmentDrive" %>
 
-
-
 <%
 
     response.setCharacterEncoding("UTF-8");
-
-
 
     Integer companyId = (Integer) session.getAttribute("companyId");
 
     String companyName = (String) session.getAttribute("companyName");
 
     String email = (String) session.getAttribute("email");
-
-
 
     if (companyId == null) {
 
@@ -26,15 +21,11 @@
 
     }
 
-
-
     if (companyName == null) {
 
         companyName = "Company";
 
     }
-
-
 
     String driveUpdateMessage = (String) session.getAttribute("driveUpdateMessage");
     if (driveUpdateMessage != null) {
@@ -51,8 +42,6 @@
         email = "";
 
     }
-
-
 
     String logoPath = null;
 
@@ -92,7 +81,7 @@
                 companyLogoName.contains("tata consultancy")) {
             logoPath = "images/company/tcs-logo.png";
         } else {
-            logoPath = "images/company/tcs-logo.png";
+            logoPath = "images/company/default-logo.png";
         }
     }
 
@@ -112,51 +101,35 @@
     }
 
     String logoUrl = logoPath + (logoPath.contains("?") ? "&" : "?") + "v=2";
-    String defaultLogoUrl = request.getContextPath() + "/images/company/tcs-logo.png";
+    String defaultLogoUrl = request.getContextPath() + "/images/company/default-logo.png";
     RecruitmentDrive r = new RecruitmentDrive();
 
     r.setCompanyId(companyId);
-
-
 
     ResultSet rs = r.SelectMethod();
 
 %>
 
-
-
 <!DOCTYPE html>
 
 <html>
 
-
-
 <head>
-
-
 
     <meta charset="UTF-8">
 
-
-
     <title>Recruitment Drives</title>
-
-
 
         <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 <style>
 
-
-
         * {
 
             box-sizing: border-box;
 
         }
-
-
 
         body {
 
@@ -170,11 +143,7 @@
 
         }
 
-
-
         /* ================= HEADER ================= */
-
-
 
         .top-header {
 
@@ -184,8 +153,6 @@
 
             border-bottom: 1px solid #dce5ee;
 
-
-
             display: flex;
 
             justify-content: space-between;
@@ -193,8 +160,6 @@
             align-items: center;
 
         }
-
-
 
         .header-title h1 {
 
@@ -206,15 +171,11 @@
 
         }
 
-
-
         .header-title p {
 
             margin-top: 10px;
 
             margin-bottom: 0;
-
-
 
             color: #6785a5;
 
@@ -222,15 +183,11 @@
 
         }
 
-
-
         .dashboard-link {
 
             color: #087cf5;
 
             text-decoration: none;
-
-
 
             font-size: 18px;
 
@@ -238,19 +195,13 @@
 
         }
 
-
-
         .dashboard-link:hover {
 
             text-decoration: underline;
 
         }
 
-
-
         /* ================= MAIN ================= */
-
-
 
         .container {
 
@@ -260,15 +211,9 @@
 
         }
 
-
-
         /* ================= COMPANY BANNER ================= */
 
-
-
         .company-banner {
-
-
 
             background: linear-gradient(
                 110deg,
@@ -276,15 +221,9 @@
                 #087ff0
             );
 
-
-
             border-radius: 24px;
 
-
-
             padding: 34px 48px;
-
-
 
             display: flex;
 
@@ -292,51 +231,31 @@
 
             justify-content: space-between;
 
-
-
             color: white;
-
-
 
             box-shadow: 0 12px 30px rgba(0, 100, 200, 0.15);
 
         }
 
-
-
         .company-left {
-
-
 
             display: flex;
 
             align-items: center;
-
-
 
             gap: 28px;
 
         }
 
-
-
         .company-logo {
-
-
 
             width: 116px;
 
             height: 116px;
 
-
-
             background: white;
 
-
-
             border-radius: 20px;
-
-
 
             display: flex;
 
@@ -344,1021 +263,567 @@
 
             justify-content: center;
 
-
-
             overflow: hidden;
 
         }
 
-
-
         .company-logo img {
-
-
 
             max-width: 90px;
 
             max-height: 90px;
 
-
-
             object-fit: contain;
 
         }
 
-
-
         .company-logo-text {
-
-
 
             font-size: 32px;
 
             font-weight: bold;
 
-
-
             color: #087cf5;
 
         }
 
-
-
         .company-info h2 {
-
-
 
             margin: 0;
 
-
-
             font-size: 34px;
-
-
 
             color: white;
 
         }
 
-
-
         .company-info p {
-
-
 
             margin-top: 8px;
 
             margin-bottom: 0;
 
-
-
             font-size: 18px;
-
-
 
             color: #e9f4ff;
 
         }
 
-
-
         .account-status {
-
-
 
             border: 1px solid rgba(255,255,255,0.7);
 
-
-
             border-radius: 30px;
-
-
 
             padding: 13px 25px;
 
-
-
             font-size: 16px;
-
-
 
             font-weight: bold;
 
         }
 
-
-
         /* ================= MAIN CARD ================= */
-
-
 
         .main-card {
 
-
-
             margin-top: 35px;
-
-
 
             background: white;
 
-
-
             border-radius: 24px;
-
-
 
             border: 1px solid #dce7f1;
 
-
-
             overflow: hidden;
-
-
 
             box-shadow: 0 5px 18px rgba(20, 80, 130, 0.06);
 
         }
 
-
-
         .card-header {
 
-
-
             padding: 32px 38px;
-
-
 
             border-bottom: 1px solid #e2eaf2;
 
         }
 
-
-
         .card-header h2 {
-
-
 
             margin: 0;
 
-
-
             font-size: 30px;
-
-
 
             color: #104875;
 
         }
 
-
-
         .card-header p {
-
-
 
             margin-top: 8px;
 
             margin-bottom: 0;
 
-
-
             color: #6d88a5;
-
-
 
             font-size: 17px;
 
         }
 
-
-
         /* ================= DRIVE CARD ================= */
-
-
 
         .drive-card {
 
-
-
             margin: 0;
-
-
 
             border-bottom: 1px solid #e1e9f1;
 
         }
 
-
-
         .drive-card:last-child {
-
-
 
             border-bottom: none;
 
         }
 
-
-
         .drive-top {
-
-
 
             padding: 30px 36px;
 
-
-
             display: flex;
 
-
-
             align-items: center;
-
-
 
             justify-content: space-between;
 
         }
 
-
-
         .drive-title-section {
-
-
 
             display: flex;
 
-
-
             align-items: center;
-
-
 
             gap: 20px;
 
         }
 
-
-
         .drive-icon {
-
-
 
             width: 58px;
 
             height: 58px;
 
-
-
             border-radius: 15px;
-
-
 
             background: #edf6ff;
 
-
-
             display: flex;
-
-
 
             align-items: center;
 
             justify-content: center;
 
-
-
             color: #087cf5;
 
-
-
             font-size: 25px;
-
-
 
             font-weight: bold;
 
         }
 
-
-
         .drive-title h3 {
-
-
 
             margin: 0;
 
-
-
             font-size: 27px;
-
-
 
             color: #0d4777;
 
         }
 
-
-
         .drive-meta {
-
-
 
             margin-top: 7px;
 
-
-
             color: #6985a2;
-
-
 
             font-size: 16px;
 
         }
 
-
-
         /* ================= STATUS ================= */
-
-
 
         .status-active {
 
-
-
             background: #e7f8ef;
-
-
 
             color: #07884e;
 
-
-
             border: 1px solid #bdebd2;
-
-
 
             padding: 10px 18px;
 
-
-
             border-radius: 25px;
 
-
-
             font-size: 15px;
-
-
 
             font-weight: bold;
 
         }
-
-
 
         .status-closed {
 
-
-
             background: #fff0f0;
-
-
 
             color: #d93025;
 
-
-
             border: 1px solid #f3c5c5;
-
-
 
             padding: 10px 18px;
 
-
-
             border-radius: 25px;
 
-
-
             font-size: 15px;
-
-
 
             font-weight: bold;
 
         }
 
-
-
         /* ================= DESCRIPTION ================= */
 
-
-
         .description-section {
-
-
 
             padding: 0 36px 28px 36px;
 
         }
 
-
-
         .description-section h4 {
-
-
 
             margin: 0 0 12px 0;
 
-
-
             color: #0d4777;
-
-
 
             font-size: 18px;
 
         }
 
-
-
         .description-section p {
-
-
 
             margin: 0;
 
-
-
             color: #6684a2;
 
-
-
             font-size: 16px;
-
-
 
             line-height: 1.6;
 
         }
 
-
-
         /* ================= DETAILS ================= */
-
-
 
         .details-grid {
 
-
-
             padding: 0 36px 28px 36px;
-
-
 
             display: grid;
 
-
-
             grid-template-columns: repeat(4, 1fr);
-
-
 
             gap: 18px;
 
         }
 
-
-
         .detail-box {
-
-
 
             background: #fbfdff;
 
-
-
             border: 1px solid #dce8f3;
 
-
-
             border-radius: 14px;
-
-
 
             padding: 20px;
 
         }
 
-
-
         .detail-label {
-
-
 
             color: #6d88a5;
 
-
-
             font-size: 15px;
-
-
 
             margin-bottom: 8px;
 
         }
 
-
-
         .detail-value {
-
-
 
             color: #073e6c;
 
-
-
             font-size: 18px;
 
-
-
             font-weight: bold;
-
-
 
             word-break: break-word;
 
         }
 
-
-
         /* ================= SKILLS ================= */
 
-
-
         .skills-section {
-
-
 
             padding: 0 36px 28px 36px;
 
         }
 
-
-
         .skills-section h4 {
-
-
 
             margin: 0 0 10px 0;
 
-
-
             color: #0d4777;
-
-
 
             font-size: 18px;
 
         }
 
-
-
         .skills-section p {
-
-
 
             margin: 0;
 
-
-
             color: #6684a2;
-
-
 
             font-size: 16px;
 
         }
 
-
-
         /* ================= DEADLINE ================= */
 
-
-
         .deadline-section {
-
-
 
             padding: 0 36px 30px 36px;
 
         }
 
-
-
         .deadline-section h4 {
-
-
 
             margin: 0 0 10px 0;
 
-
-
             color: #0d4777;
-
-
 
             font-size: 18px;
 
         }
 
-
-
         .deadline-section p {
-
-
 
             margin: 0;
 
-
-
             color: #6684a2;
-
-
 
             font-size: 16px;
 
         }
 
-
-
         /* ================= ACTIONS ================= */
-
-
 
         .actions {
 
-
-
             padding: 22px 36px;
-
-
 
             border-top: 1px solid #e1e9f1;
 
-
-
             display: flex;
 
-
-
             gap: 12px;
-
-
 
             flex-wrap: wrap;
 
         }
 
-
-
         .action-btn {
-
-
 
             display: inline-block;
 
-
-
             padding: 11px 20px;
-
-
 
             border-radius: 9px;
 
-
-
             text-decoration: none;
-
-
 
             font-size: 15px;
 
-
-
             font-weight: bold;
-
-
 
             transition: 0.2s;
 
         }
 
-
-
         /* EDIT */
-
-
 
         .edit-btn {
 
-
-
             color: #087cf5;
 
-
-
             background: #edf6ff;
-
-
 
             border: 1px solid #c5e1fb;
 
         }
 
-
-
         .edit-btn:hover {
-
-
 
             background: #dcefff;
 
         }
 
-
-
         /* CLOSE */
-
-
 
         .close-btn {
 
-
-
             color: #d93025;
 
-
-
             background: #fff2f2;
-
-
 
             border: 1px solid #f1c8c8;
 
         }
 
-
-
         .close-btn:hover {
-
-
 
             background: #ffe3e3;
 
         }
 
-
-
         /* SELECT COLLEGES */
-
-
 
         .college-btn {
 
-
-
             color: #087c49;
 
-
-
             background: #eaf9f1;
-
-
 
             border: 1px solid #bfe9d2;
 
         }
 
-
-
         .college-btn:hover {
-
-
 
             background: #d9f5e6;
 
         }
 
-
-
         /* ================= CLOSED DRIVE INFO ================= */
-
-
 
         .closed-info {
 
-
-
             padding: 11px 20px;
-
-
 
             border-radius: 9px;
 
-
-
             background: #fff7e8;
-
-
 
             border: 1px solid #f4d59a;
 
-
-
             color: #a56800;
 
-
-
             font-size: 14px;
-
-
 
             font-weight: bold;
 
         }
 
-
-
         /* ================= BOTTOM ================= */
-
-
 
         .bottom-actions {
 
-
-
             margin-top: 28px;
-
-
 
             display: flex;
 
-
-
             justify-content: space-between;
-
-
 
             align-items: center;
 
         }
 
-
-
         .create-btn {
-
-
 
             display: inline-block;
 
-
-
             background: #087ff0;
-
-
 
             color: white;
 
-
-
             padding: 14px 24px;
-
-
 
             border-radius: 10px;
 
-
-
             text-decoration: none;
-
-
 
             font-size: 16px;
 
-
-
             font-weight: bold;
-
-
 
             box-shadow: 0 7px 18px rgba(0, 120, 240, 0.2);
 
         }
 
-
-
         .create-btn:hover {
-
-
 
             background: #066ed2;
 
         }
 
-
-
         .bottom-dashboard {
-
-
 
             color: #087cf5;
 
-
-
             text-decoration: none;
 
-
-
             font-size: 16px;
-
-
 
             font-weight: bold;
 
         }
 
-
-
         .bottom-dashboard:hover {
-
-
 
             text-decoration: underline;
 
         }
 
-
-
         /* ================= NO DATA ================= */
-
-
 
         .no-data {
 
-
-
             padding: 60px;
-
-
 
             text-align: center;
 
-
-
             color: #6d88a5;
-
-
 
             font-size: 18px;
 
         }
 
-
-
         /* ================= RESPONSIVE ================= */
-
-
 
         @media(max-width: 1000px) {
 
-
-
             .container {
-
-
 
                 width: 94%;
 
             }
 
-
-
             .details-grid {
-
-
 
                 grid-template-columns: repeat(2, 1fr);
 
             }
 
-
-
             .company-banner {
-
-
 
                 padding: 25px;
 
@@ -1366,21 +831,13 @@
 
         }
 
-
-
         @media(max-width: 700px) {
 
-
-
             .top-header {
-
-
 
                 padding: 25px;
 
             }
-
-
 
             .top-header,
 
@@ -1390,55 +847,33 @@
 
             .bottom-actions {
 
-
-
                 flex-direction: column;
 
-
-
                 align-items: flex-start;
-
-
 
                 gap: 20px;
 
             }
 
-
-
             .details-grid {
-
-
 
                 grid-template-columns: 1fr;
 
             }
 
-
-
             .container {
-
-
 
                 width: 94%;
 
             }
 
-
-
             .actions {
-
-
 
                 flex-wrap: wrap;
 
             }
 
         }
-
-
-
-
 
         /* =========================================================
            COMPANY PORTAL SIDEBAR - ADDED ONLY
@@ -1561,7 +996,6 @@
             .cc-page { margin-left: 0; }
         }
 
-    
         /* Centered update confirmation popup */
         .drive-message-overlay {
             position: fixed;
@@ -1818,16 +1252,9 @@
 
     </style>
 
-
-
 </head>
 
-
-
-
-
 <body>
-
 
     <!-- =====================================================
          COMPANY PORTAL SIDEBAR - ADDED ONLY
@@ -1912,22 +1339,11 @@
 
     <div class="cc-page">
 
-
-
-
-
-
 <!-- ================= HEADER ================= -->
-
-
 
 <div class="top-header">
 
-
-
     <div class="header-title">
-
-
 
         <h1>
 
@@ -1935,21 +1351,13 @@
 
         </h1>
 
-
-
         <p>
 
             Manage and track your company's recruitment opportunities.
 
         </p>
 
-
-
     </div>
-
-
-
-
 
     <a
 
@@ -1957,45 +1365,19 @@
 
         class="dashboard-link">
 
-
-
         Back to Dashboard
-
-
 
     </a>
 
-
-
 </div>
-
-
-
-
-
-
 
 <div class="container">
 
-
-
-
-
     <!-- ================= COMPANY BANNER ================= -->
-
-
 
     <div class="company-banner">
 
-
-
-
-
         <div class="company-left">
-
-
-
-
 
             <div class="company-logo">
 
@@ -2007,85 +1389,37 @@
 
             </div>
 
-
-
-
-
             <div class="company-info">
-
-
 
                 <h2>
 
-
-
                     <%= companyName %>
-
-
 
                 </h2>
 
-
-
                 <p>
-
-
 
                     <%= email %>
 
-
-
                 </p>
-
-
 
             </div>
 
-
-
-
-
         </div>
-
-
-
-
 
         <div class="account-status">
 
-
-
             ACTIVE ACCOUNT
-
-
 
         </div>
 
-
-
-
-
     </div>
-
-
-
-
-
-
 
     <!-- ================= MAIN CARD ================= -->
 
-
-
     <div class="main-card">
 
-
-
-
-
         <div class="card-header">
-
-
 
             <h2>
 
@@ -2093,441 +1427,211 @@
 
             </h2>
 
-
-
             <p>
 
                 View, edit and manage all recruitment drives created by your company.
 
             </p>
 
-
-
         </div>
-
-
-
-
-
-
 
 <%
 
-
-
     boolean found = false;
-
-
 
     while (rs != null && rs.next()) {
 
-
-
         found = true;
-
-
-
-
 
         int currentDriveId =
 
                 rs.getInt("DRIVE_ID");
 
-
-
         String driveType =
 
                 rs.getString("DRIVE_TYPE");
-
-
 
         String jobTitle =
 
                 rs.getString("JOB_TITLE");
 
-
-
         String description =
 
                 rs.getString("DESCRIPTION");
-
-
 
         int vacancy =
 
                 rs.getInt("VACANCY");
 
-
-
         double eligibilityCgpa =
 
                 rs.getDouble("ELIGIBILITY_CGPA");
-
-
 
         String requiredBranch =
 
                 rs.getString("REQUIRED_BRANCH");
 
-
-
         String requiredSkills =
 
                 rs.getString("REQUIRED_SKILLS");
-
-
 
         double salary =
 
                 rs.getDouble("SALARY");
 
-
-
         java.sql.Date deadline =
 
                 rs.getDate("DEADLINE");
-
-
 
         String status =
 
                 rs.getString("STATUS");
 
-
-
 %>
-
-
-
-
 
         <!-- ================= DRIVE CARD ================= -->
 
-
-
         <div class="drive-card">
-
-
-
-
 
             <!-- DRIVE TOP -->
 
-
-
             <div class="drive-top">
 
-
-
-
-
                 <div class="drive-title-section">
-
-
-
-
 
                     <div class="drive-icon" aria-hidden="true">
                         <i class="fa-solid fa-briefcase"></i>
                     </div>
 
-
-
-
-
                     <div class="drive-title">
-
-
 
                         <h3>
 
-
-
                             <%= jobTitle %>
-
-
 
                         </h3>
 
-
-
-
-
                         <div class="drive-meta">
-
-
 
                             <%= companyName %>
 
-
-
                             &nbsp; &#8226; &nbsp;
-
-
 
                             <%= driveType %>
 
-
-
                             &nbsp; &#8226; &nbsp;
-
-
 
                             Drive ID #<%= currentDriveId %>
 
-
-
                         </div>
-
-
 
                     </div>
 
-
-
-
-
                 </div>
-
-
-
-
-
-
 
                 <!-- STATUS -->
 
-
-
                 <%
-
-
 
                     if ("ACTIVE".equalsIgnoreCase(status)) {
 
-
-
                 %>
-
-
 
                     <div class="status-active">
 
-
-
                         ACTIVE
-
-
 
                     </div>
 
-
-
                 <%
-
-
 
                     } else {
 
-
-
                 %>
-
-
 
                     <div class="status-closed">
 
-
-
                         CLOSED
 
-
-
                     </div>
-
-
 
                 <%
 
-
-
                     }
-
-
 
                 %>
 
-
-
-
-
             </div>
-
-
-
-
-
-
 
                         <!-- Key information stays visible; long text details are expandable. --><div class="details-grid">
 
-
-
-
-
                 <div class="detail-box">
 
-
-
                     <div class="detail-label">
-
-
 
                         Number of Vacancies
 
-
-
                     </div>
 
-
-
                     <div class="detail-value">
-
-
 
                         <%= vacancy %>
 
-
-
                     </div>
-
-
 
                 </div>
 
-
-
-
-
-
-
                 <div class="detail-box">
 
-
-
                     <div class="detail-label">
-
-
 
                         Minimum Eligibility CGPA
 
-
-
                     </div>
 
-
-
                     <div class="detail-value">
-
-
 
                         <%= eligibilityCgpa %>
 
-
-
                     </div>
-
-
 
                 </div>
 
-
-
-
-
-
-
                 <div class="detail-box">
 
-
-
                     <div class="detail-label">
-
-
 
                         Required Branch
 
-
-
                     </div>
 
-
-
                     <div class="detail-value">
-
-
 
                         <%= requiredBranch %>
 
-
-
                     </div>
 
-
-
                 </div>
-
-
-
-
-
-
 
                 <div class="detail-box">
 
-
-
                     <div class="detail-label">
-
-
 
                         Salary / CTC
 
-
-
                     </div>
-
-
 
                     <div class="detail-value">
 
-
-
                         &#8377;
-
-
 
                         <%= String.format("%.0f", salary) %>
 
-
-
                     </div>
-
-
 
                 </div>
 
-
-
-
-
             </div>
-
-
-
-
-
-
 
                         <details class="drive-more">
                 <summary>
@@ -2537,163 +1641,75 @@
                 </summary>
                 <div class="drive-more-content"><div class="description-section">
 
-
-
                 <h4>
-
-
 
                     Job Description
 
-
-
                 </h4>
 
-
-
                 <p>
-
-
 
                     <%= description %>
 
-
-
                 </p>
 
-
-
             </div>
-
-
-
-
-
-
 
             <div class="skills-section">
 
-
-
                 <h4>
-
-
 
                     Required Skills
 
-
-
                 </h4>
 
-
-
                 <p>
-
-
 
                     <%= requiredSkills %>
 
-
-
                 </p>
 
-
-
             </div>
-
-
-
-
-
-
 
             <div class="deadline-section">
 
-
-
                 <h4>
-
-
 
                     Application Deadline
 
-
-
                 </h4>
-
-
 
                 <p>
 
-
-
                     <%= deadline %>
-
-
 
                 </p>
 
-
-
             </div>
-
-
-
-
-
-
 
                             </div>
             </details>
 <!-- ================= ACTION BUTTONS ================= -->
 
-
-
             <div class="actions">
-
-
-
-
 
                 <!-- EDIT
 
-
-
                      Available for both ACTIVE and CLOSED
-
-
 
                 \-->
 
-
-
                 <a
-
-
 
                     href="edit-recruitment-drive.jsp?driveId=<%= currentDriveId %>"
 
-
-
                     class="action-btn edit-btn">
-
-
 
                     Edit
 
-
-
                 </a>
 
-
-
-
-
-
-
                 <%
-
-
 
                     /*
 
@@ -2705,17 +1721,9 @@
 
                      */
 
-
-
                     if ("ACTIVE".equalsIgnoreCase(status)) {
 
-
-
                 %>
-
-
-
-
 
                     <button
                         type="button"
@@ -2724,29 +1732,13 @@
                         Close Drive
                     </button>
 
-
-
-
-
                 <%
-
-
 
                     }
 
-
-
                 %>
 
-
-
-
-
-
-
                 <%
-
-
 
                     /*
 
@@ -2768,75 +1760,35 @@
 
                      */
 
-
-
                     if (
 
-
-
-                        "ACTIVE".equalsIgnoreCase(status)
-
-
+                        ("ACTIVE".equalsIgnoreCase(status) || "OPEN".equalsIgnoreCase(status))
 
                         &&
 
-
-
-                        "On Campus".equalsIgnoreCase(driveType)
-
-
+                        (driveType != null && (driveType.equalsIgnoreCase("On Campus") || driveType.equalsIgnoreCase("Campus") || driveType.equalsIgnoreCase("On-Campus")))
 
                     ) {
 
-
-
                 %>
-
-
-
-
 
                     <a
 
-
-
                         href="select-drive-colleges.jsp?driveId=<%= currentDriveId %>"
-
-
 
                         class="action-btn college-btn">
 
-
-
                         Select Colleges
-
-
 
                     </a>
 
-
-
-
-
                 <%
-
-
 
                     }
 
-
-
                 %>
 
-
-
-
-
-
-
                 <%
-
-
 
                     /*
 
@@ -2848,212 +1800,91 @@
 
                      */
 
-
-
                     if ("CLOSED".equalsIgnoreCase(status)) {
 
-
-
                 %>
-
-
-
-
 
                     <div class="closed-info">
 
-
-
                         Drive Closed
-
-
 
                     </div>
 
-
-
-
-
                 <%
-
-
 
                     }
 
-
-
                 %>
-
-
-
-
 
             </div>
 
-
-
-
-
         </div>
-
-
-
-
 
 <%
 
-
-
     }
-
-
-
-
 
     if (!found) {
 
-
-
 %>
-
-
-
-
 
         <div class="no-data">
 
-
-
             No Recruitment Drives Found.
-
-
 
         </div>
 
-
-
-
-
 <%
 
-
-
     }
-
-
-
-
 
     if (rs != null) {
 
-
-
         try {
-
-
 
             rs.close();
 
-
-
         } catch (Exception e) {
-
-
 
             // Ignore close exception
 
-
-
         }
-
-
 
     }
 
-
-
 %>
 
-
-
-
-
     </div>
-
-
-
-
-
-
 
     <!-- ================= BOTTOM ACTIONS ================= -->
 
-
-
     <div class="bottom-actions">
 
-
-
-
-
         <a
-
-
 
             href="recruitment-drive.jsp"
 
-
-
             class="create-btn">
-
-
 
             + Create New Recruitment Drive
 
-
-
         </a>
-
-
-
-
 
         <a
 
-
-
             href="company-dashboard.jsp"
-
-
 
             class="bottom-dashboard">
 
-
-
             Back to Dashboard
-
-
 
         </a>
 
-
-
-
-
     </div>
-
-
-
-
 
 </div>
 
-
-
-
-
     </div>
-
 
 <div id="closeConfirmOverlay" class="close-confirm-overlay"
      aria-hidden="true">
@@ -3134,7 +1965,5 @@
 </script>
 <% } %>
 </body>
-
-
 
 </html>

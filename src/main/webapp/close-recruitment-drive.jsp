@@ -1,3 +1,4 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="com.campusconnect.bean.RecruitmentDrive" %>
 
 <%
@@ -356,9 +357,7 @@
 
 </head>
 
-
 <body>
-
 
 <!-- ================= HEADER ================= -->
 
@@ -374,7 +373,6 @@
 
     </div>
 
-
     <a href="company-dashboard.jsp"
        class="dashboard-link">
 
@@ -384,20 +382,16 @@
 
 </div>
 
-
-
 <!-- ================= MAIN ================= -->
 
 <div class="main">
 
     <div class="result-card">
 
-
         <%
             if (result)
             {
         %>
-
 
         <!-- SUCCESS ICON -->
 
@@ -407,11 +401,9 @@
 
         </div>
 
-
         <h2>
             Recruitment Drive Closed Successfully
         </h2>
-
 
         <p class="result-message">
 
@@ -420,7 +412,6 @@
 
         </p>
 
-
         <div class="status-badge closed">
 
             <span class="status-dot"></span>
@@ -428,7 +419,6 @@
             DRIVE STATUS: CLOSED
 
         </div>
-
 
         <div class="buttons">
 
@@ -439,7 +429,6 @@
 
             </a>
 
-
             <a href="company-dashboard.jsp"
                class="btn btn-secondary">
 
@@ -449,7 +438,6 @@
 
         </div>
 
-
         <p class="note">
 
             You can view your closed recruitment drive from the
@@ -457,13 +445,11 @@
 
         </p>
 
-
         <%
             }
             else
             {
         %>
-
 
         <!-- ERROR ICON -->
 
@@ -473,11 +459,9 @@
 
         </div>
 
-
         <h2>
             Unable to Close Recruitment Drive
         </h2>
-
 
         <p class="result-message">
 
@@ -487,7 +471,6 @@
 
         </p>
 
-
         <div class="status-badge failed">
 
             <span class="status-dot"></span>
@@ -495,7 +478,6 @@
             DRIVE STATUS: NOT CLOSED
 
         </div>
-
 
         <div class="buttons">
 
@@ -506,7 +488,6 @@
 
             </a>
 
-
             <a href="company-dashboard.jsp"
                class="btn btn-secondary">
 
@@ -516,7 +497,6 @@
 
         </div>
 
-
         <p class="note">
 
             If the problem continues, please check the recruitment
@@ -524,16 +504,13 @@
 
         </p>
 
-
         <%
             }
         %>
 
-
     </div>
 
 </div>
-
 
 </body>
 

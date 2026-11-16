@@ -248,7 +248,7 @@
                 <div class="actions">
                     <% if (result) { %>
                         <a class="button button-primary" href="view-recruitment-drives.jsp">
-                            View Recruitment Drives <span aria-hidden="true">&nbsp;→</span>
+                            View Recruitment Drives <span aria-hidden="true">&nbsp;&rarr;</span>
                         </a>
                         <a class="button button-secondary" href="company-dashboard.jsp">
                             Back to Dashboard

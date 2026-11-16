@@ -10,9 +10,7 @@ import com.campusconnect.util.DBConnection;
 
 public class StudentDAO {
 
-    // ==========================================
     // GET ALL STUDENTS
-    // ==========================================
 
     public ArrayList<Student> getAllStudents() {
 
@@ -109,92 +107,58 @@ public class StudentDAO {
 
     }
 
-    // ==========================================
     // ACTIVATE STUDENT
-    // ==========================================
 
     public boolean activateStudent(int id){
 
         boolean flag=false;
+        String sql = "UPDATE STUDENT SET STATUS='ACTIVE' WHERE STUDENT_ID=?";
 
-        try{
-
-            Connection con=DBConnection.getConnection();
-
-            String sql=
-                    "UPDATE STUDENT SET STATUS='ACTIVE' WHERE STUDENT_ID=?";
-
-            PreparedStatement ps=con.prepareStatement(sql);
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1,id);
 
             int x=ps.executeUpdate();
 
             if(x>0){
-
                 flag=true;
-
             }
-
-            ps.close();
-
-            con.close();
 
         }
         catch(Exception e){
-
             e.printStackTrace();
-
         }
 
         return flag;
-
     }
 
-    // ==========================================
     // DEACTIVATE STUDENT
-    // ==========================================
 
     public boolean deactivateStudent(int id){
 
         boolean flag=false;
+        String sql = "UPDATE STUDENT SET STATUS='INACTIVE' WHERE STUDENT_ID=?";
 
-        try{
-
-            Connection con=DBConnection.getConnection();
-
-            String sql=
-                    "UPDATE STUDENT SET STATUS='INACTIVE' WHERE STUDENT_ID=?";
-
-            PreparedStatement ps=con.prepareStatement(sql);
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1,id);
 
             int x=ps.executeUpdate();
 
             if(x>0){
-
                 flag=true;
-
             }
-
-            ps.close();
-
-            con.close();
 
         }
         catch(Exception e){
-
             e.printStackTrace();
-
         }
 
         return flag;
-
     }
- // ==========================================
  // GET STUDENT BY ID
- // ==========================================
 
  public Student getStudentById(int id) {
 

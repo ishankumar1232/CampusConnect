@@ -4,7 +4,6 @@
 
 <%@ page import="java.sql.*" %>
 
-
 <%
 
     String admissionId =
@@ -12,7 +11,6 @@
 
     String email =
         request.getParameter("email");
-
 
     String status = "";
 
@@ -24,8 +22,9 @@
 
     String admissionDate = "";
 
-    boolean found = false;
+    double decidedAdmissionFee = 50000.0;
 
+    boolean found = false;
 
     // Payment details
 
@@ -39,7 +38,6 @@
 
     String transactionId = "";
 
-
     if(admissionId != null &&
        !admissionId.trim().equals(""))
     {
@@ -50,14 +48,12 @@
 
         ResultSet rs = null;
 
-
         try
         {
 
             Class.forName(
                 "oracle.jdbc.driver.OracleDriver"
             );
-
 
             con = DriverManager.getConnection(
 
@@ -68,7 +64,6 @@
                 "campus123"
 
             );
-
 
             /*
              * Get admission details
@@ -82,6 +77,7 @@
                 "A.APPLICANT_NAME, " +
                 "A.ADMISSION_DATE, " +
                 "A.STATUS, " +
+                "NVL(A.ADMISSION_FEE, NVL(C.DEFAULT_ADMISSION_FEE, 50000)) AS DECIDED_FEE, " +
                 "C.COLLEGE_NAME, " +
                 "CO.COURSE_NAME " +
                 "FROM ADMISSION A " +
@@ -90,7 +86,6 @@
                 "JOIN COURSE CO " +
                 "ON A.APPLICANT_COURSE_ID = CO.COURSE_ID " +
                 "WHERE A.ADMISSION_ID=?";
-
 
             if(email != null &&
                !email.trim().equals(""))
@@ -101,6 +96,7 @@
                     "A.APPLICANT_NAME, " +
                     "A.ADMISSION_DATE, " +
                     "A.STATUS, " +
+                    "NVL(A.ADMISSION_FEE, NVL(C.DEFAULT_ADMISSION_FEE, 50000)) AS DECIDED_FEE, " +
                     "C.COLLEGE_NAME, " +
                     "CO.COURSE_NAME " +
                     "FROM ADMISSION A " +
@@ -113,15 +109,12 @@
 
             }
 
-
             ps = con.prepareStatement(sql);
-
 
             ps.setInt(
                 1,
                 Integer.parseInt(admissionId)
             );
-
 
             if(email != null &&
                !email.trim().equals(""))
@@ -132,31 +125,32 @@
                 );
             }
 
-
             rs = ps.executeQuery();
-
 
             if(rs.next())
             {
 
                 found = true;
 
-
                 studentName =
                     rs.getString("APPLICANT_NAME");
-
 
                 collegeName =
                     rs.getString("COLLEGE_NAME");
 
-
                 courseName =
                     rs.getString("COURSE_NAME");
-
 
                 status =
                     rs.getString("STATUS");
 
+                decidedAdmissionFee =
+                    rs.getDouble("DECIDED_FEE");
+
+                if(decidedAdmissionFee <= 0)
+                {
+                    decidedAdmissionFee = 50000.0;
+                }
 
                 if(rs.getDate("ADMISSION_DATE") != null)
                 {
@@ -166,14 +160,11 @@
 
                 }
 
-
             }
-
 
             rs.close();
 
             ps.close();
-
 
             /*
              * Get payment details
@@ -194,20 +185,16 @@
                     "WHERE ADMISSION_ID=? " +
                     "ORDER BY PAYMENT_ID DESC";
 
-
                 PreparedStatement paymentPs =
                     con.prepareStatement(paymentSql);
-
 
                 paymentPs.setInt(
                     1,
                     Integer.parseInt(admissionId)
                 );
 
-
                 ResultSet paymentRs =
                     paymentPs.executeQuery();
-
 
                 if(paymentRs.next())
                 {
@@ -216,7 +203,6 @@
                         String.valueOf(
                             paymentRs.getDouble("AMOUNT")
                         );
-
 
                     if(paymentRs.getDate("PAYMENT_DATE") != null)
                     {
@@ -228,18 +214,15 @@
 
                     }
 
-
                     paymentMethod =
                         paymentRs.getString(
                             "PAYMENT_METHOD"
                         );
 
-
                     transactionId =
                         paymentRs.getString(
                             "TRANSACTION_ID"
                         );
-
 
                     paymentStatus =
                         paymentRs.getString(
@@ -247,7 +230,6 @@
                         );
 
                 }
-
 
                 paymentRs.close();
 
@@ -278,7 +260,6 @@
             {
             }
 
-
             try
             {
                 if(ps != null)
@@ -287,7 +268,6 @@
             catch(Exception e)
             {
             }
-
 
             try
             {
@@ -304,28 +284,22 @@
 
 %>
 
-
 <!DOCTYPE html>
 
 <html lang="en">
-
 
 <head>
 
 <meta charset="UTF-8">
 
-
 <meta name="viewport"
       content="width=device-width, initial-scale=1.0">
-
 
 <title>
     Track Admission | CampusConnect
 </title>
 
-
 <style>
-
 
 *{
 
@@ -339,7 +313,6 @@
 
 }
 
-
 body{
 
     background:#f4f7fb;
@@ -347,7 +320,6 @@ body{
     color:#26364f;
 
 }
-
 
 /* HEADER */
 
@@ -372,7 +344,6 @@ body{
 
 }
 
-
 .logo{
 
     font-size:27px;
@@ -381,13 +352,11 @@ body{
 
 }
 
-
 .logo span{
 
     color:#a9d0ff;
 
 }
-
 
 .home-btn{
 
@@ -405,13 +374,11 @@ body{
 
 }
 
-
 .home-btn:hover{
 
     background:rgba(255,255,255,0.15);
 
 }
-
 
 /* MAIN */
 
@@ -425,7 +392,6 @@ body{
 
 }
 
-
 /* TITLE */
 
 .title{
@@ -435,7 +401,6 @@ body{
     margin-bottom:30px;
 
 }
-
 
 .title h1{
 
@@ -447,7 +412,6 @@ body{
 
 }
 
-
 .title p{
 
     color:#718096;
@@ -455,7 +419,6 @@ body{
     font-size:15px;
 
 }
-
 
 /* SEARCH CARD */
 
@@ -477,7 +440,6 @@ body{
 
 }
 
-
 .search-card h2{
 
     color:#173c76;
@@ -488,7 +450,6 @@ body{
 
 }
 
-
 .search-form{
 
     display:flex;
@@ -496,7 +457,6 @@ body{
     gap:12px;
 
 }
-
 
 .search-form input{
 
@@ -514,7 +474,6 @@ body{
 
 }
 
-
 .search-form input:focus{
 
     border-color:#1769e0;
@@ -524,7 +483,6 @@ body{
         rgba(23,105,224,0.10);
 
 }
-
 
 .search-form button{
 
@@ -544,13 +502,11 @@ body{
 
 }
 
-
 .search-form button:hover{
 
     background:#0d54bd;
 
 }
-
 
 /* RESULT */
 
@@ -570,7 +526,6 @@ body{
 
 }
 
-
 /* RESULT HEADER */
 
 .result-header{
@@ -585,7 +540,6 @@ body{
 
 }
 
-
 .result-header h2{
 
     color:#173c76;
@@ -593,7 +547,6 @@ body{
     font-size:21px;
 
 }
-
 
 /* STATUS */
 
@@ -609,7 +562,6 @@ body{
 
 }
 
-
 .pending{
 
     background:#fff5d6;
@@ -617,7 +569,6 @@ body{
     color:#a36b00;
 
 }
-
 
 .approved{
 
@@ -627,7 +578,6 @@ body{
 
 }
 
-
 .rejected{
 
     background:#fdeaea;
@@ -636,7 +586,6 @@ body{
 
 }
 
-
 .confirmed{
 
     background:#e6f7ed;
@@ -644,7 +593,6 @@ body{
     color:#21854b;
 
 }
-
 
 /* DETAILS */
 
@@ -660,7 +608,6 @@ body{
 
 }
 
-
 .row{
 
     display:flex;
@@ -675,13 +622,11 @@ body{
 
 }
 
-
 .row:last-child{
 
     border-bottom:none;
 
 }
-
 
 .label{
 
@@ -690,7 +635,6 @@ body{
     font-size:13px;
 
 }
-
 
 .value{
 
@@ -703,7 +647,6 @@ body{
     text-align:right;
 
 }
-
 
 /* MESSAGE */
 
@@ -721,7 +664,6 @@ body{
 
 }
 
-
 .pending-message{
 
     background:#fff9e8;
@@ -731,7 +673,6 @@ body{
     border-left:4px solid #e4ad22;
 
 }
-
 
 .approved-message{
 
@@ -743,7 +684,6 @@ body{
 
 }
 
-
 .rejected-message{
 
     background:#fff0f0;
@@ -753,7 +693,6 @@ body{
     border-left:4px solid #d94343;
 
 }
-
 
 /* BUTTON */
 
@@ -779,13 +718,11 @@ body{
 
 }
 
-
 .pay-btn:hover{
 
     background:#0d54bd;
 
 }
-
 
 /* PAYMENT */
 
@@ -803,7 +740,6 @@ body{
 
 }
 
-
 .payment-box h3{
 
     color:#173c76;
@@ -813,7 +749,6 @@ body{
     font-size:18px;
 
 }
-
 
 .payment-success{
 
@@ -835,7 +770,6 @@ body{
 
 }
 
-
 /* NOT FOUND */
 
 .not-found{
@@ -856,7 +790,6 @@ body{
 
 }
 
-
 /* FOOTER */
 
 .footer{
@@ -875,7 +808,6 @@ body{
 
 }
 
-
 /* RESPONSIVE */
 
 @media(max-width:650px)
@@ -888,7 +820,6 @@ body{
 
     }
 
-
     .result-header{
 
         flex-direction:column;
@@ -899,7 +830,6 @@ body{
 
     }
 
-
     .row{
 
         flex-direction:column;
@@ -907,7 +837,6 @@ body{
         gap:5px;
 
     }
-
 
     .value{
 
@@ -921,21 +850,17 @@ body{
 
 </head>
 
-
 <body>
-
 
 <!-- HEADER -->
 
 <div class="header">
-
 
     <div class="logo">
 
         Campus<span>Connect</span>
 
     </div>
-
 
     <a href="index.jsp"
        class="home-btn">
@@ -944,15 +869,11 @@ body{
 
     </a>
 
-
 </div>
-
-
 
 <!-- MAIN -->
 
 <div class="container">
-
 
     <!-- TITLE -->
 
@@ -968,22 +889,17 @@ body{
 
     </div>
 
-
-
     <!-- SEARCH -->
 
     <div class="search-card">
-
 
         <h2>
             Enter Your Admission Details
         </h2>
 
-
         <form method="get"
               action="admission_status.jsp"
               class="search-form">
-
 
             <input type="text"
                    name="admissionId"
@@ -991,13 +907,11 @@ body{
                    value="<%= admissionId != null ? admissionId : "" %>"
                    required>
 
-
             <input type="email"
                    name="email"
                    placeholder="Email ID"
                    value="<%= email != null ? email : "" %>"
                    required>
-
 
             <button type="submit">
 
@@ -1005,13 +919,9 @@ body{
 
             </button>
 
-
         </form>
 
-
     </div>
-
-
 
 <%
 
@@ -1024,19 +934,15 @@ body{
 
 %>
 
-
     <!-- RESULT -->
 
     <div class="result-card">
 
-
         <div class="result-header">
-
 
             <h2>
                 Admission Details
             </h2>
-
 
 <%
 
@@ -1107,15 +1013,11 @@ body{
 
 %>
 
-
         </div>
-
-
 
         <!-- ADMISSION DETAILS -->
 
         <div class="details">
-
 
             <div class="row">
 
@@ -1129,7 +1031,6 @@ body{
 
             </div>
 
-
             <div class="row">
 
                 <span class="label">
@@ -1141,7 +1042,6 @@ body{
                 </span>
 
             </div>
-
 
             <div class="row">
 
@@ -1155,7 +1055,6 @@ body{
 
             </div>
 
-
             <div class="row">
 
                 <span class="label">
@@ -1167,7 +1066,6 @@ body{
                 </span>
 
             </div>
-
 
             <div class="row">
 
@@ -1181,7 +1079,6 @@ body{
 
             </div>
 
-
             <div class="row">
 
                 <span class="label">
@@ -1194,10 +1091,19 @@ body{
 
             </div>
 
+            <div class="row">
+
+                <span class="label">
+                    Admission Fee
+                </span>
+
+                <span class="value" style="color:#1769e0; font-size:15px; font-weight:bold;">
+                    ₹ <%= String.format("%,.2f", decidedAdmissionFee) %>
+                </span>
+
+            </div>
 
         </div>
-
-
 
 <%
 
@@ -1207,7 +1113,6 @@ body{
         {
 
 %>
-
 
         <div class="message pending-message">
 
@@ -1222,7 +1127,7 @@ body{
             <br>
 
             Please wait for the College Admin to review
-            your application.
+            your application and finalize your admission fee.
 
             <br><br>
 
@@ -1231,11 +1136,9 @@ body{
 
         </div>
 
-
 <%
 
         }
-
 
         /* APPROVED */
 
@@ -1244,33 +1147,29 @@ body{
 
 %>
 
-
         <div class="message approved-message">
 
             <b>
-                Congratulations! Your admission has been approved.
+                Congratulations! Your admission has been approved by <%= collegeName %>.
             </b>
 
             <br>
 
-            You can now complete your admission by
-            paying the required admission fee.
+            The admission fee decided for you is <strong>₹<%= String.format("%,.2f", decidedAdmissionFee) %></strong>.
+            You can now complete your admission by paying this fee.
 
         </div>
-
 
         <a href="fee_payment.jsp?admissionId=<%=admissionId%>"
            class="pay-btn">
 
-            Pay Admission Fee
+            Pay Admission Fee (₹<%= String.format("%,.0f", decidedAdmissionFee) %>)
 
         </a>
-
 
 <%
 
         }
-
 
         /* REJECTED */
 
@@ -1278,7 +1177,6 @@ body{
         {
 
 %>
-
 
         <div class="message rejected-message">
 
@@ -1297,11 +1195,9 @@ body{
 
         </div>
 
-
 <%
 
         }
-
 
         /* CONFIRMED */
 
@@ -1309,7 +1205,6 @@ body{
         {
 
 %>
-
 
         <div class="message approved-message">
 
@@ -1324,8 +1219,6 @@ body{
 
         </div>
 
-
-
 <%
 
             /*
@@ -1338,14 +1231,11 @@ body{
 
 %>
 
-
         <div class="payment-box">
-
 
             <h3>
                 Payment Details
             </h3>
-
 
             <div class="payment-success">
 
@@ -1354,9 +1244,7 @@ body{
 
             </div>
 
-
             <div class="details">
-
 
                 <div class="row">
 
@@ -1370,7 +1258,6 @@ body{
 
                 </div>
 
-
                 <div class="row">
 
                     <span class="label">
@@ -1382,7 +1269,6 @@ body{
                     </span>
 
                 </div>
-
 
                 <div class="row">
 
@@ -1396,7 +1282,6 @@ body{
 
                 </div>
 
-
                 <div class="row">
 
                     <span class="label">
@@ -1409,19 +1294,15 @@ body{
 
                 </div>
 
-
             </div>
 
-
         </div>
-
 
 <%
 
             }
 
 %>
-
 
         <!-- REGISTRATION -->
 
@@ -1432,16 +1313,13 @@ body{
 
         </a>
 
-
 <%
 
         }
 
 %>
 
-
     </div>
-
 
 <%
 
@@ -1451,7 +1329,6 @@ body{
         {
 
 %>
-
 
     <div class="not-found">
 
@@ -1464,7 +1341,6 @@ body{
 
     </div>
 
-
 <%
 
         }
@@ -1473,10 +1349,7 @@ body{
 
 %>
 
-
 </div>
-
-
 
 <!-- FOOTER -->
 
@@ -1486,7 +1359,6 @@ body{
     Campus Recruitment Management System
 
 </div>
-
 
 </body>
 

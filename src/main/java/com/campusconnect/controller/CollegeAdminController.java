@@ -11,12 +11,14 @@ import com.campusconnect.bean.SystemSetting;
 
 public class CollegeAdminController extends HttpServlet {
 
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException {
+        res.sendRedirect(req.getContextPath() + "/collegeAdminRegister.jsp");
+    }
+
     public void doPost(HttpServletRequest req, HttpServletResponse res)
             throws IOException, ServletException {
-
-        res.setContentType("text/html");
-
-        PrintWriter pw = res.getWriter();
 
         String name = req.getParameter("name");
         String email = req.getParameter("email");
@@ -24,68 +26,45 @@ public class CollegeAdminController extends HttpServlet {
         String college = req.getParameter("collegeId");
 
         try {
-        	
-        	// ======================================
-        	// CHECK COLLEGE REGISTRATION STATUS
-        	// ======================================
 
-        	SystemSettingDAO settingDAO = new SystemSettingDAO();
+            // CHECK COLLEGE REGISTRATION STATUS
 
-        	SystemSetting setting = settingDAO.getSystemSettings();
+            SystemSettingDAO settingDAO = new SystemSettingDAO();
 
-        	if (setting != null &&
-        	    "OFF".equalsIgnoreCase(setting.getCollegeRegistration())) {
+            SystemSetting setting = settingDAO.getSystemSettings();
 
-        	    pw.println("<html>");
-        	    pw.println("<body>");
+            if (setting != null &&
+                "OFF".equalsIgnoreCase(setting.getCollegeRegistration())) {
 
-        	    pw.println("<h2>College Registration Disabled</h2>");
+                res.sendRedirect(req.getContextPath() + "/collegeAdminRegister.jsp?error=disabled");
+                return;
+            }
 
-        	    pw.println("<p>");
-        	    pw.println("College Registration has been disabled by Super Admin.");
-        	    pw.println("</p>");
-
-        	    pw.println("<a href='index.jsp'>Back</a>");
-
-        	    pw.println("</body>");
-        	    pw.println("</html>");
-
-        	    return;
-        	}
+            if (college == null || college.trim().isEmpty()) {
+                res.sendRedirect(req.getContextPath() + "/collegeAdminRegister.jsp?error=failed");
+                return;
+            }
 
             CollegeAdmin admin = new CollegeAdmin();
 
             admin.setName(name);
             admin.setEmail(email);
             admin.setPassword(password);
-            admin.setCollegeId(Integer.parseInt(college));
+            admin.setCollegeId(Integer.parseInt(college.trim()));
 
             boolean x = admin.InsertMethod();
 
             if(x) {
-
-                pw.println("<html><body>");
-                pw.println("<h2>College Admin Registration Successful</h2>");
-                pw.println("<a href='collegeAdminLogin.jsp'>Login</a>");
-                pw.println("</body></html>");
-
+                res.sendRedirect(req.getContextPath() + "/collegeAdminLogin.jsp?success=registered");
             }
             else {
-
-                pw.println("<html><body>");
-                pw.println("<h2>College Admin Registration Failed</h2>");
-                pw.println("</body></html>");
-
+                res.sendRedirect(req.getContextPath() + "/collegeAdminRegister.jsp?error=failed");
             }
 
         }
         catch(Exception e) {
-
-            pw.println("<html><body>");
-            pw.println("<h2>Registration Error</h2>");
-            pw.println("<p>" + e + "</p>");
-            pw.println("</body></html>");
-
+            e.printStackTrace();
+            res.sendRedirect(req.getContextPath() + "/collegeAdminRegister.jsp?error=exception");
         }
     }
 }

@@ -1,6 +1,7 @@
 package com.campusconnect.bean;
 
 import java.sql.*;
+import com.campusconnect.util.DBConnection;
 
 public class StudentResume
 {
@@ -53,99 +54,55 @@ public class StudentResume
         this.uploadedDate = uploadedDate;
     }
 
-
     // ADD
 
     public boolean InsertMethod()
     {
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+        String idSql = "SELECT NVL(MAX(RESUME_ID),0)+1 FROM RESUME";
+        String insertSql =
+            "INSERT INTO RESUME " +
+            "(RESUME_ID, STUDENT_ID, RESUME_FILE, UPLOADED_DATE) " +
+            "VALUES (?, ?, ?, SYSDATE)";
 
-        try
+        try (Connection con = DBConnection.getConnection();
+             Statement stmt = con.createStatement();
+             ResultSet rs = stmt.executeQuery(idSql))
         {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-
-            con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
-            Statement stmt = con.createStatement();
-
-            rs = stmt.executeQuery(
-                "SELECT NVL(MAX(RESUME_ID),0)+1 FROM RESUME"
-            );
-
             int id = 1;
-
             if(rs.next())
             {
                 id = rs.getInt(1);
             }
+            this.resumeId = id;
 
-            rs.close();
-            stmt.close();
+            try (PreparedStatement ps = con.prepareStatement(insertSql))
+            {
+                ps.setInt(1, id);
+                ps.setInt(2, studentId);
+                ps.setString(3, resumeFile);
 
-
-            String sql =
-                "INSERT INTO RESUME " +
-                "(RESUME_ID, STUDENT_ID, RESUME_FILE, UPLOADED_DATE) " +
-                "VALUES (?, ?, ?, SYSDATE)";
-
-            ps = con.prepareStatement(sql);
-
-            ps.setInt(1, id);
-            ps.setInt(2, studentId);
-            ps.setString(3, resumeFile);
-
-            return ps.executeUpdate() > 0;
+                return ps.executeUpdate() > 0;
+            }
         }
         catch(Exception e)
         {
             e.printStackTrace();
             return false;
         }
-        finally
-        {
-            try
-            {
-                if(rs != null) rs.close();
-                if(ps != null) ps.close();
-                if(con != null) con.close();
-            }
-            catch(Exception e)
-            {
-            }
-        }
     }
-
 
     // UPDATE
 
     public boolean UpdateMethod()
     {
-        Connection con = null;
-        PreparedStatement ps = null;
+        String sql =
+            "UPDATE RESUME SET RESUME_FILE=?, " +
+            "UPLOADED_DATE=SYSDATE " +
+            "WHERE RESUME_ID=? AND STUDENT_ID=?";
 
-        try
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql))
         {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-
-            con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
-            String sql =
-                "UPDATE RESUME SET RESUME_FILE=?, " +
-                "UPLOADED_DATE=SYSDATE " +
-                "WHERE RESUME_ID=? AND STUDENT_ID=?";
-
-            ps = con.prepareStatement(sql);
-
             ps.setString(1, resumeFile);
             ps.setInt(2, resumeId);
             ps.setInt(3, studentId);
@@ -157,43 +114,19 @@ public class StudentResume
             e.printStackTrace();
             return false;
         }
-        finally
-        {
-            try
-            {
-                if(ps != null) ps.close();
-                if(con != null) con.close();
-            }
-            catch(Exception e)
-            {
-            }
-        }
     }
-
 
     // DELETE
 
     public boolean DeleteMethod()
     {
-        Connection con = null;
-        PreparedStatement ps = null;
+        String sql =
+            "DELETE FROM RESUME " +
+            "WHERE RESUME_ID=? AND STUDENT_ID=?";
 
-        try
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql))
         {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-
-            con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
-            String sql =
-                "DELETE FROM RESUME " +
-                "WHERE RESUME_ID=? AND STUDENT_ID=?";
-
-            ps = con.prepareStatement(sql);
-
             ps.setInt(1, resumeId);
             ps.setInt(2, studentId);
 
@@ -203,17 +136,6 @@ public class StudentResume
         {
             e.printStackTrace();
             return false;
-        }
-        finally
-        {
-            try
-            {
-                if(ps != null) ps.close();
-                if(con != null) con.close();
-            }
-            catch(Exception e)
-            {
-            }
         }
     }
 }

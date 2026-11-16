@@ -890,7 +890,6 @@ function searchCollege()
 
 </div>
 
-
 <!-- ================= HERO ================= -->
 
 <section class="page-hero">
@@ -916,13 +915,11 @@ function searchCollege()
 
 </section>
 
-
 <!-- ================= MAIN ================= -->
 
 <main class="main">
 
 <div class="container">
-
 
     <!-- CONTROL -->
 
@@ -946,12 +943,11 @@ function searchCollege()
             class="status-button">
 
             Already Applied? Check Status
-            <span>→</span>
+            <span>&rarr;</span>
 
         </a>
 
     </div>
-
 
     <!-- SEARCH -->
 
@@ -972,7 +968,6 @@ function searchCollege()
         </div>
 
     </div>
-
 
     <!-- COLLEGE GRID -->
 
@@ -1001,7 +996,6 @@ try
 
     );
 
-
     String sql =
 
         "SELECT COLLEGE_ID, " +
@@ -1020,61 +1014,47 @@ try
 
         "ORDER BY COLLEGE_NAME";
 
-
     ps = con.prepareStatement(sql);
 
     rs = ps.executeQuery();
 
-
     boolean found = false;
-
 
     while(rs.next())
     {
 
         found = true;
 
-
         int collegeId =
             rs.getInt("COLLEGE_ID");
-
 
         String collegeName =
             rs.getString("COLLEGE_NAME");
 
-
         String address =
             rs.getString("ADDRESS");
-
 
         String city =
             rs.getString("CITY");
 
-
         String state =
             rs.getString("STATE");
-
 
         String email =
             rs.getString("EMAIL");
 
-
         String phone =
             rs.getString("PHONE");
-
 
         String logoImage =
             rs.getString("LOGO_IMAGE");
 
-
         String coverImage =
             rs.getString("COVER_IMAGE");
-
 
         String logoPath;
 
         String coverPath;
-
 
         if(logoImage != null &&
            !logoImage.trim().equals(""))
@@ -1094,7 +1074,6 @@ try
                 + "/images/college-logo.png";
 
         }
-
 
         if(coverImage != null &&
            !coverImage.trim().equals(""))
@@ -1121,7 +1100,6 @@ try
 
         <div class="college-card">
 
-
             <!-- COVER IMAGE -->
 
             <div class="college-image-box">
@@ -1133,7 +1111,6 @@ try
 
                     onerror="this.onerror=null;
                     this.src='<%=request.getContextPath()%>/image/college-banner.png';">
-
 
                 <!-- FLOATING LOGO -->
 
@@ -1150,7 +1127,6 @@ try
 
             </div>
 
-
             <!-- CONTENT -->
 
             <div class="card-content">
@@ -1163,9 +1139,7 @@ try
                     <%= collegeName %>
                 </h3>
 
-
                 <div class="details">
-
 
                     <div class="detail-row">
 
@@ -1187,7 +1161,6 @@ try
 
                     </div>
 
-
                     <div class="detail-row">
 
                         <div class="detail-icon">
@@ -1207,7 +1180,6 @@ try
                         </div>
 
                     </div>
-
 
                     <div class="detail-row">
 
@@ -1229,7 +1201,6 @@ try
 
                     </div>
 
-
                     <div class="detail-row">
 
                         <div class="detail-icon">
@@ -1250,9 +1221,7 @@ try
 
                     </div>
 
-
                 </div>
-
 
                 <!-- VIEW DETAILS -->
 
@@ -1265,7 +1234,7 @@ try
                     </span>
 
                     <b>
-                        →
+                        &rarr;
                     </b>
 
                 </a>
@@ -1274,11 +1243,9 @@ try
 
         </div>
 
-
 <%
 
     }
-
 
     if(!found)
     {
@@ -1335,7 +1302,6 @@ finally
     {
     }
 
-
     try
     {
         if(ps != null)
@@ -1344,7 +1310,6 @@ finally
     catch(Exception e)
     {
     }
-
 
     try
     {
@@ -1365,7 +1330,6 @@ finally
 
 </main>
 
-
 <!-- ================= FOOTER ================= -->
 
 <footer>
@@ -1373,7 +1337,6 @@ finally
     © 2026 CampusConnect. All Rights Reserved.
 
 </footer>
-
 
 </body>
 </html>

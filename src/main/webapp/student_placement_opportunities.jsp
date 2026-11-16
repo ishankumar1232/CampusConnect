@@ -53,6 +53,11 @@
     if (studentName != null && !studentName.trim().isEmpty()) {
         firstLetter = studentName.trim().substring(0, 1).toUpperCase();
     }
+
+    String flashMsg = (String) session1.getAttribute("applyMsg");
+    session1.removeAttribute("applyMsg");
+    String flashErr = (String) session1.getAttribute("applyError");
+    session1.removeAttribute("applyError");
 %>
 
 <!DOCTYPE html>
@@ -472,6 +477,20 @@ a {
         </div>
     </div>
 
+    <% if (flashMsg != null) { %>
+        <div style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; padding: 14px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 600; margin-bottom: 22px; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-circle-check" style="font-size: 18px;"></i>
+            <%= flashMsg %>
+        </div>
+    <% } %>
+
+    <% if (flashErr != null) { %>
+        <div style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; padding: 14px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 600; margin-bottom: 22px; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 18px;"></i>
+            <%= flashErr %>
+        </div>
+    <% } %>
+
     <!-- TABLE CARD -->
     <div class="content-card">
         <div class="table-responsive">
@@ -524,10 +543,19 @@ a {
                             "WHERE S.STUDENT_ID = SA.STUDENT_ID " +
                             "AND S.COURSE_ID = CO.COURSE_ID " +
                             "AND R.COMPANY_ID = C.COMPANY_ID " +
-                            "AND R.STATUS = 'OPEN' " +
-                            "AND R.DEADLINE >= SYSDATE " +
+                            "AND (R.STATUS = 'OPEN' OR R.STATUS = 'ACTIVE') " +
+                            "AND R.DEADLINE >= TRUNC(SYSDATE) " +
                             "AND SA.CGPA >= R.ELIGIBILITY_CGPA " +
-                            "AND LOWER(CO.COURSE_NAME) LIKE '%' || LOWER(R.REQUIRED_BRANCH) || '%' " +
+                            "AND ( " +
+                            "    LOWER(R.REQUIRED_BRANCH) LIKE '%all%' " +
+                            "    OR LOWER(R.REQUIRED_BRANCH) LIKE '%any%' " +
+                            "    OR LOWER(CO.COURSE_NAME) LIKE '%' || LOWER(R.REQUIRED_BRANCH) || '%' " +
+                            "    OR LOWER(R.REQUIRED_BRANCH) LIKE '%' || LOWER(CO.COURSE_NAME) || '%' " +
+                            "    OR (LOWER(R.REQUIRED_BRANCH) LIKE '%cse%' AND (LOWER(CO.COURSE_NAME) LIKE '%computer%' OR LOWER(CO.COURSE_NAME) LIKE '%technology%')) " +
+                            "    OR (LOWER(R.REQUIRED_BRANCH) LIKE '%it%' AND (LOWER(CO.COURSE_NAME) LIKE '%information%' OR LOWER(CO.COURSE_NAME) LIKE '%technology%')) " +
+                            "    OR (LOWER(R.REQUIRED_BRANCH) LIKE '%aiml%' AND (LOWER(CO.COURSE_NAME) LIKE '%ai%' OR LOWER(CO.COURSE_NAME) LIKE '%machine%')) " +
+                            ") " +
+                            "AND (UPPER(R.DRIVE_TYPE) = 'DIRECT' OR UPPER(R.DRIVE_TYPE) = 'OFF CAMPUS' OR UPPER(R.DRIVE_TYPE) = 'OFF-CAMPUS' OR EXISTS (SELECT 1 FROM DRIVE_COLLEGE DC WHERE DC.DRIVE_ID = R.DRIVE_ID AND DC.COLLEGE_ID = S.COLLEGE_ID)) " +
                             "AND S.STUDENT_ID = ? " +
                             "ORDER BY R.DEADLINE";
 

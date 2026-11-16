@@ -1,4 +1,5 @@
 
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="com.campusconnect.bean.Company" %>
 <%@ page import="java.util.Locale" %>
 
@@ -45,9 +46,7 @@
 %>
 
 <%
-    // ==========================================
     // COMPANY SESSION CHECK
-    // ==========================================
 
     Integer companyId = (Integer) session.getAttribute("companyId");
 
@@ -56,9 +55,7 @@
         return;
     }
 
-    // ==========================================
     // LOAD COMPANY DETAILS FROM ORACLE
-    // ==========================================
 
     Company c = new Company();
 
@@ -70,9 +67,7 @@
         application.log("Unable to load company profile for ID: " + companyId);
     }
 
-    // ==========================================
     // COMPANY DETAILS
-    // ==========================================
 
     String companyName = result ? c.getCompanyName() : "";
     String email = result ? c.getEmail() : "";
@@ -82,15 +77,11 @@
     String status = result ? c.getStatus() : "";
     String description = result ? c.getDescription() : "";
 
-    // ==========================================
     // COMPANY LOGO
-    // ==========================================
 
     String companyLogo = result ? c.getLogoUrl() : "";
 
-    // ==========================================
     // COMPANY BANNER
-    // ==========================================
 
     String companyBanner = result ? c.getBannerUrl() : "";
 
@@ -795,7 +786,6 @@
 
 </head>
 
-
 <div class="dashboard-wrapper">
 
     <!-- =========================================
@@ -818,7 +808,6 @@
 
         </div>
 
-
         <!-- SIDEBAR CONTENT -->
 
         <div class="sidebar-content">
@@ -838,7 +827,6 @@
 
             </a>
 
-
             <a href="company-profile.jsp"
                class="menu-item active">
 
@@ -848,13 +836,11 @@
 
             </a>
 
-
             <!-- RECRUITMENT -->
 
             <div class="menu-section-title">
                 RECRUITMENT
             </div>
-
 
             <a href="recruitment-drive.jsp"
                class="menu-item">
@@ -865,7 +851,6 @@
 
             </a>
 
-
             <a href="view-recruitment-drives.jsp"
                class="menu-item">
 
@@ -874,7 +859,6 @@
                 <span>Recruitment Drives</span>
 
             </a>
-
 
             <a href="company-applicants.jsp"
                class="menu-item">
@@ -885,7 +869,6 @@
 
             </a>
 
-
             <a href="company-shortlisted.jsp"
                class="menu-item">
 
@@ -894,7 +877,6 @@
                 <span>Shortlisted Candidates</span>
 
             </a>
-
 
             <a href="company-interviews.jsp"
                class="menu-item">
@@ -905,7 +887,6 @@
 
             </a>
 
-
             <a href="company-offers.jsp"
                class="menu-item">
 
@@ -915,13 +896,11 @@
 
             </a>
 
-
             <!-- ANALYTICS -->
 
             <div class="menu-section-title">
                 ANALYTICS
             </div>
-
 
             <a href="company-reports.jsp"
                class="menu-item">
@@ -931,7 +910,6 @@
                 <span>Reports &amp; Analytics</span>
 
             </a>
-
 
             <a href="company-analytics.jsp"
                class="menu-item">
@@ -943,7 +921,6 @@
             </a>
 
         </div>
-
 
         <!-- BOTTOM MENU -->
 
@@ -958,7 +935,6 @@
 
             </a>
 
-
             <a href="CompanyLogoutServlet"
                class="menu-item logout">
 
@@ -971,7 +947,6 @@
         </div>
 
     </aside>
-
 
     <!-- =========================================
          MAIN CONTENT
@@ -1004,11 +979,9 @@
 
             </header>
 
-
             <!-- PAGE BODY -->
 
             <div class="page-body">
-
 
                 <!-- =================================
                      COMPANY HERO
@@ -1028,7 +1001,6 @@
                         >
 
                     <% } %>
-
 
                     <!-- COMPANY IDENTITY -->
 
@@ -1065,7 +1037,6 @@
 
                         </div>
 
-
                         <!-- COMPANY NAME AND EMAIL -->
 
                         <div>
@@ -1082,7 +1053,6 @@
 
                     </div>
 
-
                     <!-- ACCOUNT STATUS -->
 
                     <div class="hero-status">
@@ -1091,13 +1061,11 @@
 
                 </section>
 
-
                 <!-- =================================
                      CONTENT GRID
                 ================================== -->
 
                 <div class="content-grid">
-
 
                     <!-- COMPANY INFORMATION -->
 
@@ -1113,9 +1081,7 @@
 
                         </div>
 
-
                         <div class="details">
-
 
                             <!-- COMPANY NAME -->
 
@@ -1131,7 +1097,6 @@
 
                             </div>
 
-
                             <!-- EMAIL -->
 
                             <div class="detail-row">
@@ -1145,7 +1110,6 @@
                                 </div>
 
                             </div>
-
 
                             <!-- PHONE -->
 
@@ -1164,7 +1128,6 @@
                                 </div>
 
                             </div>
-
 
                             <!-- WEBSITE -->
 
@@ -1203,7 +1166,6 @@
 
                             </div>
 
-
                             <!-- ADDRESS -->
 
                             <div class="detail-row">
@@ -1221,7 +1183,6 @@
                                 </div>
 
                             </div>
-
 
                             <!-- DESCRIPTION -->
 
@@ -1246,11 +1207,9 @@
 
                     </div>
 
-
                     <!-- RIGHT SIDE -->
 
                     <div>
-
 
                         <!-- ACCOUNT OVERVIEW -->
 
@@ -1266,13 +1225,11 @@
 
                             </div>
 
-
                             <div class="side-content">
 
                                 <div class="status-label">
                                     Account Status
                                 </div>
-
 
                                 <div class="status-badge">
 
@@ -1281,7 +1238,6 @@
                                     <%= escapeHtml(status) %>
 
                                 </div>
-
 
                                 <div class="company-id-section">
 
@@ -1299,7 +1255,6 @@
 
                         </div>
 
-
                         <!-- PROFILE SETTINGS -->
 
                         <div class="card">
@@ -1314,7 +1269,6 @@
 
                             </div>
 
-
                             <div class="side-content">
 
                                 <div class="settings-text">
@@ -1325,7 +1279,6 @@
 
                                 </div>
 
-
                                 <a
                                     href="company-edit-profile.jsp"
                                     class="edit-button">
@@ -1335,7 +1288,6 @@
                                     Edit Company Profile
 
                                 </a>
-
 
                                 <a
                                     href="company-dashboard.jsp"
@@ -1349,16 +1301,13 @@
 
                         </div>
 
-
                     </div>
 
                 </div>
 
             </div>
 
-
         <% } else { %>
-
 
             <!-- ERROR -->
 
@@ -1386,7 +1335,6 @@
                 </a>
 
             </div>
-
 
         <% } %>
 

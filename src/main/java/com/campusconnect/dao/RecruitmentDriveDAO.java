@@ -97,9 +97,7 @@ public class RecruitmentDriveDAO {
 
 	            drive.setStatus(rs.getString("STATUS"));
 
-	            // ===========================
 	            // MONITORING COUNTS
-	            // ===========================
 
 	            drive.setApplications(rs.getInt("APPLICATIONS"));
 
@@ -112,7 +110,6 @@ public class RecruitmentDriveDAO {
 	            list.add(drive);
 	        }
 	        
-
 	    } catch (Exception e) {
 
 	        e.printStackTrace();

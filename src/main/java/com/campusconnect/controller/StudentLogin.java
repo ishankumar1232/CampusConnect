@@ -1,6 +1,7 @@
 package com.campusconnect.controller;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
@@ -18,36 +19,28 @@ public class StudentLogin extends HttpServlet
     public void doPost(HttpServletRequest req, HttpServletResponse res)
             throws IOException, ServletException
     {
-        res.setContentType("text/html");
+        // CHECK MAINTENANCE MODE
 
-        PrintWriter pw = res.getWriter();
-     // ======================================
-     // CHECK MAINTENANCE MODE
-     // ======================================
+        SystemSettingDAO settingDAO = new SystemSettingDAO();
 
-     SystemSettingDAO settingDAO = new SystemSettingDAO();
+        SystemSetting setting = settingDAO.getSystemSettings();
 
-     SystemSetting setting = settingDAO.getSystemSettings();
+        if (setting != null &&
+            "ON".equalsIgnoreCase(setting.getMaintenanceMode())) {
 
-     if (setting != null &&
-         "ON".equalsIgnoreCase(setting.getMaintenanceMode())) {
-
-         pw.println("<html>");
-         pw.println("<body>");
-
-         pw.println("<h2>System Under Maintenance</h2>");
-
-         pw.println("<p>");
-         pw.println("Student Login is temporarily unavailable.");
-         pw.println("</p>");
-
-         pw.println("</body>");
-         pw.println("</html>");
-
-         return;
-     }
+            res.setContentType("text/html");
+            PrintWriter pw = res.getWriter();
+            pw.println("<html>");
+            pw.println("<body>");
+            pw.println("<h2>System Under Maintenance</h2>");
+            pw.println("<p>");
+            pw.println("Student Login is temporarily unavailable.");
+            pw.println("</p>");
+            pw.println("</body>");
+            pw.println("</html>");
+            return;
+        }
         
-
         String email = req.getParameter("email");
         String password = req.getParameter("password");
 

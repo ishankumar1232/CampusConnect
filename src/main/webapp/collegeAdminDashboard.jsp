@@ -13,13 +13,11 @@
     String adminName =
         (String) session.getAttribute("adminName");
 
-
     if(collegeId == null)
     {
         response.sendRedirect("collegeAdminLogin.jsp");
         return;
     }
-
 
     /* ================= COLLEGE ================= */
 
@@ -33,14 +31,12 @@
     String city = "";
     String state = "";
 
-
     /* ================= STUDENTS ================= */
 
     Student student = new Student();
 
     int totalStudents =
         student.getStudentCount(collegeId);
-
 
     /* ================= ADMISSIONS ================= */
 
@@ -49,15 +45,12 @@
     int admissionRequests =
         admission.getPendingAdmissionCount(collegeId);
 
-
     int recruitmentDrives = 0;
     int placedStudents = 0;
-
 
     Connection con = null;
     PreparedStatement ps = null;
     ResultSet rs = null;
-
 
     try
     {
@@ -65,7 +58,6 @@
         Class.forName(
             "oracle.jdbc.driver.OracleDriver"
         );
-
 
         con = DriverManager.getConnection(
 
@@ -77,7 +69,6 @@
 
         );
 
-
         /* ================= COLLEGE DETAILS ================= */
 
         String collegeSql =
@@ -87,13 +78,11 @@
             "FROM COLLEGE " +
             "WHERE COLLEGE_ID=?";
 
-
         ps = con.prepareStatement(collegeSql);
 
         ps.setInt(1, collegeId);
 
         rs = ps.executeQuery();
-
 
         if(rs.next())
         {
@@ -115,10 +104,8 @@
 
         }
 
-
         rs.close();
         ps.close();
-
 
         /* ================= RECRUITMENT DRIVES ================= */
 
@@ -128,13 +115,11 @@
             "FROM DRIVE_COLLEGE " +
             "WHERE COLLEGE_ID=?";
 
-
         ps = con.prepareStatement(sql1);
 
         ps.setInt(1, collegeId);
 
         rs = ps.executeQuery();
-
 
         if(rs.next())
         {
@@ -142,10 +127,8 @@
                 rs.getInt(1);
         }
 
-
         rs.close();
         ps.close();
-
 
         /* ================= PLACED STUDENTS ================= */
 
@@ -167,20 +150,17 @@
 
             "AND SE.RESULT='SELECTED'";
 
-
         ps = con.prepareStatement(sql2);
 
         ps.setInt(1, collegeId);
 
         rs = ps.executeQuery();
 
-
         if(rs.next())
         {
             placedStudents =
                 rs.getInt(1);
         }
-
 
         rs.close();
         ps.close();
@@ -204,7 +184,6 @@
             }
         }
 
-
         if(ps != null)
         {
             try
@@ -215,7 +194,6 @@
             {
             }
         }
-
 
         if(con != null)
         {
@@ -232,7 +210,6 @@
 
 %>
 
-
 <!DOCTYPE html>
 
 <html>
@@ -242,7 +219,7 @@
 <meta charset="UTF-8">
 
 <title>College Admin Dashboard</title>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 <style>
 
@@ -256,7 +233,6 @@
     box-sizing: border-box;
 }
 
-
 body {
 
     font-family: Arial, sans-serif;
@@ -266,7 +242,6 @@ body {
     color: #173b5c;
 
 }
-
 
 /* =====================================================
    SIDEBAR
@@ -294,7 +269,6 @@ body {
 
 }
 
-
 .logo-area {
 
     display: flex;
@@ -306,7 +280,6 @@ body {
     padding: 5px 10px 28px;
 
 }
-
 
 .logo-area img {
 
@@ -324,7 +297,6 @@ body {
 
 }
 
-
 .logo-name {
 
     font-size: 21px;
@@ -333,13 +305,11 @@ body {
 
 }
 
-
 .logo-name span {
 
     color: #19a8e8;
 
 }
-
 
 .logo-sub {
 
@@ -351,7 +321,6 @@ body {
 
 }
 
-
 /* =====================================================
    MENU
 ===================================================== */
@@ -361,7 +330,6 @@ body {
     margin-top: 5px;
 
 }
-
 
 .menu a {
 
@@ -387,13 +355,11 @@ body {
 
 }
 
-
 .menu a:hover {
 
     background: #124f78;
 
 }
-
 
 .menu a.active {
 
@@ -406,7 +372,6 @@ body {
     color: white;
 
 }
-
 
 .menu-icon {
 
@@ -424,7 +389,6 @@ body {
 
 }
 
-
 .logout-area {
 
     margin-top: 20px;
@@ -434,7 +398,6 @@ body {
     border-top: 1px solid #31536c;
 
 }
-
 
 .logout {
 
@@ -454,13 +417,11 @@ body {
 
 }
 
-
 .logout:hover {
 
     background: #d9363e;
 
 }
-
 
 /* =====================================================
    MAIN
@@ -473,7 +434,6 @@ body {
     min-height: 100vh;
 
 }
-
 
 /* =====================================================
    TOPBAR
@@ -497,7 +457,6 @@ body {
 
 }
 
-
 .admin-area {
 
     display: flex;
@@ -507,7 +466,6 @@ body {
     gap: 13px;
 
 }
-
 
 .admin-logo {
 
@@ -525,7 +483,6 @@ body {
 
 }
 
-
 .admin-details strong {
 
     display: block;
@@ -533,7 +490,6 @@ body {
     font-size: 15px;
 
 }
-
 
 .admin-details span {
 
@@ -547,7 +503,6 @@ body {
 
 }
 
-
 /* =====================================================
    CONTENT
 ===================================================== */
@@ -557,7 +512,6 @@ body {
     padding: 18px 22px;
 
 }
-
 
 /* =====================================================
    COLLEGE BANNER
@@ -580,7 +534,6 @@ body {
 
 }
 
-
 .college-banner .cover {
 
     position: absolute;
@@ -592,7 +545,6 @@ body {
     object-fit: cover;
 
 }
-
 
 .banner-overlay {
 
@@ -609,7 +561,6 @@ body {
         );
 
 }
-
 
 .banner-content {
 
@@ -629,7 +580,6 @@ body {
 
 }
 
-
 .college-logo {
 
     width: 135px;
@@ -648,7 +598,6 @@ body {
 
 }
 
-
 .banner-text h1 {
 
     font-size: 32px;
@@ -656,7 +605,6 @@ body {
     margin-bottom: 12px;
 
 }
-
 
 .location {
 
@@ -666,7 +614,6 @@ body {
 
 }
 
-
 .welcome-text {
 
     font-size: 15px;
@@ -674,7 +621,6 @@ body {
     color: #d9eaf5;
 
 }
-
 
 .tagline {
 
@@ -687,7 +633,6 @@ body {
     font-style: italic;
 
 }
-
 
 /* =====================================================
    STAT CARDS
@@ -705,7 +650,6 @@ body {
     margin-top: 18px;
 
 }
-
 
 .stat-card {
 
@@ -730,7 +674,6 @@ body {
 
 }
 
-
 .stat-icon {
 
     width: 58px;
@@ -751,7 +694,6 @@ body {
 
 }
 
-
 .stat-number {
 
     font-size: 31px;
@@ -762,7 +704,6 @@ body {
 
 }
 
-
 .stat-name {
 
     margin-top: 5px;
@@ -772,7 +713,6 @@ body {
     font-size: 14px;
 
 }
-
 
 .stat-link {
 
@@ -788,13 +728,11 @@ body {
 
 }
 
-
 .stat-link:hover {
 
     text-decoration: underline;
 
 }
-
 
 /* =====================================================
    QUICK ACTIONS
@@ -815,7 +753,6 @@ body {
 
 }
 
-
 .section-heading {
 
     font-size: 21px;
@@ -828,7 +765,6 @@ body {
 
 }
 
-
 .quick-actions {
 
     display: grid;
@@ -839,7 +775,6 @@ body {
     gap: 12px;
 
 }
-
 
 .action {
 
@@ -867,7 +802,6 @@ body {
 
 }
 
-
 .action:hover {
 
     transform: translateY(-3px);
@@ -877,7 +811,6 @@ body {
 
 }
 
-
 .action-icon {
 
     font-size: 28px;
@@ -886,13 +819,11 @@ body {
 
 }
 
-
 .action strong {
 
     font-size: 13px;
 
 }
-
 
 /* =====================================================
    LOWER PANELS
@@ -911,7 +842,6 @@ body {
 
 }
 
-
 .panel {
 
     background: white;
@@ -925,7 +855,6 @@ body {
 
 }
 
-
 .panel-title {
 
     font-size: 20px;
@@ -938,7 +867,6 @@ body {
 
 }
 
-
 .activity {
 
     padding: 13px 5px;
@@ -949,13 +877,11 @@ body {
 
 }
 
-
 .activity:last-child {
 
     border-bottom: none;
 
 }
-
 
 .activity-dot {
 
@@ -973,7 +899,6 @@ body {
 
 }
 
-
 .activity-time {
 
     float: right;
@@ -983,7 +908,6 @@ body {
     font-size: 12px;
 
 }
-
 
 .notice {
 
@@ -999,7 +923,6 @@ body {
 
 }
 
-
 .notice strong {
 
     display: block;
@@ -1010,13 +933,11 @@ body {
 
 }
 
-
 .notice small {
 
     color: #718494;
 
 }
-
 
 /* =====================================================
    FOOTER
@@ -1040,7 +961,6 @@ body {
 
 }
 
-
 /* =====================================================
    RESPONSIVE
 ===================================================== */
@@ -1057,7 +977,6 @@ body {
 
 }
 
-
 @media(max-width: 950px)
 {
 
@@ -1068,7 +987,6 @@ body {
 
     }
 
-
     .lower-section {
 
         grid-template-columns: 1fr;
@@ -1076,7 +994,6 @@ body {
     }
 
 }
-
 
 @media(max-width: 700px)
 {
@@ -1087,13 +1004,11 @@ body {
 
     }
 
-
     .main {
 
         margin-left: 75px;
 
     }
-
 
     .logo-name,
     .logo-sub,
@@ -1103,13 +1018,11 @@ body {
 
     }
 
-
     .menu a {
 
         justify-content: center;
 
     }
-
 
     .logout {
 
@@ -1117,13 +1030,11 @@ body {
 
     }
 
-
     .banner-content {
 
         left: 20px;
 
     }
-
 
     .college-logo {
 
@@ -1133,20 +1044,17 @@ body {
 
     }
 
-
     .banner-text h1 {
 
         font-size: 22px;
 
     }
 
-
     .stats {
 
         grid-template-columns: 1fr;
 
     }
-
 
     .footer {
 
@@ -1162,9 +1070,7 @@ body {
 
 </head>
 
-
 <body>
-
 
 <!-- =====================================================
      SIDEBAR
@@ -1172,9 +1078,7 @@ body {
 
 <div class="sidebar">
 
-
     <div class="logo-area">
-
 
         <%
         if(logoImage != null &&
@@ -1202,7 +1106,6 @@ body {
         }
         %>
 
-
         <div>
 
             <div class="logo-name">
@@ -1219,13 +1122,9 @@ body {
 
         </div>
 
-
     </div>
 
-
-
     <div class="menu">
-
 
         <a
             href="collegeAdminDashboard.jsp"
@@ -1240,7 +1139,6 @@ body {
 
         </a>
 
-
         <a href="collegeProfile.jsp">
 
             <span class="menu-icon">🏫</span>
@@ -1250,7 +1148,6 @@ body {
             </span>
 
         </a>
-
 
         <a href="admissionManagement.jsp">
 
@@ -1262,7 +1159,6 @@ body {
 
         </a>
 
-
         <a href="studentManagement.jsp">
 
             <span class="menu-icon">👥</span>
@@ -1272,7 +1168,6 @@ body {
             </span>
 
         </a>
-
 
         <a href="facultyManagement.jsp">
 
@@ -1284,7 +1179,6 @@ body {
 
         </a>
 
-
         <a href="departmentManagement.jsp">
 
             <span class="menu-icon">🏢</span>
@@ -1294,7 +1188,6 @@ body {
             </span>
 
         </a>
-
 
         <a href="courseManagement.jsp">
 
@@ -1306,7 +1199,6 @@ body {
 
         </a>
 
-
         <a href="recruitmentManagement.jsp">
 
             <span class="menu-icon">💼</span>
@@ -1316,7 +1208,6 @@ body {
             </span>
 
         </a>
-
 
         <a href="applicationManagement.jsp">
 
@@ -1328,7 +1219,6 @@ body {
 
         </a>
 
-
         <a href="interviewManagement.jsp">
 
             <span class="menu-icon">🎤</span>
@@ -1338,7 +1228,6 @@ body {
             </span>
 
         </a>
-
 
         <a href="selectionManagement.jsp">
 
@@ -1350,7 +1239,6 @@ body {
 
         </a>
 
-
         <a href="placementTracking.jsp">
 
             <span class="menu-icon">📈</span>
@@ -1360,7 +1248,6 @@ body {
             </span>
 
         </a>
-
 
         <a href="noticeManagement.jsp">
 
@@ -1372,7 +1259,6 @@ body {
 
         </a>
 
-
         <a href="collegeReports.jsp">
 
             <span class="menu-icon">📊</span>
@@ -1383,10 +1269,7 @@ body {
 
         </a>
 
-
     </div>
-
-
 
     <div class="logout-area">
 
@@ -1405,10 +1288,7 @@ body {
 
     </div>
 
-
 </div>
-
-
 
 <!-- =====================================================
      MAIN
@@ -1416,14 +1296,11 @@ body {
 
 <div class="main">
 
-
     <!-- TOPBAR -->
 
     <div class="topbar">
 
-
         <div class="admin-area">
-
 
             <%
             if(logoImage != null &&
@@ -1453,7 +1330,6 @@ body {
             }
             %>
 
-
             <div class="admin-details">
 
                 <strong>
@@ -1466,21 +1342,15 @@ body {
 
             </div>
 
-
         </div>
-
 
     </div>
 
-
-
     <div class="content">
-
 
         <!-- COLLEGE BANNER -->
 
         <div class="college-banner">
-
 
             <%
             if(coverImage != null &&
@@ -1512,12 +1382,9 @@ body {
             }
             %>
 
-
             <div class="banner-overlay"></div>
 
-
             <div class="banner-content">
-
 
                 <%
                 if(logoImage != null &&
@@ -1547,21 +1414,17 @@ body {
                 }
                 %>
 
-
                 <div class="banner-text">
-
 
                     <h1>
                         <%=collegeName%>
                     </h1>
-
 
                     <div class="location">
 
                         📍 <%=city%>, <%=state%>
 
                     </div>
-
 
                     <div class="welcome-text">
 
@@ -1572,36 +1435,27 @@ body {
 
                     </div>
 
-
                     <div class="tagline">
 
                         "Knowledge Today, Better Tomorrow"
 
                     </div>
 
-
                 </div>
-
 
             </div>
 
-
         </div>
-
-
 
         <!-- STAT CARDS -->
 
         <div class="stats">
 
-
             <div class="stat-card">
-
 
                 <div class="stat-icon">
                     🎓
                 </div>
-
 
                 <div>
 
@@ -1617,23 +1471,18 @@ body {
                         href="studentManagement.jsp"
                         class="stat-link"
                     >
-                        View Details →
+                        View Details <i class="fa-solid fa-arrow-right"></i>
                     </a>
 
                 </div>
 
-
             </div>
 
-
-
             <div class="stat-card">
-
 
                 <div class="stat-icon">
                     📄
                 </div>
-
 
                 <div>
 
@@ -1649,23 +1498,18 @@ body {
                         href="admissionManagement.jsp"
                         class="stat-link"
                     >
-                        View Details →
+                        View Details <i class="fa-solid fa-arrow-right"></i>
                     </a>
 
                 </div>
 
-
             </div>
 
-
-
             <div class="stat-card">
-
 
                 <div class="stat-icon">
                     📢
                 </div>
-
 
                 <div>
 
@@ -1681,23 +1525,18 @@ body {
                         href="recruitmentManagement.jsp"
                         class="stat-link"
                     >
-                        View Details →
+                        View Details <i class="fa-solid fa-arrow-right"></i>
                     </a>
 
                 </div>
 
-
             </div>
 
-
-
             <div class="stat-card">
-
 
                 <div class="stat-icon">
                     💼
                 </div>
-
 
                 <div>
 
@@ -1713,23 +1552,18 @@ body {
                         href="placementTracking.jsp"
                         class="stat-link"
                     >
-                        View Details →
+                        View Details <i class="fa-solid fa-arrow-right"></i>
                     </a>
 
                 </div>
 
-
             </div>
 
-
         </div>
-
-
 
         <!-- QUICK ACTIONS -->
 
         <div class="section-box">
-
 
             <div class="section-heading">
 
@@ -1737,9 +1571,7 @@ body {
 
             </div>
 
-
             <div class="quick-actions">
-
 
                 <a
                     href="collegeProfile.jsp"
@@ -1756,7 +1588,6 @@ body {
 
                 </a>
 
-
                 <a
                     href="admissionManagement.jsp"
                     class="action"
@@ -1771,7 +1602,6 @@ body {
                     </strong>
 
                 </a>
-
 
                 <a
                     href="studentManagement.jsp"
@@ -1788,7 +1618,6 @@ body {
 
                 </a>
 
-
                 <a
                     href="facultyManagement.jsp"
                     class="action"
@@ -1803,7 +1632,6 @@ body {
                     </strong>
 
                 </a>
-
 
                 <a
                     href="recruitmentManagement.jsp"
@@ -1820,7 +1648,6 @@ body {
 
                 </a>
 
-
                 <a
                     href="collegeReports.jsp"
                     class="action"
@@ -1836,30 +1663,23 @@ body {
 
                 </a>
 
-
             </div>
 
-
         </div>
-
-
 
         <!-- LOWER SECTION -->
 
         <div class="lower-section">
 
-
             <!-- RECENT ACTIVITIES -->
 
             <div class="panel">
-
 
                 <div class="panel-title">
 
                     🕘 Recent Activities
 
                 </div>
-
 
                 <div class="activity">
 
@@ -1872,7 +1692,6 @@ body {
                     </span>
 
                 </div>
-
 
                 <div class="activity">
 
@@ -1889,7 +1708,6 @@ body {
 
                 </div>
 
-
                 <div class="activity">
 
                     <span
@@ -1904,7 +1722,6 @@ body {
                     </span>
 
                 </div>
-
 
                 <div class="activity">
 
@@ -1921,22 +1738,17 @@ body {
 
                 </div>
 
-
             </div>
-
-
 
             <!-- ANNOUNCEMENTS -->
 
             <div class="panel">
-
 
                 <div class="panel-title">
 
                     📣 Announcements
 
                 </div>
-
 
                 <div class="notice">
 
@@ -1952,7 +1764,6 @@ body {
 
                 </div>
 
-
                 <div class="notice">
 
                     <strong>
@@ -1966,7 +1777,6 @@ body {
                     </small>
 
                 </div>
-
 
                 <div class="notice">
 
@@ -1982,18 +1792,13 @@ body {
 
                 </div>
 
-
             </div>
 
-
         </div>
-
-
 
         <!-- FOOTER -->
 
         <div class="footer">
-
 
             <div>
 
@@ -2001,7 +1806,6 @@ body {
                 All rights reserved.
 
             </div>
-
 
             <div>
 
@@ -2011,15 +1815,11 @@ body {
 
             </div>
 
-
         </div>
-
 
     </div>
 
-
 </div>
-
 
 </body>
 

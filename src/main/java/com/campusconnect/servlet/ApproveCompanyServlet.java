@@ -1,4 +1,4 @@
- package com.campusconnect.servlet;
+package com.campusconnect.servlet;
 
 import java.io.IOException;
 
@@ -8,25 +8,47 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
-public class ApproveCompanyServlet extends HttpServlet
-{
+public class ApproveCompanyServlet extends HttpServlet {
 
     public void doGet(HttpServletRequest req,
             HttpServletResponse res)
-            throws IOException, ServletException
-    {
+            throws IOException, ServletException {
 
-        int id =
-        Integer.parseInt(req.getParameter("id"));
+        // ================= SESSION CHECK =================
 
-        CompanyDAO dao = new CompanyDAO();
+        HttpSession session = req.getSession(false);
 
-        dao.approveCompany(id);
+        if (session == null || session.getAttribute("admin") == null) {
 
-        res.sendRedirect(
-        req.getContextPath()
-        + "/CompanyManagementServlet");
+            res.sendRedirect(req.getContextPath()
+                    + "/superadmin/login.jsp");
+            return;
+        }
+
+        String idStr = req.getParameter("id");
+
+        if (idStr == null || idStr.trim().isEmpty()) {
+
+            res.sendRedirect(req.getContextPath()
+                    + "/CompanyManagementServlet");
+            return;
+        }
+
+        try {
+            int id = Integer.parseInt(idStr.trim());
+
+            CompanyDAO dao = new CompanyDAO();
+
+            dao.approveCompany(id);
+
+        } catch (NumberFormatException e) {
+            // Invalid ID format, ignore and redirect
+        }
+
+        res.sendRedirect(req.getContextPath()
+                + "/CompanyManagementServlet");
 
     }
 

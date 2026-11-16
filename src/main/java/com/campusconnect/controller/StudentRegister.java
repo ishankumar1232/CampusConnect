@@ -2,478 +2,215 @@ package com.campusconnect.controller;
 
 import java.io.*;
 import java.sql.*;
+import java.net.URLEncoder;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 import jakarta.servlet.annotation.WebServlet;
 
 import com.campusconnect.bean.Student;
-
 import com.campusconnect.dao.SystemSettingDAO;
 import com.campusconnect.bean.SystemSetting;
- 
+import com.campusconnect.util.DBConnection;
+
 public class StudentRegister extends HttpServlet
 {
+    public void doGet(HttpServletRequest req, HttpServletResponse res)
+            throws IOException, ServletException
+    {
+        res.sendRedirect(req.getContextPath() + "/student_register_status.jsp");
+    }
+
     public void doPost(HttpServletRequest req, HttpServletResponse res)
             throws IOException, ServletException
     {
-        res.setContentType("text/html");
-
-        PrintWriter pw = res.getWriter();
-
         String admissionId = req.getParameter("admissionId");
+        String email = req.getParameter("email");
+
+        // 1. Check if email already registered
+        if (email != null && !email.trim().isEmpty()) {
+            try (Connection checkCon = DBConnection.getConnection();
+                 PreparedStatement checkPs = checkCon.prepareStatement("SELECT 1 FROM STUDENT WHERE LOWER(EMAIL) = LOWER(?)")) {
+                checkPs.setString(1, email.trim());
+                try (ResultSet checkRs = checkPs.executeQuery()) {
+                    if (checkRs.next()) {
+                        req.setAttribute("status", "already_exists");
+                        req.setAttribute("email", email.trim());
+                        req.setAttribute("message", "An active student account already exists with this Email ID.");
+                        req.getRequestDispatcher("student_register_status.jsp").forward(req, res);
+                        return;
+                    }
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
 
         String password = req.getParameter("password");
         String dob = req.getParameter("dob");
         String gender = req.getParameter("gender");
         String address = req.getParameter("address");
 
-        Connection con = null;
-        
-        try {
+        // 2. Check System Settings
+        try (Connection settingCon = DBConnection.getConnection();
+             PreparedStatement psSetting = settingCon.prepareStatement("SELECT STUDENT_REGISTRATION FROM SYSTEM_SETTINGS WHERE SETTING_ID=1");
+             ResultSet rsSetting = psSetting.executeQuery()) {
 
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-
-            con = DriverManager.getConnection(
-                    "jdbc:oracle:thin:@localhost:1521:XE",
-                    "CAMPUSCONNECT",
-                    "campus123");
-
-            PreparedStatement ps = con.prepareStatement(
-                "SELECT STUDENT_REGISTRATION FROM SYSTEM_SETTINGS WHERE SETTING_ID=1");
-
-            ResultSet rs = ps.executeQuery();
-
-            if(rs.next()){
-
-                if(rs.getString("STUDENT_REGISTRATION").equals("OFF")){
-
-                    pw.println("<h2>Student Registration is Disabled by Super Admin.</h2>");
-
-                    return;
-                }
-
+            if (rsSetting.next() && "OFF".equalsIgnoreCase(rsSetting.getString("STUDENT_REGISTRATION"))) {
+                req.setAttribute("status", "disabled");
+                req.setAttribute("message", "Student Registration is currently disabled by Super Admin.");
+                req.getRequestDispatcher("student_register_status.jsp").forward(req, res);
+                return;
             }
-
-            rs.close();
-            ps.close();
-
-        } catch(Exception e){
-
+        } catch (Exception e) {
             e.printStackTrace();
         }
-        
-        try
-        {
-            if(admissionId == null ||
-               admissionId.trim().equals(""))
-            {
-                pw.println("<h2>Invalid Admission ID</h2>");
-                return;
-            }
 
+        // 3. Validate Inputs
+        if (admissionId == null || admissionId.trim().isEmpty() ||
+            password == null || password.trim().isEmpty() ||
+            dob == null || dob.trim().isEmpty()) {
 
-            if(password == null ||
-               password.trim().equals(""))
-            {
-                pw.println("<h2>Password is required</h2>");
-                return;
-            }
+            req.setAttribute("status", "invalid");
+            req.setAttribute("message", "Please fill in all mandatory fields (Password, Date of Birth, Address).");
+            req.getRequestDispatcher("student_register_status.jsp").forward(req, res);
+            return;
+        }
 
+        Connection con = null;
 
-            if(dob == null ||
-               dob.trim().equals(""))
-            {
-                pw.println("<h2>Date of Birth is required</h2>");
-                return;
-            }
-
-
-            Class.forName(
-                "oracle.jdbc.driver.OracleDriver"
-            );
-
-
-            con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
-
+        try {
+            con = DBConnection.getConnection();
             con.setAutoCommit(false);
 
-
-            /*
-             * Get admission details
-             */
-
+            // 4. Retrieve Admission details
             String admissionSql =
-                "SELECT COLLEGE_ID, " +
-                "APPLICANT_COURSE_ID, " +
-                "APPLICANT_NAME, " +
-                "APPLICANT_EMAIL, " +
-                "APPLICANT_PHONE " +
-                "FROM ADMISSION " +
-                "WHERE ADMISSION_ID=? " +
-                "AND STATUS='CONFIRMED' " +
-                "AND STUDENT_ID IS NULL";
+                "SELECT A.COLLEGE_ID, " +
+                "A.APPLICANT_COURSE_ID, " +
+                "A.APPLICANT_NAME, " +
+                "A.APPLICANT_EMAIL, " +
+                "A.APPLICANT_PHONE, " +
+                "C.COLLEGE_NAME, " +
+                "CR.COURSE_NAME " +
+                "FROM ADMISSION A " +
+                "LEFT JOIN COLLEGE C ON A.COLLEGE_ID = C.COLLEGE_ID " +
+                "LEFT JOIN COURSE CR ON A.APPLICANT_COURSE_ID = CR.COURSE_ID " +
+                "WHERE A.ADMISSION_ID=? " +
+                "AND A.STATUS='CONFIRMED' " +
+                "AND A.STUDENT_ID IS NULL";
 
+            PreparedStatement admissionPs = con.prepareStatement(admissionSql);
+            admissionPs.setInt(1, Integer.parseInt(admissionId.trim()));
 
-            PreparedStatement admissionPs =
-                con.prepareStatement(admissionSql);
+            ResultSet rs = admissionPs.executeQuery();
 
-
-            admissionPs.setInt(
-                1,
-                Integer.parseInt(admissionId)
-            );
-
-
-            ResultSet rs =
-                admissionPs.executeQuery();
-
-
-            if(!rs.next())
-            {
+            if (!rs.next()) {
                 rs.close();
                 admissionPs.close();
-
                 con.rollback();
 
-                pw.println("<html>");
-                pw.println("<body>");
-
-                pw.println(
-                    "<h2>Registration Not Available</h2>"
-                );
-
-                pw.println(
-                    "<p>Admission is not confirmed or "
-                    + "registration is already completed.</p>"
-                );
-
-                pw.println(
-                    "<br>"
-                    + "<a href='new_student_check_status.jsp'>"
-                    + "Track Admission"
-                    + "</a>"
-                );
-
-                pw.println("</body>");
-                pw.println("</html>");
-
+                req.setAttribute("status", "not_available");
+                req.setAttribute("admissionId", admissionId);
+                req.setAttribute("message", "Admission is not confirmed or registration is already completed.");
+                req.getRequestDispatcher("student_register_status.jsp").forward(req, res);
                 return;
             }
 
-
-            int collegeId =
-                rs.getInt("COLLEGE_ID");
-
-
-            int courseId =
-                rs.getInt("APPLICANT_COURSE_ID");
-
-
-            String name =
-                rs.getString("APPLICANT_NAME");
-
-
-            String email =
-                rs.getString("APPLICANT_EMAIL");
-
-
-            String phone =
-                rs.getString("APPLICANT_PHONE");
-
+            int collegeId = rs.getInt("COLLEGE_ID");
+            int courseId = rs.getInt("APPLICANT_COURSE_ID");
+            String name = rs.getString("APPLICANT_NAME");
+            email = rs.getString("APPLICANT_EMAIL");
+            String phone = rs.getString("APPLICANT_PHONE");
+            String collegeName = rs.getString("COLLEGE_NAME");
+            String courseName = rs.getString("COURSE_NAME");
 
             rs.close();
             admissionPs.close();
 
+            // 5. Secondary check for email collision
+            String emailCheckSql = "SELECT STUDENT_ID FROM STUDENT WHERE LOWER(EMAIL)=LOWER(?)";
+            PreparedStatement emailPs = con.prepareStatement(emailCheckSql);
+            emailPs.setString(1, email);
+            ResultSet emailRs = emailPs.executeQuery();
 
-            /*
-             * CHECK EMAIL
-             *
-             * One email can have only one
-             * student account.
-             */
-
-            String emailCheckSql =
-                "SELECT STUDENT_ID " +
-                "FROM STUDENT " +
-                "WHERE LOWER(EMAIL)=LOWER(?)";
-
-
-            PreparedStatement emailPs =
-                con.prepareStatement(emailCheckSql);
-
-
-            emailPs.setString(
-                1,
-                email
-            );
-
-
-            ResultSet emailRs =
-                emailPs.executeQuery();
-
-
-            if(emailRs.next())
-            {
-                int existingStudentId =
-                    emailRs.getInt("STUDENT_ID");
-
-
+            if (emailRs.next()) {
                 emailRs.close();
                 emailPs.close();
-
                 con.rollback();
 
-
-                pw.println("<html>");
-                pw.println("<head>");
-                pw.println(
-                    "<title>Registration Failed</title>"
-                );
-                pw.println("</head>");
-
-                pw.println("<body>");
-
-
-                pw.println(
-                    "<h2>Registration Failed</h2>"
-                );
-
-
-                pw.println(
-                    "<p>"
-                    + "An account already exists with this Email ID."
-                    + "</p>"
-                );
-
-
-                pw.println(
-                    "<p>"
-                    + "Please use the existing Student Login."
-                    + "</p>"
-                );
-
-
-                pw.println(
-                    "<br>"
-                    + "<a href='student_login.jsp'>"
-                    + "Go to Student Login"
-                    + "</a>"
-                );
-
-
-                pw.println("</body>");
-                pw.println("</html>");
-
-
+                req.setAttribute("status", "already_exists");
+                req.setAttribute("email", email);
+                req.setAttribute("message", "An account already exists with this Email ID (" + email + ").");
+                req.getRequestDispatcher("student_register_status.jsp").forward(req, res);
                 return;
             }
-
-
             emailRs.close();
             emailPs.close();
 
-
-            /*
-             * Create Student object
-             */
-
+            // 6. Create Student Record
             Student s = new Student();
-
-
             s.setCollegeId(collegeId);
-
             s.setCourseId(courseId);
-
             s.setName(name);
-
             s.setEmail(email);
-
             s.setPhone(phone);
-
             s.setPassword(password);
+            s.setDob(Date.valueOf(dob));
+            s.setGender(gender != null ? gender : "Male");
+            s.setAddress(address != null ? address : "");
 
-            s.setDob(
-                Date.valueOf(dob)
-            );
+            int studentId = s.InsertNewStudent(con);
 
-            s.setGender(gender);
-
-            s.setAddress(address);
-
-
-            /*
-             * Insert Student
-             */
-
-            int studentId =
-                s.InsertNewStudent(con);
-
-
-            /*
-             * Link Student with Admission
-             */
-
+            // 7. Link Admission to Student
             String updateSql =
                 "UPDATE ADMISSION " +
                 "SET STUDENT_ID=? " +
                 "WHERE ADMISSION_ID=? " +
                 "AND STUDENT_ID IS NULL";
 
+            PreparedStatement updatePs = con.prepareStatement(updateSql);
+            updatePs.setInt(1, studentId);
+            updatePs.setInt(2, Integer.parseInt(admissionId.trim()));
 
-            PreparedStatement updatePs =
-                con.prepareStatement(updateSql);
-
-
-            updatePs.setInt(
-                1,
-                studentId
-            );
-
-
-            updatePs.setInt(
-                2,
-                Integer.parseInt(admissionId)
-            );
-
-
-            int updated =
-                updatePs.executeUpdate();
-
-
+            int updated = updatePs.executeUpdate();
             updatePs.close();
 
-
-            if(updated == 0)
-            {
+            if (updated == 0) {
                 con.rollback();
-
-                pw.println(
-                    "<h2>Registration Failed</h2>"
-                );
-
-                pw.println(
-                    "<p>Admission registration could not be completed.</p>"
-                );
-
+                req.setAttribute("status", "error");
+                req.setAttribute("message", "Admission registration could not be completed.");
+                req.getRequestDispatcher("student_register_status.jsp").forward(req, res);
                 return;
             }
 
-
-            /*
-             * Commit
-             */
-
+            // Commit transaction
             con.commit();
 
+            // 8. Forward to Registration Success Page
+            req.setAttribute("status", "success");
+            req.setAttribute("studentId", studentId);
+            req.setAttribute("name", name);
+            req.setAttribute("email", email);
+            req.setAttribute("phone", phone);
+            req.setAttribute("collegeName", collegeName);
+            req.setAttribute("courseName", courseName);
+            req.setAttribute("admissionId", admissionId);
 
-            /*
-             * Success
-             */
+            req.getRequestDispatcher("student_register_status.jsp").forward(req, res);
 
-            pw.println("<html>");
+        } catch (Exception e) {
+            try {
+                if (con != null) con.rollback();
+            } catch (Exception ignore) {}
 
-            pw.println("<head>");
-
-            pw.println(
-                "<title>Registration Successful</title>"
-            );
-
-            pw.println("</head>");
-
-
-            pw.println("<body>");
-
-
-            pw.println(
-                "<h2>Student Registration Successful</h2>"
-            );
-
-
-            pw.println(
-                "<p>Your Student ID is: "
-                + "<b>"
-                + studentId
-                + "</b></p>"
-            );
-
-
-            pw.println(
-                "<p>Email: "
-                + "<b>"
-                + email
-                + "</b></p>"
-            );
-
-
-            pw.println(
-                "<br>"
-            );
-
-
-            pw.println(
-                "<a href='student_login.jsp'>"
-                + "Go to Student Login"
-                + "</a>"
-            );
-
-
-            pw.println("</body>");
-
-            pw.println("</html>");
-        }
-        catch(Exception e)
-        {
-            try
-            {
-                if(con != null)
-                {
-                    con.rollback();
-                }
-            }
-            catch(Exception ex)
-            {
-            }
-
-
-            pw.println("<html>");
-
-            pw.println("<body>");
-
-
-            pw.println(
-                "<h2>Registration Error</h2>"
-            );
-
-
-            pw.println(
-                "<p>"
-                + e.getMessage()
-                + "</p>"
-            );
-
-
-            pw.println("</body>");
-
-            pw.println("</html>");
-        }
-        finally
-        {
-            try
-            {
-                if(con != null)
-                {
-                    con.close();
-                }
-            }
-            catch(Exception e)
-            {
-            }
+            e.printStackTrace();
+            req.setAttribute("status", "error");
+            req.setAttribute("message", "Registration Error: " + (e.getMessage() != null ? e.getMessage() : e.toString()));
+            req.getRequestDispatcher("student_register_status.jsp").forward(req, res);
+        } finally {
+            try {
+                if (con != null) con.close();
+            } catch (Exception ignore) {}
         }
     }
 }

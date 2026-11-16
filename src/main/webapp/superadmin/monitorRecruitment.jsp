@@ -1,507 +1,269 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.ArrayList"%>
 <%@ page import="com.campusconnect.bean.RecruitmentDrive"%>
 <%@ page import="com.campusconnect.bean.SuperAdmin"%>
+<%@ page import="com.campusconnect.dao.RecruitmentDriveDAO"%>
 
 <%
-SuperAdmin admin=(SuperAdmin)session.getAttribute("admin");
-
-if(admin==null){
-    response.sendRedirect("login.jsp");
-    return;
-}
-
-ArrayList<RecruitmentDrive> list=
-(ArrayList<RecruitmentDrive>)request.getAttribute("driveList");
-
-int totalApplications=0;
-int totalSelected=0;
-int totalPlaced=0;
-
-if(list!=null){
-    for(RecruitmentDrive d:list){
-        totalApplications+=d.getApplicationCount();
-        totalSelected+=d.getSelectedCount();
-        totalPlaced+=d.getPlacedCount();
+    SuperAdmin admin = (SuperAdmin) session.getAttribute("admin");
+    if (admin == null) {
+        response.sendRedirect(request.getContextPath() + "/superadmin/login.jsp");
+        return;
     }
-}
+
+    ArrayList<RecruitmentDrive> list = (ArrayList<RecruitmentDrive>) request.getAttribute("driveList");
+    if (list == null) {
+        RecruitmentDriveDAO dao = new RecruitmentDriveDAO();
+        list = dao.getAllDrives();
+    }
+
+    int totalDrives = 0;
+    int campusDrives = 0;
+    int directDrives = 0;
+    int activeDrives = 0;
+    int closedDrives = 0;
+    int totalApplications = 0;
+    int totalSelected = 0;
+
+    if (list != null) {
+        totalDrives = list.size();
+        for (RecruitmentDrive d : list) {
+            String type = d.getDriveType() != null ? d.getDriveType().toUpperCase() : "";
+            if (type.contains("CAMPUS")) campusDrives++;
+            else directDrives++;
+
+            String st = d.getStatus() != null ? d.getStatus().toUpperCase() : "";
+            if ("ACTIVE".equals(st)) activeDrives++;
+            else closedDrives++;
+
+            totalApplications += d.getApplicationCount();
+            totalSelected += d.getSelectedCount();
+        }
+    }
+
+    request.setAttribute("activeNav", "drives");
 %>
 
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recruitment Drives Telemetry | CampusConnect</title>
 
-<title>Monitor Recruitment</title>
-
-<style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,Helvetica,sans-serif;
-}
-
-body{
-background:#eef2f7;
-}
-
-.main{
-width:98%;
-margin:auto;
-padding:20px;
-}
-
-.header{
-background:#0B3D91;
-color:white;
-padding:18px;
-text-align:center;
-font-size:28px;
-font-weight:bold;
-margin-bottom:20px;
-border-radius:8px;
-}
-
-.back-btn{
-float:right;
-padding:10px 20px;
-background:#0B3D91;
-color:white;
-text-decoration:none;
-border-radius:6px;
-font-weight:bold;
-margin-bottom:20px;
-}
-
-.back-btn:hover{
-background:#072c69;
-}
-
-h2{
-text-align:center;
-color:#0B3D91;
-font-size:34px;
-margin-bottom:25px;
-}
-
-.card-container{
-display:flex;
-justify-content:space-between;
-gap:20px;
-flex-wrap:wrap;
-margin-bottom:30px;
-}
-
-.card{
-flex:1;
-min-width:220px;
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 2px 10px rgba(0,0,0,.15);
-text-align:center;
-transition:.3s;
-}
-
-.card:hover{
-transform:translateY(-5px);
-}
-
-.card h3{
-color:#666;
-margin-bottom:10px;
-}
-
-.card h1{
-color:#0B3D91;
-font-size:35px;
-}
-
-.search-box{
-text-align:right;
-margin-bottom:20px;
-}
-
-.search-box input{
-width:300px;
-padding:10px;
-border-radius:6px;
-border:1px solid #ccc;
-outline:none;
-}
-
-table{
-width:100%;
-border-collapse:collapse;
-background:white;
-box-shadow:0 2px 10px rgba(0,0,0,.15);
-}
-
-th{
-background:#0B3D91;
-color:white;
-padding:12px;
-}
-
-td{
-padding:10px;
-border:1px solid #ddd;
-text-align:center;
-}
-
-tr:nth-child(even){
-background:#f8f8f8;
-}
-
-tr:hover{
-background:#eef5ff;
-}
-
-.badge-active{
-background:#28a745;
-color:white;
-padding:5px 12px;
-border-radius:20px;
-}
-
-.badge-open{
-background:#17a2b8;
-color:white;
-padding:5px 12px;
-border-radius:20px;
-}
-
-.badge-completed{
-background:#ffc107;
-color:black;
-padding:5px 12px;
-border-radius:20px;
-}
-
-.badge-closed{
-background:#dc3545;
-color:white;
-padding:5px 12px;
-border-radius:20px;
-}
-
-.footer{
-margin-top:30px;
-background:white;
-padding:20px;
-text-align:center;
-border-radius:8px;
-box-shadow:0 2px 10px rgba(0,0,0,.15);
-color:#555;
-}
-
-</style>
-
+<!-- Google Fonts & FontAwesome -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="<%=request.getContextPath()%>/css/superadmin-dashboard.css">
 </head>
-
 <body>
 
-<div class="main">
+<!-- Navigation Include -->
+<%@ include file="superAdminNav.jsp" %>
 
-<div class="header">
+<!-- Main Content -->
+<main class="main">
 
-Campus Recruitment Management System
-
-</div>
-
-<a href="<%=request.getContextPath()%>/DashboardServlet"
-class="back-btn">
-
- Back to Dashboard
-
-</a>
-
-<br><br>
-
-<h2>
-
-Monitor Recruitment Drives
-
-</h2>
-
-<!-- ================= DASHBOARD CARDS ================= -->
-
-<div class="card-container">
-
-    <div class="card">
-        <h3>Total Drives</h3>
-     	<h1><%=request.getAttribute("totalDrives")%></h1>
+    <!-- Page Toolbar -->
+    <div class="page-toolbar">
+        <div class="page-title-block">
+            <h1>Platform Recruitment Drives Telemetry</h1>
+            <p>Monitor multi-college campus recruitment drives, direct corporate hiring campaigns, and candidate pipelines.</p>
+        </div>
     </div>
 
-    <div class="card">
-        <h3>Total Applications</h3>
-      	<h1><%=request.getAttribute("totalApplications")%></h1>
+    <!-- KPI Metric Cards -->
+    <div class="stats-grid">
+        <div class="kpi-card">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-title">Total Drives</span>
+                    <div class="kpi-value"><%=totalDrives%></div>
+                </div>
+                <div class="kpi-icon orange"><i class="fa-solid fa-bullhorn"></i></div>
+            </div>
+            <div class="kpi-subtext">Hiring campaigns initiated</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-title">Campus Drives</span>
+                    <div class="kpi-value" style="color: #2563eb;"><%=campusDrives%></div>
+                </div>
+                <div class="kpi-icon blue"><i class="fa-solid fa-building-columns"></i></div>
+            </div>
+            <div class="kpi-subtext">Multi-college targeted drives</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-title">Direct Drives</span>
+                    <div class="kpi-value" style="color: #7c3aed;"><%=directDrives%></div>
+                </div>
+                <div class="kpi-icon purple"><i class="fa-solid fa-globe"></i></div>
+            </div>
+            <div class="kpi-subtext">Open application hiring</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-title">Applications Received</span>
+                    <div class="kpi-value"><%=totalApplications%></div>
+                </div>
+                <div class="kpi-icon teal"><i class="fa-solid fa-file-signature"></i></div>
+            </div>
+            <div class="kpi-subtext">Submissions across all colleges</div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-title">Selected / Offers</span>
+                    <div class="kpi-value" style="color: #16a34a;"><%=totalSelected%></div>
+                </div>
+                <div class="kpi-icon green"><i class="fa-solid fa-award"></i></div>
+            </div>
+            <div class="kpi-subtext">Confirmed student selections</div>
+        </div>
     </div>
 
-    <div class="card">
-        <h3>Total Selected</h3>
-        <h1><%=request.getAttribute("totalSelected")%></h1>
+    <!-- Content Card with Live Search & Filter -->
+    <div class="content-card">
+        <div class="content-card-header">
+            <div class="content-card-title">
+                <i class="fa-solid fa-bullhorn" style="color: #2563eb;"></i>
+                <span>All Recruitment Drives (<span id="visibleDriveCount"><%=totalDrives%></span>)</span>
+            </div>
+            <div class="filter-bar">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="driveSearch" placeholder="Search by role, company, branch..." onkeyup="filterDriveTable()">
+                </div>
+                <select id="driveTypeFilter" class="filter-select" onchange="filterDriveTable()">
+                    <option value="">All Drive Types</option>
+                    <option value="CAMPUS">Campus Drives Only</option>
+                    <option value="DIRECT">Direct Drives Only</option>
+                </select>
+                <select id="driveStatusFilter" class="filter-select" onchange="filterDriveTable()">
+                    <option value="">All Statuses</option>
+                    <option value="ACTIVE">Active Only</option>
+                    <option value="CLOSED">Closed Only</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="data-table" id="driveTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Job Title & Company</th>
+                        <th>Type</th>
+                        <th>Package (CTC)</th>
+                        <th>Eligibility</th>
+                        <th>Vacancies</th>
+                        <th>Applications</th>
+                        <th>Selections</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%
+                    if (list != null && !list.isEmpty()) {
+                        for (RecruitmentDrive d : list) {
+                            String rawType = d.getDriveType() != null ? d.getDriveType() : "Campus Drive";
+                            String typeBadge = rawType.toUpperCase().contains("CAMPUS") ? "badge-campus" : "badge-direct";
+                            String rawStatus = d.getStatus() != null ? d.getStatus() : "ACTIVE";
+                            String statusBadge = "ACTIVE".equalsIgnoreCase(rawStatus) ? "badge-approved" : "badge-rejected";
+                    %>
+                    <tr data-type="<%=rawType.toUpperCase()%>" data-status="<%=rawStatus.toUpperCase()%>">
+                        <td><strong>#<%=d.getDriveId()%></strong></td>
+                        <td>
+                            <a href="${pageContext.request.contextPath}/DriveDetailsServlet?id=<%=d.getDriveId()%>"
+                               style="font-weight: 700; color: #2563eb; display: block;">
+                                <%=d.getJobTitle()%>
+                            </a>
+                            <span style="font-size: 12px; color: var(--text-muted); display: flex; align-items: center; gap: 4px; margin-top: 2px;">
+                                <i class="fa-regular fa-building"></i>
+                                <%=d.getCompanyName()%>
+                            </span>
+                        </td>
+                        <td><span class="badge <%=typeBadge%>"><%=rawType%></span></td>
+                        <td><strong>₹<%=d.getSalary()%> LPA</strong></td>
+                        <td>
+                            <span style="font-size: 13px; color: #334155;">&ge; <%=d.getEligibilityCgpa()%> CGPA</span>
+                        </td>
+                        <td><%=d.getVacancy()%> Seats</td>
+                        <td>
+                            <span class="badge badge-primary"><%=d.getApplicationCount()%> applied</span>
+                        </td>
+                        <td>
+                            <span class="badge badge-approved"><%=d.getSelectedCount()%> hired</span>
+                        </td>
+                        <td><span class="badge <%=statusBadge%>"><%=rawStatus%></span></td>
+                        <td style="text-align: right;">
+                            <a href="${pageContext.request.contextPath}/DriveDetailsServlet?id=<%=d.getDriveId()%>"
+                               class="btn btn-outline btn-sm" title="View Full Drive Details & Participating Colleges">
+                                <i class="fa-solid fa-eye"></i>
+                                <span>Drive Dossier</span>
+                            </a>
+                        </td>
+                    </tr>
+                    <%
+                        }
+                    } else {
+                    %>
+                    <tr>
+                        <td colspan="10" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                            <i class="fa-solid fa-bullhorn" style="font-size: 28px; margin-bottom: 10px; display: block;"></i>
+                            No recruitment drives currently posted on the platform.
+                        </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
     </div>
 
-    <div class="card">
-        <h3>Total Placed</h3>
-        <h1><%=request.getAttribute("totalPlaced")%></h1>
-    </div>
-
-</div>
-
-<!-- ================= SEARCH BOX ================= -->
-
-<div class="search-box">
-
-<input
-type="text"
-id="searchBox"
-placeholder="Search Company / Job Title / Drive Type..."
-onkeyup="searchTable()">
-
-</div>
-
-<!-- ================= TABLE ================= -->
-
-<table id="driveTable">
-
-<tr>
-
-<th>Drive ID</th>
-
-<th>Company</th>
-
-<th>Drive Type</th>
-
-<th>Job Title</th>
-
-<th>Vacancy</th>
-
-<th>Applications</th>
-
-<th>Selected</th>
-
-<th>Placed</th>
-
-<th>Salary</th>
-
-<th>Deadline</th>
-
-<th>Status</th>
-
-</tr>
-
-<%
-
-if(list!=null && !list.isEmpty())
-{
-
-for(RecruitmentDrive d:list)
-{
-
-%>
-
-<tr>
-
-<td><%=d.getDriveId()%></td>
-
-<td><%=d.getCompanyName()%></td>
-
-<td><%=d.getDriveType()%></td>
-
-<td><%=d.getJobTitle()%></td>
-
-<td><%=d.getVacancy()%></td>
-
-<td style="font-weight:bold;color:#007bff;">
-<%=d.getApplications()%>
-</td>
-
-<td style="font-weight:bold;color:#ff9800;">
-<%=d.getSelectedStudents()%>
-</td>
-
-<td style="font-weight:bold;color:green;">
-<%=d.getPlacedStudents()%>
-</td>
-
-<td>
-
-Rs. <%=d.getSalary()%>
-
-</td>
-
-<td>
-
-<%=d.getDeadline()%>
-
-</td>
-
-<td>
-
-<%
-
-String status=d.getStatus();
-
-if(status.equalsIgnoreCase("ACTIVE"))
-{
-
-%>
-
-<span class="badge-active">
-
-ACTIVE
-
-</span>
-
-<%
-
-}
-
-else if(status.equalsIgnoreCase("OPEN"))
-{
-
-%>
-
-<span class="badge-open">
-
-OPEN
-
-</span>
-
-<%
-
-}
-
-else if(status.equalsIgnoreCase("COMPLETED"))
-{
-
-%>
-
-<span class="badge-completed">
-
-COMPLETED
-
-</span>
-
-<%
-
-}
-
-else
-
-{
-
-%>
-
-<span class="badge-closed">
-
-<%=status%>
-
-</span>
-
-<%
-
-}
-
-%>
-
-</td>
-
-</tr>
-
-<%
-
-}
-
-}
-
-else
-
-{
-
-%>
-
-<tr>
-
-<td colspan="11">
-
-No Recruitment Drives Found
-
-</td>
-
-</tr>
-
-<%
-
-}
-
-%>
-
-</table>
-
-<br><br>
-
-</div>
-
-<!-- ================= SEARCH FUNCTION ================= -->
+</main>
+
+<footer class="footer">
+    &copy; CampusConnect Platform. Super Administrator Control Center.
+</footer>
 
 <script>
+function filterDriveTable() {
+    const search = document.getElementById('driveSearch').value.toLowerCase();
+    const type = document.getElementById('driveTypeFilter').value.toUpperCase();
+    const status = document.getElementById('driveStatusFilter').value.toUpperCase();
+    const rows = document.querySelectorAll('#driveTable tbody tr');
+    let visible = 0;
 
-function searchTable(){
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const rowType = row.getAttribute('data-type') || '';
+        const rowStatus = row.getAttribute('data-status') || '';
 
-var input=document.getElementById("searchBox");
+        const matchesSearch = text.includes(search);
+        const matchesType = !type || rowType.includes(type);
+        const matchesStatus = !status || rowStatus === status;
 
-var filter=input.value.toUpperCase();
+        if (matchesSearch && matchesType && matchesStatus) {
+            row.style.display = '';
+            visible++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
 
-var table=document.getElementById("driveTable");
-
-var tr=table.getElementsByTagName("tr");
-
-for(var i=1;i<tr.length;i++){
-
-var tdCompany=tr[i].getElementsByTagName("td")[1];
-
-var tdDrive=tr[i].getElementsByTagName("td")[2];
-
-var tdJob=tr[i].getElementsByTagName("td")[3];
-
-if(tdCompany||tdDrive||tdJob){
-
-var txt1=tdCompany.textContent||tdCompany.innerText;
-
-var txt2=tdDrive.textContent||tdDrive.innerText;
-
-var txt3=tdJob.textContent||tdJob.innerText;
-
-if(txt1.toUpperCase().indexOf(filter)>-1 ||
-
-txt2.toUpperCase().indexOf(filter)>-1 ||
-
-txt3.toUpperCase().indexOf(filter)>-1){
-
-tr[i].style.display="";
-
+    const countElem = document.getElementById('visibleDriveCount');
+    if (countElem) countElem.innerText = visible;
 }
-
-else{
-
-tr[i].style.display="none";
-
-}
-
-}
-
-}
-
-}
-
 </script>
 
 </body>
-
 </html>

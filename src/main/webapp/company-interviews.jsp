@@ -37,9 +37,10 @@
     }
 
     private String safeMessage(Exception e) {
-
-        return e instanceof IllegalArgumentException ? e.getMessage() : "The action could not be completed. Please refresh and try again.";
-
+        if (e instanceof IllegalArgumentException) {
+            return e.getMessage();
+        }
+        return "Action could not be completed: " + (e.getMessage() != null ? e.getMessage() : e.toString());
     }
 
 %>
@@ -54,8 +55,6 @@
 
     if (companyName == null || companyName.trim().length() == 0) companyName = "Company";
 
-
-
     String csrf = (String) session.getAttribute("interviewCsrf");
 
     if (csrf == null) { csrf = UUID.randomUUID().toString(); session.setAttribute("interviewCsrf", csrf); }
@@ -67,8 +66,6 @@
     String error = null;
 
     Connection con = null;
-
-
 
     if ("POST".equalsIgnoreCase(request.getMethod())) {
 
@@ -134,13 +131,15 @@
 
                 if (remarks != null && remarks.length() > 500) throw new IllegalArgumentException("Remarks must be 500 characters or fewer.");
 
-
-
                 // Lock the application row after verifying this company owns its drive.
 
                 String lockSql = "SELECT A.APPLICATION_ID FROM APPLICATION A JOIN RECRUITMENT_DRIVE D ON D.DRIVE_ID=A.DRIVE_ID " +
 
-                    "WHERE A.APPLICATION_ID=? AND D.COMPANY_ID=? AND UPPER(A.COLLEGE_SHORTLIST_STATUS)='SHORTLISTED' " +
+                    "WHERE A.APPLICATION_ID=? AND D.COMPANY_ID=? AND ( " +
+                    "  ( (UPPER(D.DRIVE_TYPE) LIKE '%ON%CAMPUS%' OR UPPER(D.DRIVE_TYPE) = 'CAMPUS') AND UPPER(A.COLLEGE_SHORTLIST_STATUS)='SHORTLISTED' ) " +
+                    "  OR " +
+                    "  ( (UPPER(D.DRIVE_TYPE) NOT LIKE '%ON%CAMPUS%' AND UPPER(D.DRIVE_TYPE) != 'CAMPUS') AND UPPER(A.STATUS)='SHORTLISTED' ) " +
+                    ") " +
 
                     "AND UPPER(NVL(A.STATUS,'PENDING')) NOT IN ('REJECTED','SELECTED') FOR UPDATE OF A.STATUS";
 
@@ -236,35 +235,87 @@
 
                 String target = request.getParameter("target");
 
-                if (!("COMPLETED".equals(target) || "NO_SHOW".equals(target) || "CANCELLED".equals(target))) throw new IllegalArgumentException("Choose a valid interview action.");
+                if (!("COMPLETED".equals(target) || "NO_SHOW".equals(target) || "CANCELLED".equals(target) || "SELECTED".equals(target) || "REJECTED".equals(target) || "ADVANCE".equals(target))) {
+                    throw new IllegalArgumentException("Choose a valid interview action.");
+                }
 
                 String reason = request.getParameter("reason");
 
-                if ("CANCELLED".equals(target) && (reason == null || reason.trim().length() == 0 || reason.length() > 300)) throw new IllegalArgumentException("Enter a cancellation reason (up to 300 characters).");
+                if ("CANCELLED".equals(target) && (reason == null || reason.trim().length() == 0 || reason.length() > 300)) {
+                    throw new IllegalArgumentException("Enter a cancellation reason (up to 300 characters).");
+                }
 
-                String update = "UPDATE INTERVIEW I SET STATUS=?, CANCEL_REASON=?, UPDATED_AT=SYSDATE WHERE I.INTERVIEW_ID=? AND I.STATUS='SCHEDULED' " +
+                boolean isDirectDecision = "SELECTED".equals(target) || "REJECTED".equals(target) || "ADVANCE".equals(target);
+                String newStatus = isDirectDecision ? "COMPLETED" : target;
+                String newResult = isDirectDecision ? target : "PENDING";
 
-                    "AND ((?='CANCELLED') OR (I.INTERVIEW_DATE<=SYSDATE AND ? IN ('COMPLETED','NO_SHOW'))) " +
-
+                String update = "UPDATE INTERVIEW I SET STATUS=?, RESULT=?, CANCEL_REASON=?, UPDATED_AT=SYSDATE WHERE I.INTERVIEW_ID=? AND I.STATUS='SCHEDULED' " +
                     "AND EXISTS (SELECT 1 FROM APPLICATION A JOIN RECRUITMENT_DRIVE D ON D.DRIVE_ID=A.DRIVE_ID WHERE A.APPLICATION_ID=I.APPLICATION_ID AND D.COMPANY_ID=?)";
 
                 try (PreparedStatement p = con.prepareStatement(update)) {
-
-                    p.setString(1,target); if("CANCELLED".equals(target)) p.setString(2,reason.trim()); else p.setNull(2,Types.VARCHAR);
-
-                    p.setInt(3,interviewId); p.setString(4,target); p.setString(5,target); p.setInt(6,companyId);
-
-                    if(p.executeUpdate()!=1) throw new IllegalArgumentException("Interview not found, already updated, or not yet started.");
-
+                    p.setString(1, newStatus);
+                    p.setString(2, newResult);
+                    if ("CANCELLED".equals(target)) {
+                        p.setString(3, (reason != null && !reason.trim().isEmpty()) ? reason.trim() : "Cancelled by Company");
+                    } else {
+                        p.setNull(3, Types.VARCHAR);
+                    }
+                    p.setInt(4, interviewId);
+                    p.setInt(5, companyId);
+                    if (p.executeUpdate() != 1) {
+                        throw new IllegalArgumentException("Interview not found or already updated.");
+                    }
                 }
 
-                try (PreparedStatement p = con.prepareStatement("INSERT INTO INTERVIEW_HISTORY (HISTORY_ID,INTERVIEW_ID,ACTION,NOTE,ACTION_BY,ACTION_AT) VALUES (INTERVIEW_HISTORY_SEQ.NEXTVAL,?,?,?,?,SYSDATE)")) {
+                if ("SELECTED".equals(target) || "REJECTED".equals(target)) {
+                    String appUpdate = "UPDATE APPLICATION A SET STATUS=? WHERE EXISTS (SELECT 1 FROM INTERVIEW I JOIN RECRUITMENT_DRIVE D ON D.DRIVE_ID=A.DRIVE_ID WHERE I.INTERVIEW_ID=? AND I.APPLICATION_ID=A.APPLICATION_ID AND D.COMPANY_ID=?)";
+                    try (PreparedStatement p = con.prepareStatement(appUpdate)) {
+                        p.setString(1, target);
+                        p.setInt(2, interviewId);
+                        p.setInt(3, companyId);
+                        p.executeUpdate();
+                    }
 
-                    p.setInt(1,interviewId); p.setString(2,target); p.setString(3,"CANCELLED".equals(target)?reason.trim():null); p.setString(4,companyName); p.executeUpdate();
-
+                    if ("SELECTED".equals(target)) {
+                        String getApp = "SELECT APPLICATION_ID FROM INTERVIEW WHERE INTERVIEW_ID = ?";
+                        int selAppId = 0;
+                        try (PreparedStatement p = con.prepareStatement(getApp)) {
+                            p.setInt(1, interviewId);
+                            try (ResultSet r = p.executeQuery()) {
+                                if (r.next()) selAppId = r.getInt(1);
+                            }
+                        }
+                        if (selAppId > 0) {
+                            String checkSel = "SELECT COUNT(*) FROM SELECTION WHERE APPLICATION_ID = ?";
+                            boolean exists = false;
+                            try (PreparedStatement p = con.prepareStatement(checkSel)) {
+                                p.setInt(1, selAppId);
+                                try (ResultSet r = p.executeQuery()) {
+                                    if (r.next() && r.getInt(1) > 0) exists = true;
+                                }
+                            }
+                            if (!exists) {
+                                String insSel = "INSERT INTO SELECTION (SELECTION_ID, APPLICATION_ID, RESULT, SELECTION_DATE, REMARKS) " +
+                                                "VALUES (NVL((SELECT MAX(SELECTION_ID) FROM SELECTION), 0) + 1, ?, 'SELECTED', SYSDATE, 'Selected by Company after Interview')";
+                                try (PreparedStatement p = con.prepareStatement(insSel)) {
+                                    p.setInt(1, selAppId);
+                                    p.executeUpdate();
+                                }
+                            }
+                        }
+                    }
                 }
 
-                con.commit(); flash = "Interview updated.";
+                try (PreparedStatement p = con.prepareStatement("INSERT INTO INTERVIEW_HISTORY (HISTORY_ID,INTERVIEW_ID,ACTION,NEW_VALUE,ACTION_BY,ACTION_AT) VALUES (INTERVIEW_HISTORY_SEQ.NEXTVAL,?,?,?,?,SYSDATE)")) {
+                    p.setInt(1, interviewId);
+                    p.setString(2, target);
+                    p.setString(3, "CANCELLED".equals(target) ? reason.trim() : (isDirectDecision ? "Direct Decision: " + target : null));
+                    p.setString(4, companyName);
+                    p.executeUpdate();
+                }
+
+                con.commit();
+                flash = "Interview updated successfully (" + target + ").";
 
             } else if ("feedback".equals(action)) {
 
@@ -302,10 +353,6 @@
 
                 con.commit(); flash = "Feedback saved.";
 
-
-
-
-
                             } else if ("decision".equals(action)) {
 
                 int interviewId = number(request.getParameter("interviewId"),0);
@@ -316,21 +363,44 @@
 
                 String feedbackFlag = request.getParameter("withoutFeedback");
 
-                String fsql = "SELECT COUNT(*) FROM INTERVIEW_FEEDBACK F JOIN INTERVIEW I ON I.INTERVIEW_ID=F.INTERVIEW_ID JOIN APPLICATION A ON A.APPLICATION_ID=I.APPLICATION_ID JOIN RECRUITMENT_DRIVE D ON D.DRIVE_ID=A.DRIVE_ID WHERE I.INTERVIEW_ID=? AND D.COMPANY_ID=?";
-
-                int feedbackCount; try(PreparedStatement p=con.prepareStatement(fsql)){p.setInt(1,interviewId);p.setInt(2,companyId);try(ResultSet r=p.executeQuery()){r.next();feedbackCount=r.getInt(1);}}
-
-                if(feedbackCount==0 && !"Y".equals(feedbackFlag)) throw new IllegalArgumentException("Submit feedback first, or confirm the decision without feedback.");
-
                 String decisionSql="UPDATE INTERVIEW I SET RESULT=?, UPDATED_AT=SYSDATE WHERE I.INTERVIEW_ID=? AND I.STATUS='COMPLETED' AND I.RESULT IN ('PENDING','ON_HOLD') AND EXISTS (SELECT 1 FROM APPLICATION A JOIN RECRUITMENT_DRIVE D ON D.DRIVE_ID=A.DRIVE_ID WHERE A.APPLICATION_ID=I.APPLICATION_ID AND D.COMPANY_ID=?)";
 
-                try(PreparedStatement p=con.prepareStatement(decisionSql)){p.setString(1,result);p.setInt(2,interviewId);p.setInt(3,companyId);if(p.executeUpdate()!=1)throw new IllegalArgumentException("This interview cannot be decided again.");}
+                try(PreparedStatement p=con.prepareStatement(decisionSql)){p.setString(1,result);p.setInt(2,interviewId);p.setInt(3,companyId);if(p.executeUpdate()!=1)throw new IllegalArgumentException("This interview cannot be decided again or was already finalized.");}
 
                 if("SELECTED".equals(result)||"REJECTED".equals(result)) {
 
                     String appUpdate="UPDATE APPLICATION A SET STATUS=? WHERE EXISTS (SELECT 1 FROM INTERVIEW I JOIN RECRUITMENT_DRIVE D ON D.DRIVE_ID=A.DRIVE_ID WHERE I.INTERVIEW_ID=? AND I.APPLICATION_ID=A.APPLICATION_ID AND D.COMPANY_ID=?)";
 
                     try(PreparedStatement p=con.prepareStatement(appUpdate)){p.setString(1,result);p.setInt(2,interviewId);p.setInt(3,companyId);if(p.executeUpdate()!=1)throw new IllegalArgumentException("Candidate is no longer available.");}
+
+                    if("SELECTED".equals(result)) {
+                        String getApp = "SELECT APPLICATION_ID FROM INTERVIEW WHERE INTERVIEW_ID = ?";
+                        int selAppId = 0;
+                        try (PreparedStatement p = con.prepareStatement(getApp)) {
+                            p.setInt(1, interviewId);
+                            try (ResultSet r = p.executeQuery()) {
+                                if (r.next()) selAppId = r.getInt(1);
+                            }
+                        }
+                        if (selAppId > 0) {
+                            String checkSel = "SELECT COUNT(*) FROM SELECTION WHERE APPLICATION_ID = ?";
+                            boolean exists = false;
+                            try (PreparedStatement p = con.prepareStatement(checkSel)) {
+                                p.setInt(1, selAppId);
+                                try (ResultSet r = p.executeQuery()) {
+                                    if (r.next() && r.getInt(1) > 0) exists = true;
+                                }
+                            }
+                            if (!exists) {
+                                String insSel = "INSERT INTO SELECTION (SELECTION_ID, APPLICATION_ID, RESULT, SELECTION_DATE, REMARKS) " +
+                                                "VALUES (NVL((SELECT MAX(SELECTION_ID) FROM SELECTION), 0) + 1, ?, 'SELECTED', SYSDATE, 'Selected by Company after Interview')";
+                                try (PreparedStatement p = con.prepareStatement(insSel)) {
+                                    p.setInt(1, selAppId);
+                                    p.executeUpdate();
+                                }
+                            }
+                        }
+                    }
 
                 }
 
@@ -382,8 +452,6 @@
 
     }
 
-
-
     String activeTab = request.getParameter("tab");
 
     if (activeTab == null || !("upcoming".equals(activeTab)||"feedback".equals(activeTab)||"completed".equals(activeTab)||"all".equals(activeTab))) activeTab="upcoming";
@@ -392,13 +460,11 @@
 
     String stateFilter = "";
 
-    if ("upcoming".equals(activeTab)) stateFilter=" AND I.STATUS='SCHEDULED' AND I.INTERVIEW_DATE>=SYSDATE";
+    if ("upcoming".equals(activeTab)) stateFilter=" AND I.STATUS='SCHEDULED'";
 
     else if ("feedback".equals(activeTab)) stateFilter=" AND I.STATUS='COMPLETED' AND I.RESULT='PENDING' AND F.FEEDBACK_ID IS NULL";
 
     else if ("completed".equals(activeTab)) stateFilter=" AND I.STATUS='COMPLETED'";
-
-
 
     int todayCount=0, weekCount=0, feedbackPending=0, awaitingDecision=0, noShows=0, readyCount=0;
 
@@ -434,15 +500,25 @@
 
         String readySql="SELECT A.APPLICATION_ID,S.NAME,S.EMAIL,R.JOB_TITLE,R.DRIVE_ID,"+
 
-            "NVL((SELECT CASE WHEN I.STATUS IN ('CANCELLED','NO_SHOW') THEN I.ROUND_NO ELSE I.ROUND_NO+1 END FROM INTERVIEW I WHERE "+latestInterview+"),1) NEXT_ROUND "+
+            "NVL((SELECT CASE WHEN I.STATUS IN ('CANCELLED','NO_SHOW') THEN I.ROUND_NO ELSE I.ROUND_NO+1 END FROM INTERVIEW I WHERE "+latestInterview+"),1) NEXT_ROUND, "+
 
-            "FROM APPLICATION A JOIN STUDENT S ON S.STUDENT_ID=A.STUDENT_ID JOIN RECRUITMENT_DRIVE R ON R.DRIVE_ID=A.DRIVE_ID WHERE R.COMPANY_ID=? AND UPPER(A.COLLEGE_SHORTLIST_STATUS)='SHORTLISTED' AND UPPER(NVL(A.STATUS,'PENDING')) NOT IN ('REJECTED','SELECTED') "+
+            "COL.COLLEGE_NAME "+
+
+            "FROM APPLICATION A JOIN STUDENT S ON S.STUDENT_ID=A.STUDENT_ID "+
+
+            "LEFT JOIN COLLEGE COL ON S.COLLEGE_ID=COL.COLLEGE_ID "+
+
+            "JOIN RECRUITMENT_DRIVE R ON R.DRIVE_ID=A.DRIVE_ID WHERE R.COMPANY_ID=? AND ( "+
+            "  ( (UPPER(R.DRIVE_TYPE) LIKE '%ON%CAMPUS%' OR UPPER(R.DRIVE_TYPE) = 'CAMPUS') AND UPPER(A.COLLEGE_SHORTLIST_STATUS)='SHORTLISTED' ) "+
+            "  OR "+
+            "  ( (UPPER(R.DRIVE_TYPE) NOT LIKE '%ON%CAMPUS%' AND UPPER(R.DRIVE_TYPE) != 'CAMPUS') AND UPPER(A.STATUS)='SHORTLISTED' ) "+
+            ") AND UPPER(NVL(A.STATUS,'PENDING')) NOT IN ('REJECTED','SELECTED') "+
 
             "AND NOT EXISTS (SELECT 1 FROM INTERVIEW I WHERE I.APPLICATION_ID=A.APPLICATION_ID AND I.STATUS='SCHEDULED') "+
 
             "AND (NOT EXISTS (SELECT 1 FROM INTERVIEW I WHERE I.APPLICATION_ID=A.APPLICATION_ID) OR EXISTS (SELECT 1 FROM INTERVIEW I WHERE "+latestInterview+" AND (I.RESULT='ADVANCE' OR I.STATUS IN ('CANCELLED','NO_SHOW')))) ORDER BY A.APPLICATION_ID DESC";
 
-        try(PreparedStatement p=con.prepareStatement(readySql)){p.setInt(1,companyId);try(ResultSet r=p.executeQuery()){while(r.next()){Map<String,Object> m=new HashMap<String,Object>();m.put("id",r.getInt(1));m.put("name",r.getString(2));m.put("email",r.getString(3));m.put("job",r.getString(4));m.put("drive",r.getInt(5));m.put("nextRound",r.getInt(6));ready.add(m);}}}
+        try(PreparedStatement p=con.prepareStatement(readySql)){p.setInt(1,companyId);try(ResultSet r=p.executeQuery()){while(r.next()){Map<String,Object> m=new HashMap<String,Object>();m.put("id",r.getInt(1));m.put("name",r.getString(2));m.put("email",r.getString(3));m.put("job",r.getString(4));m.put("drive",r.getInt(5));m.put("nextRound",r.getInt(6));m.put("college",r.getString(7)!=null?r.getString(7):"Off-Campus");ready.add(m);}}}
 
         readyCount=ready.size();
 
@@ -453,7 +529,7 @@
         String searchTerm = query.trim();
         String searchFilter = searchTerm.length() == 0 ? "" :
             " AND (UPPER(S.NAME) LIKE UPPER(?) OR UPPER(S.EMAIL) LIKE UPPER(?) OR UPPER(R.JOB_TITLE) LIKE UPPER(?))";
-        String list="SELECT * FROM (SELECT Q.*,ROWNUM RN FROM (SELECT I.INTERVIEW_ID,I.APPLICATION_ID,S.NAME,S.EMAIL,R.JOB_TITLE,I.ROUND_NO,I.ROUND_NAME,I.INTERVIEW_DATE,I.DURATION_MIN,I.INTERVIEW_MODE,I.VENUE_OR_LINK,I.STATUS,I.RESULT,IV.NAME,F.FEEDBACK_ID FROM INTERVIEW I JOIN APPLICATION A ON A.APPLICATION_ID=I.APPLICATION_ID JOIN STUDENT S ON S.STUDENT_ID=A.STUDENT_ID JOIN RECRUITMENT_DRIVE R ON R.DRIVE_ID=A.DRIVE_ID LEFT JOIN INTERVIEWER IV ON IV.INTERVIEWER_ID=I.INTERVIEWER_ID LEFT JOIN INTERVIEW_FEEDBACK F ON F.INTERVIEW_ID=I.INTERVIEW_ID WHERE R.COMPANY_ID=?"+stateFilter+searchFilter+
+        String list="SELECT * FROM (SELECT Q.*,ROWNUM RN FROM (SELECT I.INTERVIEW_ID,I.APPLICATION_ID,S.NAME,S.EMAIL,R.JOB_TITLE,I.ROUND_NO,I.ROUND_NAME,I.INTERVIEW_DATE,I.DURATION_MIN,I.INTERVIEW_MODE,I.VENUE_OR_LINK,I.STATUS,I.RESULT,IV.NAME AS INTERVIEWER_NAME,F.FEEDBACK_ID FROM INTERVIEW I JOIN APPLICATION A ON A.APPLICATION_ID=I.APPLICATION_ID JOIN STUDENT S ON S.STUDENT_ID=A.STUDENT_ID JOIN RECRUITMENT_DRIVE R ON R.DRIVE_ID=A.DRIVE_ID LEFT JOIN INTERVIEWER IV ON IV.INTERVIEWER_ID=I.INTERVIEWER_ID LEFT JOIN INTERVIEW_FEEDBACK F ON F.INTERVIEW_ID=I.INTERVIEW_ID WHERE R.COMPANY_ID=?"+stateFilter+searchFilter+
             " ORDER BY I.INTERVIEW_DATE DESC NULLS LAST) Q WHERE ROWNUM<=50)";
 
         try(PreparedStatement p=con.prepareStatement(list)){
@@ -497,10 +573,6 @@
     SimpleDateFormat dateFormat = new SimpleDateFormat("EEE, dd MMM · hh:mm a");
 
 %>
-
-
-
-
 
 <!DOCTYPE html>
 
@@ -670,7 +742,6 @@ tbody tr:hover{background:#fafcff}
 
 @media(max-width:520px){.metrics{grid-template-columns:1fr 1fr;gap:8px}.metric{padding:13px}.metric-value{font-size:22px}.form{grid-template-columns:1fr;padding:16px}.field.full,.form-foot{grid-column:1}.actions{flex-wrap:wrap}}
 
-
         .sidebar {
             font-family: Arial, Helvetica, sans-serif;
             line-height: normal;
@@ -786,7 +857,6 @@ tbody tr:hover{background:#fafcff}
             .shell { width: calc(100% - 76px); margin-left: 76px; }
         }
 
-
 </style>
 
 </head>
@@ -884,8 +954,6 @@ tbody tr:hover{background:#fafcff}
 
 </header>
 
-
-
 <% if (flash != null) { %>
 
 <div class="alert" style="border-color:#bde7d6;background:#edfbf5;color:#176d55"><%=esc(flash)%></div>
@@ -893,8 +961,6 @@ tbody tr:hover{background:#fafcff}
 <% } %>
 
 <% if (error != null) { %><div class="alert"><%=esc(error)%></div><% } %>
-
-
 
 <section class="metrics">
 
@@ -910,8 +976,6 @@ tbody tr:hover{background:#fafcff}
 
 </section>
 
-
-
 <section class="pipeline">
 
     <div class="pipe ready"><span class="dot"></span> Ready to schedule <b><%=readyCount%></b></div>
@@ -923,8 +987,6 @@ tbody tr:hover{background:#fafcff}
     <div class="pipe wait"><span class="dot"></span> Rejected / on hold <b><%=rejectedHoldCount%></b></div>
 
 </section>
-
-
 
 <div class="layout">
 
@@ -978,7 +1040,7 @@ tbody tr:hover{background:#fafcff}
 
         <tr>
 
-            <td><div class="person"><%=esc((String)row.get("name"))%></div><div class="small"><%=esc((String)row.get("email"))%></div><div class="small"><%=esc((String)row.get("job"))%></div></td>
+            <td><div class="person"><a href="company-candidate-details.jsp?appId=<%=row.get("app")%>" style="color:#0f172a; text-decoration:none; font-weight:700;"><%=esc((String)row.get("name"))%> <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:9px; opacity:0.6;"></i></a></div><div class="small"><%=esc((String)row.get("email"))%></div><div class="small"><%=esc((String)row.get("job"))%></div></td>
 
             <td><b>Round <%=row.get("round")%></b><div class="small"><%=row.get("roundName")==null?"":esc((String)row.get("roundName"))%></div><div class="small"><%=row.get("duration")%> min</div></td>
 
@@ -996,24 +1058,42 @@ tbody tr:hover{background:#fafcff}
 
                 <% if ("SCHEDULED".equals(status)) { %>
 
-                <form method="post" class="inline-form">
+                <form method="post" class="inline-form" style="display:inline-flex; align-items:center; gap:6px;">
 
                     <input type="hidden" name="csrf" value="<%=esc(csrf)%>"><input type="hidden" name="action" value="meetingStatus"><input type="hidden" name="interviewId" value="<%=row.get("id")%>">
 
-                    <select name="target"><option value="COMPLETED">Complete</option><option value="NO_SHOW">No-show</option><option value="CANCELLED">Cancel</option></select>
+                    <select name="target" style="padding:5px 8px; font-size:12px; border-radius:6px; border:1px solid #cbd5e1; background:#ffffff; font-weight:600;">
+                        <option value="COMPLETED">Complete</option>
+                        <option value="SELECTED">Direct Select</option>
+                        <option value="ADVANCE">Advance Round</option>
+                        <option value="REJECTED">Reject</option>
+                        <option value="NO_SHOW">No-show</option>
+                        <option value="CANCELLED">Cancel</option>
+                    </select>
 
-                    <button class="btn" type="submit">Save</button>
+                    <button class="btn" type="submit" style="padding:5px 11px; font-size:12px; font-weight:700;">Save</button>
 
                 </form>
 
-                <% } else if ("COMPLETED".equals(status) && !Boolean.TRUE.equals(row.get("feedback"))) { %>
+                <% } else if ("COMPLETED".equals(status)) { %>
+                    <div style="display:inline-flex; align-items:center; gap:6px; flex-wrap:wrap;">
+                    <% if ("PENDING".equals(row.get("result")) || "ON_HOLD".equals(row.get("result"))) { %>
+                        <button class="btn primary" type="button" style="padding:5px 10px; font-size:12px; font-weight:700;" onclick="openDecision(<%=row.get("id")%>)">
+                            <i class="fa-solid fa-gavel"></i> Decision
+                        </button>
+                    <% } else if ("SELECTED".equals(row.get("result"))) { %>
+                        <span style="font-size:12px; color:#16a34a; font-weight:800;"><i class="fa-solid fa-circle-check"></i> Selected</span>
+                        <a href="company-offers.jsp" class="btn" style="padding:4px 8px; font-size:11px; text-decoration:none;"><i class="fa-solid fa-file-contract"></i> Make Offer</a>
+                    <% } else if ("ADVANCE".equals(row.get("result"))) { %>
+                        <span style="font-size:12px; color:#0284c7; font-weight:800;"><i class="fa-solid fa-arrow-right"></i> Advanced</span>
+                    <% } else if ("REJECTED".equals(row.get("result"))) { %>
+                        <span style="font-size:12px; color:#dc2626; font-weight:800;"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
+                    <% } %>
 
-                <button class="link" type="button" onclick="openFeedback(<%=row.get("id")%>)">Add feedback</button>
-
-                <% } else if ("COMPLETED".equals(status) && ("PENDING".equals(row.get("result")) || "ON_HOLD".equals(row.get("result")))) { %>
-
-                <button class="link" type="button" onclick="openDecision(<%=row.get("id")%>)">Record decision</button>
-
+                    <button class="link" type="button" style="font-size:12px; margin-left:4px;" onclick="openFeedback(<%=row.get("id")%>)">
+                        <%= Boolean.TRUE.equals(row.get("feedback")) ? "View Feedback" : "+ Feedback" %>
+                    </button>
+                    </div>
                 <% } else { %><span class="small">—</span><% } %>
 
             </td>
@@ -1034,8 +1114,6 @@ tbody tr:hover{background:#fafcff}
 
 </section>
 
-
-
 <aside class="side">
 
 <section class="panel">
@@ -1046,13 +1124,18 @@ tbody tr:hover{background:#fafcff}
 
     <% if (ready.isEmpty()) { %>
 
-        <div class="empty" style="padding:22px 8px"><b>No candidates ready</b>Candidates appear here when COLLEGE_SHORTLIST_STATUS is SHORTLISTED.</div>
+        <div class="empty" style="padding:22px 8px"><b>No candidates ready</b>Candidates appear here when shortlisted (College-verified for On-Campus or Company-shortlisted for Off-Campus).</div>
 
     <% } else { for (Map<String,Object> candidate : ready) { %>
 
         <div class="ready-item">
 
-            <div class="person"><%=esc((String)candidate.get("name"))%></div>
+            <div class="person">
+                <a href="company-candidate-details.jsp?appId=<%=candidate.get("id")%>" style="color:#0f172a; text-decoration:none; font-weight:700;" title="View candidate dossier">
+                    <%=esc((String)candidate.get("name"))%>
+                    <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:9px; opacity:0.6;"></i>
+                </a>
+            </div>
 
             <div class="small"><%=esc((String)candidate.get("job"))%> · Drive #<%=candidate.get("drive")%></div>
 
@@ -1065,8 +1148,6 @@ tbody tr:hover{background:#fafcff}
     </div>
 
 </section>
-
-
 
 <section class="panel">
 
@@ -1096,8 +1177,6 @@ tbody tr:hover{background:#fafcff}
 
 </main>
 
-
-
 <dialog class="dialog" id="schedule">
 
 <div class="dialog-head"><h3>Schedule an interview</h3><button class="btn" type="button" onclick="this.closest('dialog').close()">Close</button></div>
@@ -1106,11 +1185,11 @@ tbody tr:hover{background:#fafcff}
 
     <input type="hidden" name="csrf" value="<%=esc(csrf)%>"><input type="hidden" name="action" value="schedule">
 
-    <div class="field full"><label>College-shortlisted candidate</label>
+    <div class="field full"><label>Candidate for Interview</label>
 
         <select name="applicationId" id="candidateSelect" required onchange="setCandidateRound()"><option value="">Select candidate</option>
 
-        <% for (Map<String,Object> c : ready) { %><option value="<%=c.get("id")%>" data-round="<%=c.get("nextRound")%>"><%=esc((String)c.get("name"))%> — <%=esc((String)c.get("job"))%></option><% } %>
+        <% for (Map<String,Object> c : ready) { %><option value="<%=c.get("id")%>" data-round="<%=c.get("nextRound")%>"><%=esc((String)c.get("name"))%> (<%=esc((String)c.get("college"))%>) — <%=esc((String)c.get("job"))%></option><% } %>
 
         </select>
 
@@ -1138,8 +1217,6 @@ tbody tr:hover{background:#fafcff}
 
 </dialog>
 
-
-
 <dialog class="dialog" id="feedback">
 
 <div class="dialog-head"><h3>Interview scorecard</h3><button class="btn" type="button" onclick="this.closest('dialog').close()">Close</button></div>
@@ -1166,8 +1243,6 @@ tbody tr:hover{background:#fafcff}
 
 </dialog>
 
-
-
 <dialog class="dialog" id="decision">
 
 <div class="dialog-head"><h3>Record a decision</h3><button class="btn" type="button" onclick="this.closest('dialog').close()">Close</button></div>
@@ -1178,15 +1253,13 @@ tbody tr:hover{background:#fafcff}
 
     <div class="field full"><label>Outcome</label><select name="result" required><option value="ADVANCE">Advance to next round</option><option value="SELECTED">Select candidate</option><option value="REJECTED">Reject candidate</option><option value="ON_HOLD">Put on hold</option></select></div>
 
-    <div class="field full"><label><input type="checkbox" name="withoutFeedback" value="Y" style="width:auto"> I confirm this decision without a submitted scorecard</label></div>
+    <div class="field full"><label><input type="checkbox" name="withoutFeedback" value="Y" checked style="width:auto"> I confirm this hiring decision</label></div>
 
     <div class="form-foot"><button class="btn primary" type="submit">Save decision</button></div>
 
 </form>
 
 </dialog>
-
-
 
 <dialog class="dialog" id="people">
 
@@ -1217,8 +1290,6 @@ tbody tr:hover{background:#fafcff}
 </div>
 
 </dialog>
-
-
 
 <script>
 

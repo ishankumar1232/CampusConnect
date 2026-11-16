@@ -1,3 +1,4 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.sql.*" %>
 
 <%
@@ -15,6 +16,7 @@
 <head>
 
     <title>Department Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
 
@@ -110,15 +112,13 @@
     Department Management
 </div>
 
-
 <div class="back">
 
     <a href="collegeAdminDashboard.jsp">
-        ← Back to Dashboard
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
     </a>
 
 </div>
-
 
 <!-- Add Department -->
 
@@ -144,7 +144,6 @@
     </form>
 
 </div>
-
 
 <!-- Department List -->
 

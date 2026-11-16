@@ -1,6 +1,7 @@
 package com.campusconnect.bean;
 
 import java.sql.*;
+import com.campusconnect.util.DBConnection;
 
 public class College {
 
@@ -13,11 +14,9 @@ public class College {
     private String phone;
     private String status;
 
-
     public College() {
 
     }
-
 
     public College(int collegeId, String collegeName, String address,
                    String city, String state, String email,
@@ -33,7 +32,6 @@ public class College {
         this.status = status;
     }
 
-
     public int getCollegeId() {
         return collegeId;
     }
@@ -41,7 +39,6 @@ public class College {
     public void setCollegeId(int collegeId) {
         this.collegeId = collegeId;
     }
-
 
     public String getCollegeName() {
         return collegeName;
@@ -51,7 +48,6 @@ public class College {
         this.collegeName = collegeName;
     }
 
-
     public String getAddress() {
         return address;
     }
@@ -59,7 +55,6 @@ public class College {
     public void setAddress(String address) {
         this.address = address;
     }
-
 
     public String getCity() {
         return city;
@@ -69,7 +64,6 @@ public class College {
         this.city = city;
     }
 
-
     public String getState() {
         return state;
     }
@@ -77,7 +71,6 @@ public class College {
     public void setState(String state) {
         this.state = state;
     }
-
 
     public String getEmail() {
         return email;
@@ -87,7 +80,6 @@ public class College {
         this.email = email;
     }
 
-
     public String getPhone() {
         return phone;
     }
@@ -95,7 +87,6 @@ public class College {
     public void setPhone(String phone) {
         this.phone = phone;
     }
-
 
     public String getStatus() {
         return status;
@@ -105,54 +96,32 @@ public class College {
         this.status = status;
     }
 
-
     // Get College Name
 
     public String getCollegeNameById(int id) {
 
         String name = "";
+        String sql =
+            "SELECT COLLEGE_NAME FROM COLLEGE WHERE COLLEGE_ID=?";
 
-        try {
-
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-
-            Connection con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
-            String sql =
-                "SELECT COLLEGE_NAME FROM COLLEGE WHERE COLLEGE_ID=?";
-
-            PreparedStatement ps =
-                con.prepareStatement(sql);
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql)) {
 
             ps.setInt(1, id);
 
-            ResultSet rs =
-                ps.executeQuery();
-
-            if(rs.next()) {
-
-                name = rs.getString("COLLEGE_NAME");
-
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next()) {
+                    name = rs.getString("COLLEGE_NAME");
+                }
             }
-
-            rs.close();
-            ps.close();
-            con.close();
 
         }
         catch(Exception e) {
-
             e.printStackTrace();
-
         }
 
         return name;
     }
-
 
     @Override
     public String toString() {

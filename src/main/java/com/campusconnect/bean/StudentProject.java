@@ -1,6 +1,7 @@
 package com.campusconnect.bean;
 
 import java.sql.*;
+import com.campusconnect.util.DBConnection;
 
 public class StudentProject
 {
@@ -11,11 +12,9 @@ public class StudentProject
     private String technologies;
     private String projectUrl;
 
-
     public StudentProject()
     {
     }
-
 
     public int getProjectId()
     {
@@ -27,7 +26,6 @@ public class StudentProject
         this.projectId = projectId;
     }
 
-
     public int getStudentId()
     {
         return studentId;
@@ -37,7 +35,6 @@ public class StudentProject
     {
         this.studentId = studentId;
     }
-
 
     public String getProjectName()
     {
@@ -49,7 +46,6 @@ public class StudentProject
         this.projectName = projectName;
     }
 
-
     public String getDescription()
     {
         return description;
@@ -59,7 +55,6 @@ public class StudentProject
     {
         this.description = description;
     }
-
 
     public String getTechnologies()
     {
@@ -71,7 +66,6 @@ public class StudentProject
         this.technologies = technologies;
     }
 
-
     public String getProjectUrl()
     {
         return projectUrl;
@@ -82,122 +76,68 @@ public class StudentProject
         this.projectUrl = projectUrl;
     }
 
-
     // ================= ADD =================
 
     public boolean InsertMethod()
     {
-        Connection con = null;
-        Statement stmt = null;
+        String qid =
+            "SELECT NVL(MAX(PROJECT_ID),0)+1 " +
+            "FROM STUDENT_PROJECT";
 
-        try
+        String q1 =
+            "INSERT INTO STUDENT_PROJECT " +
+            "(PROJECT_ID, STUDENT_ID, PROJECT_NAME, " +
+            "DESCRIPTION, TECHNOLOGIES, PROJECT_URL) " +
+            "VALUES (?, ?, ?, ?, ?, ?)";
+
+        try (Connection con = DBConnection.getConnection();
+             Statement stmt = con.createStatement();
+             ResultSet rs = stmt.executeQuery(qid))
         {
-            Class.forName(
-                "oracle.jdbc.driver.OracleDriver"
-            );
-
-            con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
-            stmt = con.createStatement();
-
-
-            String qid =
-                "SELECT NVL(MAX(PROJECT_ID),0)+1 " +
-                "FROM STUDENT_PROJECT";
-
-
-            ResultSet rs =
-                stmt.executeQuery(qid);
-
-
             int id = 1;
 
             if(rs.next())
             {
                 id = rs.getInt(1);
             }
+            this.projectId = id;
 
-            rs.close();
+            try (PreparedStatement ps = con.prepareStatement(q1))
+            {
+                ps.setInt(1, id);
+                ps.setInt(2, studentId);
+                ps.setString(3, projectName);
+                ps.setString(4, description);
+                ps.setString(5, technologies);
+                ps.setString(6, projectUrl);
 
-
-            String q1 =
-                "INSERT INTO STUDENT_PROJECT " +
-                "(PROJECT_ID, STUDENT_ID, PROJECT_NAME, " +
-                "DESCRIPTION, TECHNOLOGIES, PROJECT_URL) " +
-                "VALUES (" +
-                id + ", " +
-                studentId + ", '" +
-                projectName + "', '" +
-                description + "', '" +
-                technologies + "', '" +
-                projectUrl + "')";
-
-
-            int x =
-                stmt.executeUpdate(q1);
-
-
-            return x > 0;
+                int x = ps.executeUpdate();
+                return x > 0;
+            }
         }
         catch(Exception e)
         {
             e.printStackTrace();
             return false;
         }
-        finally
-        {
-            try
-            {
-                if(stmt != null)
-                    stmt.close();
-
-                if(con != null)
-                    con.close();
-            }
-            catch(Exception e)
-            {
-            }
-        }
     }
-
 
     // ================= UPDATE =================
 
     public boolean UpdateMethod()
     {
-        Connection con = null;
-        PreparedStatement ps = null;
+        String sql =
+            "UPDATE STUDENT_PROJECT SET " +
+            "PROJECT_NAME=?, " +
+            "DESCRIPTION=?, " +
+            "TECHNOLOGIES=?, " +
+            "PROJECT_URL=? " +
+            "WHERE PROJECT_ID=? " +
+            "AND STUDENT_ID=?";
 
-        try
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql))
         {
-            Class.forName(
-                "oracle.jdbc.driver.OracleDriver"
-            );
-
-            con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
-
-            String sql =
-                "UPDATE STUDENT_PROJECT SET " +
-                "PROJECT_NAME=?, " +
-                "DESCRIPTION=?, " +
-                "TECHNOLOGIES=?, " +
-                "PROJECT_URL=? " +
-                "WHERE PROJECT_ID=? " +
-                "AND STUDENT_ID=?";
-
-
-            ps = con.prepareStatement(sql);
-
-
             ps.setString(1, projectName);
             ps.setString(2, description);
             ps.setString(3, technologies);
@@ -205,11 +145,7 @@ public class StudentProject
             ps.setInt(5, projectId);
             ps.setInt(6, studentId);
 
-
-            int x =
-                ps.executeUpdate();
-
-
+            int x = ps.executeUpdate();
             return x > 0;
         }
         catch(Exception e)
@@ -217,60 +153,24 @@ public class StudentProject
             e.printStackTrace();
             return false;
         }
-        finally
-        {
-            try
-            {
-                if(ps != null)
-                    ps.close();
-
-                if(con != null)
-                    con.close();
-            }
-            catch(Exception e)
-            {
-            }
-        }
     }
-
 
     // ================= DELETE =================
 
     public boolean DeleteMethod()
     {
-        Connection con = null;
-        PreparedStatement ps = null;
+        String sql =
+            "DELETE FROM STUDENT_PROJECT " +
+            "WHERE PROJECT_ID=? " +
+            "AND STUDENT_ID=?";
 
-        try
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql))
         {
-            Class.forName(
-                "oracle.jdbc.driver.OracleDriver"
-            );
-
-            con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
-
-            String sql =
-                "DELETE FROM STUDENT_PROJECT " +
-                "WHERE PROJECT_ID=? " +
-                "AND STUDENT_ID=?";
-
-
-            ps = con.prepareStatement(sql);
-
-
             ps.setInt(1, projectId);
             ps.setInt(2, studentId);
 
-
-            int x =
-                ps.executeUpdate();
-
-
+            int x = ps.executeUpdate();
             return x > 0;
         }
         catch(Exception e)
@@ -278,22 +178,7 @@ public class StudentProject
             e.printStackTrace();
             return false;
         }
-        finally
-        {
-            try
-            {
-                if(ps != null)
-                    ps.close();
-
-                if(con != null)
-                    con.close();
-            }
-            catch(Exception e)
-            {
-            }
-        }
     }
-
 
     // ================= VIEW =================
 
@@ -306,7 +191,6 @@ public class StudentProject
             Statement stmt =
                 con.createStatement();
 
-
             String q1 =
                 "SELECT PROJECT_ID, PROJECT_NAME, " +
                 "DESCRIPTION, TECHNOLOGIES, PROJECT_URL " +
@@ -314,7 +198,6 @@ public class StudentProject
                 "WHERE STUDENT_ID = " +
                 studentId +
                 " ORDER BY PROJECT_ID";
-
 
             rs =
                 stmt.executeQuery(q1);

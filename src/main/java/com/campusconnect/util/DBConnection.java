@@ -1,60 +1,41 @@
-
 package com.campusconnect.util;
 
+import java.io.InputStream;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.io.InputStream;
-import java.io.IOException;
 import java.util.Properties;
 
 public class DBConnection {
 
-    private static final Properties properties = new Properties();
+    private static String url = "jdbc:oracle:thin:@localhost:1521:XE";
+    private static String user = "CAMPUSCONNECT";
+    private static String password = "campus123";
 
     static {
-        try (InputStream input =
-                DBConnection.class.getClassLoader()
-                .getResourceAsStream("db.properties")) {
-
-            if (input == null) {
-                throw new IOException(
-                    "db.properties file not found in classpath."
-                );
-            }
-
-            properties.load(input);
-
+        try {
             Class.forName("oracle.jdbc.driver.OracleDriver");
-
-        } catch (IOException | ClassNotFoundException e) {
-            throw new ExceptionInInitializerError(e);
+            try (InputStream input = DBConnection.class.getClassLoader().getResourceAsStream("db.properties")) {
+                if (input != null) {
+                    Properties props = new Properties();
+                    props.load(input);
+                    if (props.getProperty("db.url") != null) url = props.getProperty("db.url").trim();
+                    if (props.getProperty("db.user") != null) user = props.getProperty("db.user").trim();
+                    if (props.getProperty("db.password") != null) password = props.getProperty("db.password").trim();
+                }
+            } catch (Exception ignored) {
+            }
+        } catch (ClassNotFoundException e) {
+            e.printStackTrace();
         }
     }
 
     public static Connection getConnection() {
-
+        Connection con = null;
         try {
-            String url = properties.getProperty("db.url");
-            String user = properties.getProperty("db.user");
-            String password = properties.getProperty("db.password");
-
-            if (url == null || user == null || password == null) {
-                throw new SQLException(
-                    "Database configuration is incomplete."
-                );
-            }
-
-            return DriverManager.getConnection(
-                url.trim(),
-                user.trim(),
-                password.trim()
-            );
-
-        } catch (SQLException e) {
-            System.err.println("Database connection failed:");
+            con = DriverManager.getConnection(url, user, password);
+        } catch (Exception e) {
             e.printStackTrace();
-            return null;
         }
+        return con;
     }
 }

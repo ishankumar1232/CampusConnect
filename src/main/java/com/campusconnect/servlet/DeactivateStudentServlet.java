@@ -30,13 +30,27 @@ public class DeactivateStudentServlet extends HttpServlet {
 
         // ================= GET STUDENT ID =================
 
-        int id = Integer.parseInt(req.getParameter("id"));
+        String idStr = req.getParameter("id");
 
-        // ================= DEACTIVATE STUDENT =================
+        if (idStr == null || idStr.trim().isEmpty()) {
 
-        StudentDAO dao = new StudentDAO();
+            res.sendRedirect(req.getContextPath()
+                    + "/StudentManagementServlet");
+            return;
+        }
 
-        dao.deactivateStudent(id);
+        try {
+            int id = Integer.parseInt(idStr.trim());
+
+            // ================= DEACTIVATE STUDENT =================
+
+            StudentDAO dao = new StudentDAO();
+
+            dao.deactivateStudent(id);
+
+        } catch (NumberFormatException e) {
+            // Invalid ID format, ignore
+        }
 
         // ================= REDIRECT =================
 

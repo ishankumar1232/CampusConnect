@@ -15,6 +15,17 @@ public class CompanyManagementServlet extends HttpServlet {
             HttpServletResponse res)
             throws ServletException, IOException {
 
+        // ================= SESSION CHECK =================
+
+        HttpSession session = req.getSession(false);
+
+        if (session == null || session.getAttribute("admin") == null) {
+
+            res.sendRedirect(req.getContextPath()
+                    + "/superadmin/login.jsp");
+            return;
+        }
+
         CompanyDAO dao = new CompanyDAO();
 
         ArrayList<Company> list = dao.getAllCompanies();

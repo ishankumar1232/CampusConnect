@@ -2,7 +2,6 @@ package com.campusconnect.controller;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
@@ -12,7 +11,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import com.campusconnect.util.DBConnection;
+
 public class FacultyController extends HttpServlet {
+
+    public void doGet(HttpServletRequest req, HttpServletResponse res)
+            throws IOException, ServletException {
+        if(req.getParameter("action") != null) {
+            doPost(req, res);
+        } else {
+            res.sendRedirect(req.getContextPath() + "/facultyManagement.jsp");
+        }
+    }
 
     public void doPost(HttpServletRequest req, HttpServletResponse res)
             throws IOException, ServletException {
@@ -28,20 +38,7 @@ public class FacultyController extends HttpServlet {
 
         String action = req.getParameter("action");
 
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        try {
-
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-
-            con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
+        try (Connection con = DBConnection.getConnection()) {
 
             // ADD FACULTY
             if("add".equals(action)) {
@@ -51,7 +48,6 @@ public class FacultyController extends HttpServlet {
                 String phone = req.getParameter("phone");
                 String departmentId = req.getParameter("departmentId");
 
-
                 // Check department belongs to this college
                 String checkSql =
                     "SELECT DEPARTMENT_ID " +
@@ -59,44 +55,32 @@ public class FacultyController extends HttpServlet {
                     "WHERE DEPARTMENT_ID=? " +
                     "AND COLLEGE_ID=?";
 
-                ps = con.prepareStatement(checkSql);
+                try (PreparedStatement psCheck = con.prepareStatement(checkSql)) {
+                    psCheck.setInt(1, Integer.parseInt(departmentId));
+                    psCheck.setInt(2, collegeId);
 
-                ps.setInt(1, Integer.parseInt(departmentId));
-                ps.setInt(2, collegeId);
-
-                rs = ps.executeQuery();
-
-                if(!rs.next()) {
-
-                    res.getWriter().println(
-                        "<h2>Invalid Department</h2>"
-                    );
-
-                    return;
+                    try (ResultSet rsCheck = psCheck.executeQuery()) {
+                        if(!rsCheck.next()) {
+                            res.getWriter().println(
+                                "<h2>Invalid Department</h2>"
+                            );
+                            return;
+                        }
+                    }
                 }
-
-                rs.close();
-                ps.close();
-
 
                 // Generate Faculty ID
                 String idSql =
                     "SELECT NVL(MAX(FACULTY_ID),0)+1 " +
                     "FROM FACULTY";
 
-                ps = con.prepareStatement(idSql);
-
-                rs = ps.executeQuery();
-
                 int facultyId = 1;
-
-                if(rs.next()) {
-                    facultyId = rs.getInt(1);
+                try (PreparedStatement psId = con.prepareStatement(idSql);
+                     ResultSet rsId = psId.executeQuery()) {
+                    if(rsId.next()) {
+                        facultyId = rsId.getInt(1);
+                    }
                 }
-
-                rs.close();
-                ps.close();
-
 
                 // Insert Faculty
                 String insertSql =
@@ -105,27 +89,22 @@ public class FacultyController extends HttpServlet {
                     "NAME, EMAIL, PHONE) " +
                     "VALUES (?, ?, ?, ?, ?, ?)";
 
-                ps = con.prepareStatement(insertSql);
-
-                ps.setInt(1, facultyId);
-                ps.setInt(2, collegeId);
-                ps.setInt(3, Integer.parseInt(departmentId));
-                ps.setString(4, name);
-                ps.setString(5, email);
-                ps.setString(6, phone);
-
-                ps.executeUpdate();
-
-                ps.close();
+                try (PreparedStatement psInsert = con.prepareStatement(insertSql)) {
+                    psInsert.setInt(1, facultyId);
+                    psInsert.setInt(2, collegeId);
+                    psInsert.setInt(3, Integer.parseInt(departmentId));
+                    psInsert.setString(4, name);
+                    psInsert.setString(5, email);
+                    psInsert.setString(6, phone);
+                    psInsert.executeUpdate();
+                }
 
             }
-
 
             // DELETE FACULTY
             else if("delete".equals(action)) {
 
                 String facultyId = req.getParameter("facultyId");
-
 
                 // Delete only from logged-in college
                 String deleteSql =
@@ -133,18 +112,13 @@ public class FacultyController extends HttpServlet {
                     "WHERE FACULTY_ID=? " +
                     "AND COLLEGE_ID=?";
 
-                ps = con.prepareStatement(deleteSql);
-
-                ps.setInt(1, Integer.parseInt(facultyId));
-                ps.setInt(2, collegeId);
-
-                ps.executeUpdate();
-
-                ps.close();
+                try (PreparedStatement psDelete = con.prepareStatement(deleteSql)) {
+                    psDelete.setInt(1, Integer.parseInt(facultyId));
+                    psDelete.setInt(2, collegeId);
+                    psDelete.executeUpdate();
+                }
 
             }
-
-            con.close();
 
             res.sendRedirect(
                 req.getContextPath() +
@@ -156,20 +130,6 @@ public class FacultyController extends HttpServlet {
             res.getWriter().println(
                 "<h2>Error: " + e.getMessage() + "</h2>"
             );
-
-        } finally {
-
-            if(rs != null) {
-                try { rs.close(); } catch(Exception e) {}
-            }
-
-            if(ps != null) {
-                try { ps.close(); } catch(Exception e) {}
-            }
-
-            if(con != null) {
-                try { con.close(); } catch(Exception e) {}
-            }
 
         }
     }

@@ -1,3 +1,4 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.sql.*" %>
 
 <%
@@ -44,7 +45,6 @@
         rs.close();
         ps.close();
 
-
         // Pending Admissions
         String sql2 =
             "SELECT COUNT(*) FROM ADMISSION " +
@@ -60,7 +60,6 @@
 
         rs.close();
         ps.close();
-
 
         // Recruitment Drives
         String sql3 =
@@ -78,7 +77,6 @@
 
         rs.close();
         ps.close();
-
 
         // Placed Students
         String sql4 =
@@ -102,7 +100,6 @@
         rs.close();
         ps.close();
 
-
         // Shortlisted Applications
         String sql5 =
             "SELECT COUNT(*) " +
@@ -122,7 +119,6 @@
 
         rs.close();
         ps.close();
-
 
         // Rejected Applications
         String sql6 =
@@ -157,6 +153,7 @@
 <head>
 
     <title>College Reports</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
 
@@ -259,10 +256,9 @@
 
 <div class="back">
     <a href="collegeAdminDashboard.jsp">
-        ← Back to Dashboard
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
     </a>
 </div>
-
 
 <div class="box">
 
@@ -292,7 +288,6 @@
 
     </div>
 
-
     <div class="report">
 
         <h2>Recruitment Report</h2>
@@ -306,7 +301,6 @@
             <span style="width:<%=shortlistedStudents * 10%>%;"></span>
         </div>
 
-
         <p class="label">
             Rejected Applications:
             <%=rejectedApplications%>
@@ -315,7 +309,6 @@
         <div class="bar">
             <span style="width:<%=rejectedApplications * 10%>%;"></span>
         </div>
-
 
         <p class="label">
             Placed Students:

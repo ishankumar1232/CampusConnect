@@ -18,7 +18,6 @@
 
     <link rel="stylesheet" href="css/company-login.css?v=2">
     
-    
 <style>
     .back-home-link {
         display: block;
@@ -42,7 +41,6 @@
     }
 </style>
     
-
     <script>
 
         function showMessage(message)
@@ -73,7 +71,6 @@
             var password =
                 document.forms["myForm"]["password"].value;
 
-
             /* Both fields empty */
 
             if ((email == "" || email == null) &&
@@ -86,7 +83,6 @@
                 return false;
             }
 
-
             /* Email validation */
 
             if (email == "" || email == null) {
@@ -97,7 +93,6 @@
 
                 return false;
             }
-
 
             /* Password validation */
 
@@ -110,7 +105,6 @@
                 return false;
             }
 
-
             /* Password length */
 
             if (password.length < 6) {
@@ -121,7 +115,6 @@
 
                 return false;
             }
-
 
             // Preserve the email across the failed-login redirect; never store the password.
             try {
@@ -135,11 +128,9 @@
 
 </head>
 
-
 <body>
 
     <div class="login-container">
-
 
         <!-- =========================
              LEFT BRAND PANEL
@@ -147,18 +138,15 @@
 
         <div class="login-brand">
 
-
             <!-- LOGO -->
 
             <div class="logo">
                 Campus<span>Connect</span>
             </div>
 
-
             <!-- BRAND CONTENT -->
 
             <div class="brand-content">
-
 
                 <!-- COMPANY ICON -->
 
@@ -181,14 +169,12 @@
 
                 </div>
 
-
                 <!-- WELCOME -->
 
                 <h1>
                     Welcome Back,<br>
                     <span>Company!</span>
                 </h1>
-
 
                 <!-- DESCRIPTION -->
 
@@ -197,11 +183,9 @@
                     recruitment activities from one place.
                 </p>
 
-
                 <!-- FEATURES -->
 
                 <div class="features">
-
 
                     <div class="feature">
 
@@ -213,7 +197,6 @@
 
                     </div>
 
-
                     <div class="feature">
 
                         <span class="check">&#10003;</span>
@@ -223,7 +206,6 @@
                         </span>
 
                     </div>
-
 
                     <div class="feature">
 
@@ -235,7 +217,6 @@
 
                     </div>
 
-
                     <div class="feature">
 
                         <span class="check">&#10003;</span>
@@ -246,14 +227,11 @@
 
                     </div>
 
-
                 </div>
 
             </div>
 
         </div>
-
-
 
         <!-- =========================
              RIGHT FORM PANEL
@@ -261,9 +239,7 @@
 
         <div class="login-form-section">
 
-
             <div class="login-box">
-
 
                 <!-- HEADING -->
 
@@ -271,13 +247,11 @@
                     Company Sign In
                 </h2>
 
-
                 <!-- SUBTITLE -->
 
                 <p class="subtitle">
                     Sign in to continue to your CampusConnect company account.
                 </p>
-
 
                 <!-- REQUIRED NOTE -->
 
@@ -288,14 +262,12 @@
 
                 </p>
 
-
                 <!-- LOGIN FORM -->
 
                 <form name="myForm"
                       method="post"
                       action="CompanyLoginServlet"
                       onsubmit="return validateForm();">
-
 
                     <!-- EMAIL -->
 
@@ -316,8 +288,6 @@
 
                     </div>
 
-
-
                     <!-- PASSWORD -->
 
                     <div class="form-group">
@@ -337,12 +307,9 @@
 
                     </div>
 
-
-
                     <!-- REMEMBER + FORGOT -->
 
                     <div class="login-options">
-
 
                         <label class="remember-me">
 
@@ -355,7 +322,6 @@
 
                         </label>
 
-
                         <a href="#"
                            class="forgot-password">
 
@@ -363,10 +329,7 @@
 
                         </a>
 
-
                     </div>
-
-
 
                     <!-- BUTTONS -->
 
@@ -379,7 +342,6 @@
 
                         </button>
 
-
                         <button type="reset"
                                 class="reset-button">
 
@@ -389,11 +351,8 @@
 
                     </div>
 
-
                 </form>
                    
-
-
                 <!-- REGISTER -->
 
                 <div class="register-link">
@@ -404,22 +363,17 @@
                         Register Here
                     </a>
                     
-                                    
 <a href="index.jsp" class="back-home-link">
     &larr; Back to CampusConnect
 </a>
            
-
                 </div>
-
 
             </div>
 
         </div>
 
-
     </div>
-
 
 <div class="message-overlay" id="messageOverlay" aria-hidden="true">
     <div class="message-box"

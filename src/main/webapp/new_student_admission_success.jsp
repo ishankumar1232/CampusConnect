@@ -162,7 +162,6 @@ h2{
 
 <body>
 
-
 <div class="header">
 
     <h1>CampusConnect</h1>
@@ -171,21 +170,17 @@ h2{
 
 </div>
 
-
 <div class="container">
 
 <div class="card">
-
 
     <div class="success-icon">
         ✓
     </div>
 
-
     <h2>
         Admission Request Submitted
     </h2>
-
 
     <p class="message">
 
@@ -195,9 +190,7 @@ h2{
 
     </p>
 
-
     <div class="request-box">
-
 
         <div class="row">
 
@@ -211,7 +204,6 @@ h2{
 
         </div>
 
-
         <div class="row">
 
             <span class="label">
@@ -223,7 +215,6 @@ h2{
             </span>
 
         </div>
-
 
         <div class="row">
 
@@ -237,7 +228,6 @@ h2{
 
         </div>
 
-
         <div class="row">
 
             <span class="label">
@@ -250,9 +240,7 @@ h2{
 
         </div>
 
-
     </div>
-
 
     <div class="note">
 
@@ -268,9 +256,7 @@ h2{
 
     </div>
 
-
     <br>
-
 
     <div class="buttons">
 
@@ -281,7 +267,6 @@ h2{
 
         </a>
 
-
         <a href="new_student_check_status.jsp"
            class="btn secondary">
 
@@ -290,7 +275,6 @@ h2{
         </a>
 
     </div>
-
 
 </div>
 

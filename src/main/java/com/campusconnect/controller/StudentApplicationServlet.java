@@ -1,223 +1,104 @@
 package com.campusconnect.controller;
 
-import java.io.*;
+import java.io.IOException;
 
-import jakarta.servlet.*;
-import jakarta.servlet.http.*;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServlet;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import com.campusconnect.bean.StudentApplication;
 
-
 public class StudentApplicationServlet extends HttpServlet
 {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse res)
+            throws ServletException, IOException
+    {
+        res.sendRedirect("student_application_view.jsp");
+    }
+
+    @Override
     public void doPost(HttpServletRequest req,
                        HttpServletResponse res)
             throws IOException, ServletException
     {
-        res.setContentType("text/html");
+        HttpSession session = req.getSession(false);
 
-        PrintWriter pw = res.getWriter();
+        if(session == null || session.getAttribute("studentId") == null)
+        {
+            res.sendRedirect("student_login.jsp");
+            return;
+        }
 
         try
         {
-            HttpSession session =
-                req.getSession(false);
+            int studentId = (Integer) session.getAttribute("studentId");
+            String action = req.getParameter("action");
 
-            if(session == null ||
-               session.getAttribute("studentId") == null)
-            {
-                res.sendRedirect("student_login.jsp");
-                return;
-            }
-
-
-            int studentId =
-                (Integer)session.getAttribute("studentId");
-
-
-            String action =
-                req.getParameter("action");
-
-
-            // ================= WITHDRAW =================
-
+            // ================= WITHDRAW APPLICATION =================
             if("delete".equals(action))
             {
-                int applicationId =
-                    Integer.parseInt(
-                        req.getParameter("applicationId")
-                    );
-
-
-                StudentApplication application =
-                    new StudentApplication();
-
-                application.setApplicationId(
-                    applicationId
-                );
-
-                application.setStudentId(
-                    studentId
-                );
-
-
-                boolean x =
-                    application.DeleteMethod();
-
-
-                if(x)
+                String appIdParam = req.getParameter("applicationId");
+                if (appIdParam != null && !appIdParam.trim().isEmpty())
                 {
-                    res.sendRedirect(
-                        "student_application_view.jsp"
-                    );
+                    int applicationId = Integer.parseInt(appIdParam.trim());
+
+                    StudentApplication application = new StudentApplication();
+                    application.setApplicationId(applicationId);
+                    application.setStudentId(studentId);
+
+                    boolean success = application.DeleteMethod();
+                    if(success)
+                    {
+                        session.setAttribute("applyMsg", "Application withdrawn successfully.");
+                    }
+                    else
+                    {
+                        session.setAttribute("applyError", "Unable to withdraw application. It may already be shortlisted or under active review.");
+                    }
                 }
-                else
-                {
-                    pw.println("<html><body>");
-
-                    pw.println(
-                        "<h2>Application Withdraw Failed</h2>"
-                    );
-
-                    pw.println(
-                        "<br><a href='student_application_view.jsp'>"
-                    );
-
-                    pw.println(
-                        "Back to Applications"
-                    );
-
-                    pw.println("</a>");
-
-                    pw.println("</body></html>");
-                }
-
+                res.sendRedirect("student_application_view.jsp");
                 return;
             }
 
+            // ================= APPLY TO DRIVE =================
+            String driveIdText = req.getParameter("driveId");
 
-            // ================= APPLY =================
-
-            String driveIdText =
-                req.getParameter("driveId");
-
-
-            if(driveIdText == null ||
-               driveIdText.trim().equals(""))
+            if(driveIdText == null || driveIdText.trim().isEmpty())
             {
-                pw.println("<html><body>");
-
-                pw.println(
-                    "<h2>Drive ID is required</h2>"
-                );
-
-                pw.println("</body></html>");
-
+                session.setAttribute("applyError", "Placement drive ID is required to apply.");
+                res.sendRedirect("student_drive_view.jsp");
                 return;
             }
 
+            int driveId = Integer.parseInt(driveIdText.trim());
 
-            int driveId =
-                Integer.parseInt(driveIdText);
+            StudentApplication application = new StudentApplication();
+            application.setStudentId(studentId);
+            application.setDriveId(driveId);
 
+            boolean inserted = application.InsertMethod();
 
-            StudentApplication application =
-                new StudentApplication();
-
-
-            application.setStudentId(
-                studentId
-            );
-
-            application.setDriveId(
-                driveId
-            );
-
-
-            boolean x =
-                application.InsertMethod();
-
-
-            if(x)
+            if(inserted)
             {
-                pw.println("<html><body>");
-
-                pw.println(
-                    "<h2>Application Submitted Successfully</h2>"
-                );
-
-                pw.println("<br>");
-
-                pw.println(
-                    "<a href='student_drive_view.jsp'>"
-                );
-
-                pw.println(
-                    "Back to Placement Drives"
-                );
-
-                pw.println("</a>");
-
-                pw.println("<br><br>");
-
-                pw.println(
-                    "<a href='student_application_view.jsp'>"
-                );
-
-                pw.println(
-                    "View My Applications"
-                );
-
-                pw.println("</a>");
-
-                pw.println("<br><br>");
-
-                pw.println(
-                    "<a href='student_dashboard.jsp'>"
-                );
-
-                pw.println(
-                    "Back to Dashboard"
-                );
-
-                pw.println("</a>");
-
-                pw.println("</body></html>");
+                session.setAttribute("applyMsg", "Application submitted successfully!");
+                res.sendRedirect("student_apply_status.jsp?status=success&appId=" + application.getApplicationId() + "&driveId=" + driveId);
             }
             else
             {
-                pw.println("<html><body>");
-
-                pw.println(
-                    "<h2>Application Submission Failed</h2>"
-                );
-
-                pw.println("<br>");
-
-                pw.println(
-                    "<a href='student_drive_view.jsp'>"
-                );
-
-                pw.println(
-                    "Back to Placement Drives"
-                );
-
-                pw.println("</a>");
-
-                pw.println("</body></html>");
+                res.sendRedirect("student_apply_status.jsp?status=already_applied&driveId=" + driveId);
             }
         }
         catch(Exception e)
         {
-            pw.println("<html><body>");
-
-            pw.println("<h2>Error</h2>");
-
-            pw.println(
-                "<p>" + e.getMessage() + "</p>"
-            );
-
-            pw.println("</body></html>");
+            e.printStackTrace();
+            if(session != null)
+            {
+                session.setAttribute("applyError", "An unexpected error occurred: " + e.getMessage());
+            }
+            res.sendRedirect("student_apply_status.jsp?status=error");
         }
     }
 }

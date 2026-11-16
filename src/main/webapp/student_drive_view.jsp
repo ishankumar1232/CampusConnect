@@ -53,6 +53,11 @@
     if (studentName != null && !studentName.trim().isEmpty()) {
         firstLetter = studentName.trim().substring(0, 1).toUpperCase();
     }
+
+    String flashMsg = (String) session1.getAttribute("applyMsg");
+    session1.removeAttribute("applyMsg");
+    String flashErr = (String) session1.getAttribute("applyError");
+    session1.removeAttribute("applyError");
 %>
 
 <!DOCTYPE html>
@@ -370,6 +375,18 @@ a {
     background: #1d4ed8;
 }
 
+.applied-badge {
+    color: #059669;
+    font-weight: 700;
+    background: #dcfce7;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+}
+
 .empty-state {
     padding: 40px;
     text-align: center;
@@ -463,6 +480,9 @@ a {
             <p>Explore all active recruitment drives open for application</p>
         </div>
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+            <a href="student_application_view.jsp" class="btn-primary" style="background: #2563eb;">
+                <i class="fa-solid fa-paper-plane"></i> My Applications
+            </a>
             <a href="student_placement_opportunities.jsp" class="btn-primary" style="background: #059669;">
                 <i class="fa-solid fa-bullseye"></i> Eligible Opportunities
             </a>
@@ -471,6 +491,20 @@ a {
             </a>
         </div>
     </div>
+
+    <% if (flashMsg != null) { %>
+        <div style="background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; padding: 14px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 600; margin-bottom: 22px; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-circle-check" style="font-size: 18px;"></i>
+            <%= flashMsg %>
+        </div>
+    <% } %>
+
+    <% if (flashErr != null) { %>
+        <div style="background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; padding: 14px 18px; border-radius: 10px; font-size: 13.5px; font-weight: 600; margin-bottom: 22px; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 18px;"></i>
+            <%= flashErr %>
+        </div>
+    <% } %>
 
     <!-- TABLE CARD -->
     <div class="content-card">
@@ -496,7 +530,7 @@ a {
                 <tbody>
                 <%
                     Connection con = null;
-                    Statement stmt = null;
+                    PreparedStatement ps = null;
                     ResultSet rs = null;
 
                     try {
@@ -508,24 +542,39 @@ a {
                             "campus123"
                         );
 
-                        stmt = con.createStatement();
-
                         String q =
                             "SELECT R.DRIVE_ID, C.COMPANY_NAME, R.DRIVE_TYPE, "
                           + "R.JOB_TITLE, R.DESCRIPTION, R.VACANCY, "
                           + "R.ELIGIBILITY_CGPA, R.REQUIRED_BRANCH, "
-                          + "R.REQUIRED_SKILLS, R.SALARY, R.DEADLINE, R.STATUS "
-                          + "FROM RECRUITMENT_DRIVE R, COMPANY C "
-                          + "WHERE R.COMPANY_ID = C.COMPANY_ID "
-                          + "AND R.STATUS = 'OPEN' "
+                          + "R.REQUIRED_SKILLS, R.SALARY, R.DEADLINE, R.STATUS, "
+                          + "(SELECT COUNT(*) FROM APPLICATION A WHERE A.DRIVE_ID = R.DRIVE_ID AND A.STUDENT_ID = ?) AS ALREADY_APPLIED "
+                          + "FROM RECRUITMENT_DRIVE R "
+                          + "JOIN COMPANY C ON R.COMPANY_ID = C.COMPANY_ID "
+                          + "WHERE (R.STATUS = 'OPEN' OR R.STATUS = 'ACTIVE') "
+                          + "AND R.DEADLINE >= TRUNC(SYSDATE) "
+                          + "AND ( "
+                          + "    UPPER(R.DRIVE_TYPE) = 'DIRECT' "
+                          + "    OR UPPER(R.DRIVE_TYPE) = 'OFF CAMPUS' "
+                          + "    OR UPPER(R.DRIVE_TYPE) = 'OFF-CAMPUS' "
+                          + "    OR EXISTS ( "
+                          + "        SELECT 1 FROM DRIVE_COLLEGE DC "
+                          + "        JOIN STUDENT S ON DC.COLLEGE_ID = S.COLLEGE_ID "
+                          + "        WHERE DC.DRIVE_ID = R.DRIVE_ID AND S.STUDENT_ID = ? "
+                          + "    ) "
+                          + ") "
                           + "ORDER BY R.DEADLINE";
 
-                        rs = stmt.executeQuery(q);
+                        ps = con.prepareStatement(q);
+                        ps.setInt(1, studentId);
+                        ps.setInt(2, studentId);
+
+                        rs = ps.executeQuery();
                         boolean found = false;
 
                         while(rs.next()) {
                             found = true;
                             int driveId = rs.getInt("DRIVE_ID");
+                            int alreadyApplied = rs.getInt("ALREADY_APPLIED");
                 %>
                     <tr>
                         <td><strong>#<%= driveId %></strong></td>
@@ -543,12 +592,22 @@ a {
                             <span class="badge-status"><%= rs.getString("STATUS") %></span>
                         </td>
                         <td>
+                        <%
+                            if(alreadyApplied > 0) {
+                        %>
+                            <span class="applied-badge"><i class="fa-solid fa-check"></i> Applied</span>
+                        <%
+                            } else {
+                        %>
                             <form method="post" action="studentApply" style="display:inline;">
                                 <input type="hidden" name="driveId" value="<%= driveId %>">
                                 <button type="submit" class="action-btn btn-apply">
                                     <i class="fa-solid fa-paper-plane"></i> Apply
                                 </button>
                             </form>
+                        <%
+                            }
+                        %>
                         </td>
                     </tr>
                 <%
@@ -576,7 +635,7 @@ a {
                     } finally {
                         try {
                             if(rs != null) rs.close();
-                            if(stmt != null) stmt.close();
+                            if(ps != null) ps.close();
                             if(con != null) con.close();
                         } catch(Exception e) {}
                     }

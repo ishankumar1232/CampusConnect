@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
-@WebServlet("/CompanyLogoutServlet")
 public class CompanyLogoutServlet extends HttpServlet
 {
     protected void doGet(HttpServletRequest request,
@@ -26,4 +25,3 @@ public class CompanyLogoutServlet extends HttpServlet
         response.sendRedirect("company-login.jsp");
     }
 }
-

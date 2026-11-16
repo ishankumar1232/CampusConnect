@@ -21,6 +21,12 @@ public class SuperAdminLoginServlet extends HttpServlet {
         String email = req.getParameter("email");
         String password = req.getParameter("password");
 
+        if (email == null || email.trim().isEmpty() || password == null || password.trim().isEmpty()) {
+            res.sendRedirect(
+                    req.getContextPath() + "/superadmin/login.jsp?error=required");
+            return;
+        }
+
         SuperAdminDAO dao = new SuperAdminDAO();
         SuperAdmin admin = dao.login(email, password);
 

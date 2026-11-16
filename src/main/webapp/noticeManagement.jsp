@@ -1,3 +1,4 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.sql.*" %>
 
 <%
@@ -15,6 +16,7 @@
 <head>
 
     <title>Notice Management</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
 
@@ -130,15 +132,13 @@
     Notice Management
 </div>
 
-
 <div class="back">
 
     <a href="collegeAdminDashboard.jsp">
-        ← Back to Dashboard
+        <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
     </a>
 
 </div>
-
 
 <!-- Add Notice -->
 
@@ -159,13 +159,11 @@
                placeholder="Enter notice title"
                required>
 
-
         <label>Notice Content</label>
 
         <textarea name="content"
                   placeholder="Enter notice content"
                   required></textarea>
-
 
         <button type="submit">
             Publish Notice
@@ -174,7 +172,6 @@
     </form>
 
 </div>
-
 
 <!-- Notice List -->
 

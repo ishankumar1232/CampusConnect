@@ -17,9 +17,7 @@ public class CollegeAdminLogin extends HttpServlet {
         res.setContentType("text/html");
         PrintWriter pw = res.getWriter();
 
-     // ======================================
      // CHECK MAINTENANCE MODE
-     // ======================================
 
      SystemSettingDAO settingDAO = new SystemSettingDAO();
 
@@ -28,18 +26,7 @@ public class CollegeAdminLogin extends HttpServlet {
      if (setting != null &&
          "ON".equalsIgnoreCase(setting.getMaintenanceMode())) {
 
-         pw.println("<html>");
-         pw.println("<body>");
-
-         pw.println("<h2>System Under Maintenance</h2>");
-
-         pw.println("<p>");
-         pw.println("College Admin Login is temporarily unavailable.");
-         pw.println("</p>");
-
-         pw.println("</body>");
-         pw.println("</html>");
-
+         res.sendRedirect(req.getContextPath() + "/collegeAdminLogin.jsp?error=maintenance");
          return;
      }
         
@@ -69,29 +56,13 @@ public class CollegeAdminLogin extends HttpServlet {
 
             } else {
 
-                pw.println("<html>");
-                pw.println("<body>");
-
-                pw.println("<h2>Invalid Email or Password</h2>");
-
-                pw.println("<a href='" +
-                    req.getContextPath() +
-                    "/collegeAdminLogin.jsp'>Try Again</a>");
-
-                pw.println("</body>");
-                pw.println("</html>");
+                res.sendRedirect(req.getContextPath() + "/collegeAdminLogin.jsp?error=invalid");
             }
 
         } catch(Exception e) {
 
-            pw.println("<html>");
-            pw.println("<body>");
-
-            pw.println("<h2>Login Error</h2>");
-            pw.println("<p>" + e + "</p>");
-
-            pw.println("</body>");
-            pw.println("</html>");
+            e.printStackTrace();
+            res.sendRedirect(req.getContextPath() + "/collegeAdminLogin.jsp?error=exception");
         }
     }
 }

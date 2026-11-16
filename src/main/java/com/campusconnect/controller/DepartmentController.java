@@ -2,7 +2,6 @@ package com.campusconnect.controller;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
@@ -12,7 +11,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import com.campusconnect.util.DBConnection;
+
 public class DepartmentController extends HttpServlet {
+
+    public void doGet(HttpServletRequest req, HttpServletResponse res)
+            throws IOException, ServletException {
+        if(req.getParameter("action") != null) {
+            doPost(req, res);
+        } else {
+            res.sendRedirect(req.getContextPath() + "/departmentManagement.jsp");
+        }
+    }
 
     public void doPost(HttpServletRequest req, HttpServletResponse res)
             throws IOException, ServletException {
@@ -28,20 +38,7 @@ public class DepartmentController extends HttpServlet {
 
         String action = req.getParameter("action");
 
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        try {
-
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-
-            con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
+        try (Connection con = DBConnection.getConnection()) {
 
             // ADD DEPARTMENT
             if("add".equals(action)) {
@@ -49,25 +46,18 @@ public class DepartmentController extends HttpServlet {
                 String departmentName =
                     req.getParameter("departmentName");
 
-
                 // Generate Department ID
                 String idSql =
                     "SELECT NVL(MAX(DEPARTMENT_ID),0)+1 " +
                     "FROM DEPARTMENT";
 
-                ps = con.prepareStatement(idSql);
-
-                rs = ps.executeQuery();
-
                 int departmentId = 1;
-
-                if(rs.next()) {
-                    departmentId = rs.getInt(1);
+                try (PreparedStatement ps = con.prepareStatement(idSql);
+                     ResultSet rs = ps.executeQuery()) {
+                    if(rs.next()) {
+                        departmentId = rs.getInt(1);
+                    }
                 }
-
-                rs.close();
-                ps.close();
-
 
                 // Insert Department
                 String insertSql =
@@ -75,18 +65,14 @@ public class DepartmentController extends HttpServlet {
                     "(DEPARTMENT_ID, COLLEGE_ID, DEPARTMENT_NAME) " +
                     "VALUES (?, ?, ?)";
 
-                ps = con.prepareStatement(insertSql);
-
-                ps.setInt(1, departmentId);
-                ps.setInt(2, collegeId);
-                ps.setString(3, departmentName);
-
-                ps.executeUpdate();
-
-                ps.close();
+                try (PreparedStatement ps = con.prepareStatement(insertSql)) {
+                    ps.setInt(1, departmentId);
+                    ps.setInt(2, collegeId);
+                    ps.setString(3, departmentName);
+                    ps.executeUpdate();
+                }
 
             }
-
 
             // DELETE DEPARTMENT
             else if("delete".equals(action)) {
@@ -94,25 +80,19 @@ public class DepartmentController extends HttpServlet {
                 String departmentId =
                     req.getParameter("departmentId");
 
-
                 // Delete only from logged-in college
                 String deleteSql =
                     "DELETE FROM DEPARTMENT " +
                     "WHERE DEPARTMENT_ID=? " +
                     "AND COLLEGE_ID=?";
 
-                ps = con.prepareStatement(deleteSql);
-
-                ps.setInt(1, Integer.parseInt(departmentId));
-                ps.setInt(2, collegeId);
-
-                ps.executeUpdate();
-
-                ps.close();
+                try (PreparedStatement ps = con.prepareStatement(deleteSql)) {
+                    ps.setInt(1, Integer.parseInt(departmentId));
+                    ps.setInt(2, collegeId);
+                    ps.executeUpdate();
+                }
 
             }
-
-            con.close();
 
             res.sendRedirect(
                 req.getContextPath() +
@@ -124,20 +104,6 @@ public class DepartmentController extends HttpServlet {
             res.getWriter().println(
                 "<h2>Error: " + e.getMessage() + "</h2>"
             );
-
-        } finally {
-
-            if(rs != null) {
-                try { rs.close(); } catch(Exception e) {}
-            }
-
-            if(ps != null) {
-                try { ps.close(); } catch(Exception e) {}
-            }
-
-            if(con != null) {
-                try { con.close(); } catch(Exception e) {}
-            }
 
         }
     }

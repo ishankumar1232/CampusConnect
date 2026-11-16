@@ -24,9 +24,7 @@ public class DashboardDAO {
 
             String sql;
 
-            // ============================================
             // DASHBOARD CARDS
-            // ============================================
 
             // Total Colleges
             sql = "SELECT COUNT(*) FROM COLLEGE";
@@ -40,9 +38,7 @@ public class DashboardDAO {
             rs.close();
             ps.close();
 
-            // ============================================
             // Total Companies
-            // ============================================
 
             sql = "SELECT COUNT(*) FROM COMPANY";
             ps = con.prepareStatement(sql);
@@ -55,9 +51,7 @@ public class DashboardDAO {
             rs.close();
             ps.close();
 
-            // ============================================
             // Total Students
-            // ============================================
 
             sql = "SELECT COUNT(*) FROM STUDENT";
             ps = con.prepareStatement(sql);
@@ -70,10 +64,8 @@ public class DashboardDAO {
             rs.close();
             ps.close();
 
-            // ============================================
             // Placed Students
             // (Fixed)
-            // ============================================
 
             sql =
                 "SELECT COUNT(*) " +
@@ -90,9 +82,7 @@ public class DashboardDAO {
             rs.close();
             ps.close();
 
-            // ============================================
             // Active Drives
-            // ============================================
 
             sql =
                 "SELECT COUNT(*) " +
@@ -108,9 +98,7 @@ public class DashboardDAO {
 
             rs.close();
             ps.close();
-            // ============================================
             // Pending Approvals
-            // ============================================
 
             sql =
                 "SELECT " +
@@ -129,9 +117,7 @@ public class DashboardDAO {
             rs.close();
             ps.close();
 
-            // ============================================
             // COLLEGE STATUS
-            // ============================================
 
             sql = "SELECT COUNT(*) FROM COLLEGE WHERE STATUS='APPROVED'";
             ps = con.prepareStatement(sql);
@@ -166,9 +152,7 @@ public class DashboardDAO {
             rs.close();
             ps.close();
 
-            // ============================================
             // COMPANY STATUS
-            // ============================================
 
             sql = "SELECT COUNT(*) FROM COMPANY WHERE UPPER(STATUS)='APPROVED'";
             ps = con.prepareStatement(sql);
@@ -202,9 +186,7 @@ public class DashboardDAO {
 
             rs.close();
             ps.close();
-            // =====================================================
             // RECRUITMENT STATUS
-            // =====================================================
 
             sql = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE WHERE STATUS='OPEN'";
             ps = con.prepareStatement(sql);
@@ -217,8 +199,6 @@ public class DashboardDAO {
             rs.close();
             ps.close();
 
-            // --------------------------------------------
-
             sql = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE WHERE STATUS='ACTIVE'";
             ps = con.prepareStatement(sql);
             rs = ps.executeQuery();
@@ -229,8 +209,6 @@ public class DashboardDAO {
 
             rs.close();
             ps.close();
-
-            // --------------------------------------------
 
             sql = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE WHERE STATUS='COMPLETED'";
             ps = con.prepareStatement(sql);
@@ -243,9 +221,7 @@ public class DashboardDAO {
             rs.close();
             ps.close();
 
-            // =====================================================
             // APPLICATION / SELECTION / PLACEMENT
-            // =====================================================
 
             sql = "SELECT COUNT(*) FROM APPLICATION";
             ps = con.prepareStatement(sql);
@@ -258,8 +234,6 @@ public class DashboardDAO {
             rs.close();
             ps.close();
 
-            // --------------------------------------------
-
             sql = "SELECT COUNT(*) FROM SELECTION";
             ps = con.prepareStatement(sql);
             rs = ps.executeQuery();
@@ -270,8 +244,6 @@ public class DashboardDAO {
 
             rs.close();
             ps.close();
-
-            // --------------------------------------------
 
             sql =
             "SELECT COUNT(*) " +
@@ -287,9 +259,7 @@ public class DashboardDAO {
 
             rs.close();
             ps.close();
-            // =====================================================
             // SYSTEM NOTIFICATIONS
-            // =====================================================
 
             sql = "SELECT COUNT(*) FROM COLLEGE WHERE STATUS='PENDING'";
             ps = con.prepareStatement(sql);
@@ -303,8 +273,6 @@ public class DashboardDAO {
             rs.close();
             ps.close();
 
-            // --------------------------------------------
-
             sql = "SELECT COUNT(*) FROM COMPANY WHERE STATUS='PENDING'";
             ps = con.prepareStatement(sql);
             rs = ps.executeQuery();
@@ -316,8 +284,6 @@ public class DashboardDAO {
 
             rs.close();
             ps.close();
-
-            // --------------------------------------------
 
             sql = "SELECT COUNT(*) FROM RECRUITMENT_DRIVE WHERE STATUS='ACTIVE'";
             ps = con.prepareStatement(sql);
@@ -331,8 +297,6 @@ public class DashboardDAO {
             rs.close();
             ps.close();
 
-            // --------------------------------------------
-
             sql = "SELECT COUNT(*) FROM COMPANY";
             ps = con.prepareStatement(sql);
             rs = ps.executeQuery();
@@ -345,8 +309,6 @@ public class DashboardDAO {
             rs.close();
             ps.close();
 
-            // --------------------------------------------
-
             sql = "SELECT COUNT(*) FROM STUDENT";
             ps = con.prepareStatement(sql);
             rs = ps.executeQuery();
@@ -358,9 +320,7 @@ public class DashboardDAO {
 
             rs.close();
             ps.close();
-         // =====================================================
          // COLLEGE WISE PLACEMENT CHART
-         // =====================================================
           
          sql =
          "SELECT C.COLLEGE_NAME, COUNT(*) TOTAL " +
@@ -372,13 +332,9 @@ public class DashboardDAO {
          "GROUP BY C.COLLEGE_NAME " +
          "ORDER BY TOTAL DESC";
          
-        
-
          ps = con.prepareStatement(sql);
          rs = ps.executeQuery();
          
-         
-
          ArrayList<String> colleges = new ArrayList<String>();
          ArrayList<Integer> counts = new ArrayList<Integer>();
 
@@ -406,9 +362,7 @@ public class DashboardDAO {
 
          rs.close();
          ps.close();
-         // =====================================================
          // MONTHLY RECRUITMENT TREND
-         // =====================================================
 
          sql =
          "SELECT TO_CHAR(DEADLINE,'MON') MONTH_NAME, COUNT(*) TOTAL " +
@@ -476,6 +430,4 @@ public class DashboardDAO {
 
     }
     
-    
-
 }

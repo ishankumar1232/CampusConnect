@@ -17,7 +17,6 @@
 <title>CampusConnect | One Campus. Everything Connected.</title>
 <link rel="icon" href="data:,">
 
-
 <script>
 
 if ("scrollRestoration" in history) {
@@ -37,8 +36,6 @@ window.addEventListener("load", function () {
 });
 
 </script>
-
-
 
 <style>
 
@@ -99,8 +96,6 @@ a{
     margin:auto;
 
 }
-
-
 
 /* =========================================================
 
@@ -245,8 +240,6 @@ a{
     opacity:1 !important;
 
 }
-
-
 
 /* =========================================================
 
@@ -494,8 +487,6 @@ a{
 
 }
 
-
-
 /* =========================================================
 
    PORTALS
@@ -614,8 +605,6 @@ a{
 
 }
 
-
-
 /* =========================================================
 
    PORTAL GRID
@@ -633,8 +622,6 @@ a{
     gap:18px;
 
 }
-
-
 
 /* =========================================================
 
@@ -725,8 +712,6 @@ a{
     --border:#ffdcc5;
 
 }
-
-
 
 /* =========================================================
 
@@ -846,8 +831,6 @@ a{
 
 }
 
-
-
 /* =========================================================
 
    PORTAL BODY
@@ -924,8 +907,6 @@ a{
 
 }
 
-
-
 /* =========================================================
 
    FEATURE LIST
@@ -989,8 +970,6 @@ a{
     font-weight:900;
 
 }
-
-
 
 /* =========================================================
 
@@ -1172,8 +1151,6 @@ a{
 
 }
 
-
-
 /* =========================================================
 
    PORTAL BOTTOM
@@ -1323,8 +1300,6 @@ a{
     transform:translateY(-2px);
 
 }
-
-
 
 /* =========================================================
    STUDENT JOURNEY - FINAL IMAGE BASED DESIGN
@@ -1946,8 +1921,6 @@ a{
 
 }
 
-
-
 /* =========================================================
 
    ABOUT
@@ -2055,8 +2028,6 @@ a{
     margin-top:25px;
 
 }
-
-
 
 /* =========================================================
 
@@ -2196,8 +2167,6 @@ a{
 
 }
 
-
-
 /* =========================================================
 
    FOOTER
@@ -2314,8 +2283,6 @@ footer{
 
 }
 
-
-
 /* =========================================================
 
    RESPONSIVE
@@ -2341,8 +2308,6 @@ footer{
     }
 
 }
-
-
 
 @media(max-width:850px){
 
@@ -2451,8 +2416,6 @@ footer{
     }
 
 }
-
-
 
 @media(max-width:600px){
 
@@ -2825,11 +2788,7 @@ a:focus-visible{
 
 </head>
 
-
-
 <body>
-
-
 
 <!-- =========================================================
 
@@ -2840,8 +2799,6 @@ a:focus-visible{
 <nav class="navbar">
 
     <div class="nav-inner">
-
-
 
         <a href="index.jsp"
 
@@ -2860,8 +2817,6 @@ a:focus-visible{
             </div>
 
         </a>
-
-
 
         <div class="nav-links">
 
@@ -2903,10 +2858,6 @@ a:focus-visible{
 
 </nav>
 
-
-
-
-
 <!-- =========================================================
 
      HERO
@@ -2915,11 +2866,7 @@ a:focus-visible{
 
 <section class="hero">
 
-
-
     <div class="hero-content">
-
-
 
         <div class="hero-tag">
 
@@ -2928,8 +2875,6 @@ a:focus-visible{
             MULTI-COLLEGE DIGITAL CAMPUS
 
         </div>
-
-
 
         <h1>
 
@@ -2945,8 +2890,6 @@ a:focus-visible{
 
         </h1>
 
-
-
         <p class="hero-text">
 
             CampusConnect brings students, colleges and companies
@@ -2957,11 +2900,7 @@ a:focus-visible{
 
         </p>
 
-
-
         <div class="hero-buttons">
-
-
 
             <a href="new_student_colleges.jsp"
 
@@ -2971,8 +2910,6 @@ a:focus-visible{
 
             </a>
 
-
-
             <a href="student_login.jsp"
 
                class="secondary-button">
@@ -2981,15 +2918,9 @@ a:focus-visible{
 
             </a>
 
-
-
         </div>
 
-
-
     </div>
-
-
 
     <div class="hero-info">
 
@@ -3025,13 +2956,7 @@ a:focus-visible{
 
     </div>
 
-
-
 </section>
-
-
-
-
 
 <!-- =========================================================
 
@@ -3043,15 +2968,9 @@ a:focus-visible{
 
          id="portals">
 
-
-
     <div class="container">
 
-
-
         <div class="portal-header">
-
-
 
             <div>
 
@@ -3060,8 +2979,6 @@ a:focus-visible{
                     CAMPUSCONNECT PORTALS
 
                 </div>
-
-
 
                 <h2>
 
@@ -3079,8 +2996,6 @@ a:focus-visible{
 
             </div>
 
-
-
             <p class="portal-header-text">
 
                 Choose the workspace that matches your role.
@@ -3091,17 +3006,9 @@ a:focus-visible{
 
             </p>
 
-
-
         </div>
 
-
-
-
-
         <div class="portal-grid">
-
-
 
             <!-- =================================================
 
@@ -3110,8 +3017,6 @@ a:focus-visible{
             ================================================== -->
 
             <article class="portal-card student">
-
-
 
                 <div class="portal-photo student-photo">
 
@@ -3127,11 +3032,7 @@ a:focus-visible{
 
                 </div>
 
-
-
                 <div class="portal-body">
-
-
 
                     <div class="portal-role">
 
@@ -3139,15 +3040,11 @@ a:focus-visible{
 
                     </div>
 
-
-
                     <h3>
 
                         Student Portal
 
                     </h3>
-
-
 
                     <p class="portal-description">
 
@@ -3159,11 +3056,7 @@ a:focus-visible{
 
                     </p>
 
-
-
                     <div class="feature-list">
-
-
 
                         <div class="feature-item">
 
@@ -3177,8 +3070,6 @@ a:focus-visible{
 
                         </div>
 
-
-
                         <div class="feature-item">
 
                             <span class="feature-check">
@@ -3190,8 +3081,6 @@ a:focus-visible{
                             Apply for admission
 
                         </div>
-
-
 
                         <div class="feature-item">
 
@@ -3205,8 +3094,6 @@ a:focus-visible{
 
                         </div>
 
-
-
                         <div class="feature-item">
 
                             <span class="feature-check">
@@ -3218,8 +3105,6 @@ a:focus-visible{
                             Build resume &amp; projects
 
                         </div>
-
-
 
                         <div class="feature-item">
 
@@ -3233,11 +3118,7 @@ a:focus-visible{
 
                         </div>
 
-
-
                     </div>
-
-
 
                     <div class="student-title">
 
@@ -3245,11 +3126,7 @@ a:focus-visible{
 
                     </div>
 
-
-
                     <div class="student-options">
-
-
 
                         <a href="student_login.jsp"
 
@@ -3285,8 +3162,6 @@ a:focus-visible{
 
                         </a>
 
-
-
                         <a href="new_student_colleges.jsp"
 
                            class="student-option">
@@ -3321,21 +3196,11 @@ a:focus-visible{
 
                         </a>
 
-
-
                     </div>
-
-
 
                 </div>
 
-
-
             </article>
-
-
-
-
 
             <!-- =================================================
 
@@ -3344,8 +3209,6 @@ a:focus-visible{
             ================================================== -->
 
             <article class="portal-card college">
-
-
 
                 <div class="portal-photo college-photo">
 
@@ -3361,11 +3224,7 @@ a:focus-visible{
 
                 </div>
 
-
-
                 <div class="portal-body">
-
-
 
                     <div class="portal-role">
 
@@ -3373,15 +3232,11 @@ a:focus-visible{
 
                     </div>
 
-
-
                     <h3>
 
                         College Administration
 
                     </h3>
-
-
 
                     <p class="portal-description">
 
@@ -3393,11 +3248,7 @@ a:focus-visible{
 
                     </p>
 
-
-
                     <div class="feature-list">
-
-
 
                         <div class="feature-item">
 
@@ -3411,8 +3262,6 @@ a:focus-visible{
 
                         </div>
 
-
-
                         <div class="feature-item">
 
                             <span class="feature-check">
@@ -3424,8 +3273,6 @@ a:focus-visible{
                             Manage departments &amp; courses
 
                         </div>
-
-
 
                         <div class="feature-item">
 
@@ -3439,8 +3286,6 @@ a:focus-visible{
 
                         </div>
 
-
-
                         <div class="feature-item">
 
                             <span class="feature-check">
@@ -3452,8 +3297,6 @@ a:focus-visible{
                             Manage recruitment activities
 
                         </div>
-
-
 
                         <div class="feature-item">
 
@@ -3467,15 +3310,9 @@ a:focus-visible{
 
                         </div>
 
-
-
                     </div>
 
-
-
                     <div class="portal-bottom">
-
-
 
                         <div class="info-box">
 
@@ -3503,8 +3340,6 @@ a:focus-visible{
 
                         </div>
 
-
-
                         <a href="collegeAdminLogin.jsp"
 
                            class="login-button">
@@ -3523,21 +3358,16 @@ a:focus-visible{
 
                         </a>
 
-
+                        <a href="college-registration.jsp"
+                           style="display: block; text-align: center; margin-top: 10px; padding: 10px 14px; font-size: 13px; font-weight: 600; color: #1769e0; text-decoration: none; border: 1px dashed #1769e0; border-radius: 8px; background: rgba(23,105,224,0.04); transition: 0.2s;">
+                            + Register New College Institution
+                        </a>
 
                     </div>
 
-
-
                 </div>
 
-
-
             </article>
-
-
-
-
 
             <!-- =================================================
 
@@ -3546,8 +3376,6 @@ a:focus-visible{
             ================================================== -->
 
             <article class="portal-card company">
-
-
 
                 <div class="portal-photo company-photo">
 
@@ -3563,11 +3391,7 @@ a:focus-visible{
 
                 </div>
 
-
-
                 <div class="portal-body">
-
-
 
                     <div class="portal-role">
 
@@ -3575,15 +3399,11 @@ a:focus-visible{
 
                     </div>
 
-
-
                     <h3>
 
                         Company Portal
 
                     </h3>
-
-
 
                     <p class="portal-description">
 
@@ -3595,11 +3415,7 @@ a:focus-visible{
 
                     </p>
 
-
-
                     <div class="feature-list">
-
-
 
                         <div class="feature-item">
 
@@ -3613,8 +3429,6 @@ a:focus-visible{
 
                         </div>
 
-
-
                         <div class="feature-item">
 
                             <span class="feature-check">
@@ -3626,8 +3440,6 @@ a:focus-visible{
                             Define eligibility criteria
 
                         </div>
-
-
 
                         <div class="feature-item">
 
@@ -3641,8 +3453,6 @@ a:focus-visible{
 
                         </div>
 
-
-
                         <div class="feature-item">
 
                             <span class="feature-check">
@@ -3654,8 +3464,6 @@ a:focus-visible{
                             Manage interviews
 
                         </div>
-
-
 
                         <div class="feature-item">
 
@@ -3669,15 +3477,9 @@ a:focus-visible{
 
                         </div>
 
-
-
                     </div>
 
-
-
                     <div class="portal-bottom">
-
-
 
                         <div class="info-box">
 
@@ -3705,8 +3507,6 @@ a:focus-visible{
 
                         </div>
 
-
-
                         <a href="<%=request.getContextPath()%>/company-login.jsp"
 
                            class="login-button">
@@ -3725,21 +3525,11 @@ a:focus-visible{
 
                         </a>
 
-
-
                     </div>
-
-
 
                 </div>
 
-
-
             </article>
-
-
-
-
 
             <!-- =================================================
 
@@ -3748,8 +3538,6 @@ a:focus-visible{
             ================================================== -->
 
             <article class="portal-card superadmin">
-
-
 
                 <div class="portal-photo superadmin-photo">
 
@@ -3765,11 +3553,7 @@ a:focus-visible{
 
                 </div>
 
-
-
                 <div class="portal-body">
-
-
 
                     <div class="portal-role">
 
@@ -3777,15 +3561,11 @@ a:focus-visible{
 
                     </div>
 
-
-
                     <h3>
 
                         Super Admin
 
                     </h3>
-
-
 
                     <p class="portal-description">
 
@@ -3797,11 +3577,7 @@ a:focus-visible{
 
                     </p>
 
-
-
                     <div class="feature-list">
-
-
 
                         <div class="feature-item">
 
@@ -3815,8 +3591,6 @@ a:focus-visible{
 
                         </div>
 
-
-
                         <div class="feature-item">
 
                             <span class="feature-check">
@@ -3828,8 +3602,6 @@ a:focus-visible{
                             Monitor students &amp; companies
 
                         </div>
-
-
 
                         <div class="feature-item">
 
@@ -3843,8 +3615,6 @@ a:focus-visible{
 
                         </div>
 
-
-
                         <div class="feature-item">
 
                             <span class="feature-check">
@@ -3856,8 +3626,6 @@ a:focus-visible{
                             Access system-wide information
 
                         </div>
-
-
 
                         <div class="feature-item">
 
@@ -3871,15 +3639,9 @@ a:focus-visible{
 
                         </div>
 
-
-
                     </div>
 
-
-
                     <div class="portal-bottom">
-
-
 
                         <div class="info-box">
 
@@ -3907,8 +3669,6 @@ a:focus-visible{
 
                         </div>
 
-
-
                         <a href="<%=request.getContextPath()%>/superadmin/login.jsp"
 
                            class="login-button">
@@ -3927,33 +3687,17 @@ a:focus-visible{
 
                         </a>
 
-
-
                     </div>
-
-
 
                 </div>
 
-
-
             </article>
-
-
 
         </div>
 
-
-
     </div>
 
-
-
 </section>
-
-
-
-
 
 <!-- =========================================================
      STUDENT JOURNEY - NEW DESIGN
@@ -4110,15 +3854,9 @@ a:focus-visible{
 
          id="features">
 
-
-
     <div class="container">
 
-
-
         <div class="features-heading">
-
-
 
             <div class="portal-eyebrow">
 
@@ -4126,15 +3864,11 @@ a:focus-visible{
 
             </div>
 
-
-
             <h2>
 
                 Everything your campus needs.
 
             </h2>
-
-
 
             <p>
 
@@ -4146,17 +3880,9 @@ a:focus-visible{
 
             </p>
 
-
-
         </div>
 
-
-
-
-
         <div class="feature-grid">
-
-
 
             <div class="feature-card">
 
@@ -4192,10 +3918,6 @@ a:focus-visible{
 
             </div>
 
-
-
-
-
             <div class="feature-card">
 
                 <div class="feature-top">
@@ -4229,10 +3951,6 @@ a:focus-visible{
                 </p>
 
             </div>
-
-
-
-
 
             <div class="feature-card">
 
@@ -4268,10 +3986,6 @@ a:focus-visible{
 
             </div>
 
-
-
-
-
             <div class="feature-card">
 
                 <div class="feature-top">
@@ -4305,10 +4019,6 @@ a:focus-visible{
                 </p>
 
             </div>
-
-
-
-
 
             <div class="feature-card">
 
@@ -4344,10 +4054,6 @@ a:focus-visible{
 
             </div>
 
-
-
-
-
             <div class="feature-card">
 
                 <div class="feature-top">
@@ -4382,21 +4088,11 @@ a:focus-visible{
 
             </div>
 
-
-
         </div>
-
-
 
     </div>
 
-
-
 </section>
-
-
-
-
 
 <!-- =========================================================
 
@@ -4408,25 +4104,15 @@ a:focus-visible{
 
          id="about">
 
-
-
     <div class="container">
 
-
-
         <div class="about-box">
-
-
 
             <div class="about-image">
 
             </div>
 
-
-
             <div class="about-content">
-
-
 
                 <div class="portal-eyebrow">
 
@@ -4434,15 +4120,11 @@ a:focus-visible{
 
                 </div>
 
-
-
                 <h2>
 
                     Where campus meets opportunity.
 
                 </h2>
-
-
 
                 <p>
 
@@ -4456,8 +4138,6 @@ a:focus-visible{
 
                 </p>
 
-
-
                 <p style="margin-top:13px;">
 
                     The platform brings admissions, academic
@@ -4467,8 +4147,6 @@ a:focus-visible{
                     inside one organized digital environment.
 
                 </p>
-
-
 
                 <div class="about-button">
 
@@ -4482,25 +4160,13 @@ a:focus-visible{
 
                 </div>
 
-
-
             </div>
-
-
 
         </div>
 
-
-
     </div>
 
-
-
 </section>
-
-
-
-
 
 <!-- =========================================================
 
@@ -4510,19 +4176,11 @@ a:focus-visible{
 
 <section class="cta">
 
-
-
     <div class="container">
-
-
 
         <div class="cta-box">
 
-
-
             <div class="cta-content">
-
-
 
                 <h2>
 
@@ -4534,8 +4192,6 @@ a:focus-visible{
 
                 </h2>
 
-
-
                 <p>
 
                     Explore colleges, access your student portal
@@ -4544,11 +4200,7 @@ a:focus-visible{
 
                 </p>
 
-
-
                 <div class="cta-buttons">
-
-
 
                     <a href="new_student_colleges.jsp"
 
@@ -4558,8 +4210,6 @@ a:focus-visible{
 
                     </a>
 
-
-
                     <a href="student_login.jsp"
 
                        class="secondary-button">
@@ -4568,29 +4218,15 @@ a:focus-visible{
 
                     </a>
 
-
-
                 </div>
-
-
 
             </div>
 
-
-
         </div>
-
-
 
     </div>
 
-
-
 </section>
-
-
-
-
 
 <!-- =========================================================
 
@@ -4600,19 +4236,11 @@ a:focus-visible{
 
 <footer>
 
-
-
     <div class="container">
-
-
 
         <div class="footer-grid">
 
-
-
             <div>
-
-
 
                 <a href="index.jsp"
 
@@ -4632,8 +4260,6 @@ a:focus-visible{
 
                 </a>
 
-
-
                 <p class="footer-description">
 
                     Multi-College Centralized Recruitment and
@@ -4644,13 +4270,7 @@ a:focus-visible{
 
                 </p>
 
-
-
             </div>
-
-
-
-
 
             <div>
 
@@ -4678,10 +4298,6 @@ a:focus-visible{
 
             </div>
 
-
-
-
-
             <div>
 
                 <div class="footer-title">
@@ -4698,6 +4314,12 @@ a:focus-visible{
 
                     </a>
 
+                    <a href="college-registration.jsp">
+
+                        Register College
+
+                    </a>
+
                     <a href="<%=request.getContextPath()%>/superadmin/login.jsp">
 
                         Super Admin
@@ -4707,10 +4329,6 @@ a:focus-visible{
                 </div>
 
             </div>
-
-
-
-
 
             <div>
 
@@ -4738,13 +4356,7 @@ a:focus-visible{
 
             </div>
 
-
-
         </div>
-
-
-
-
 
         <div class="footer-bottom">
 
@@ -4762,15 +4374,9 @@ a:focus-visible{
 
         </div>
 
-
-
     </div>
 
-
-
 </footer>
-
-
 
 </body>
 

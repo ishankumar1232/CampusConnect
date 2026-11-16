@@ -60,4 +60,14 @@ public class User {
         this.status = status;
     }
 
+    private int entityId;
+
+    public int getEntityId() {
+        return entityId;
+    }
+
+    public void setEntityId(int entityId) {
+        this.entityId = entityId;
+    }
+
 }

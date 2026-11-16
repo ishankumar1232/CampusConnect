@@ -51,7 +51,9 @@ public class ApplicationShortlistController extends HttpServlet {
                 "SELECT A.APPLICATION_ID " +
                 "FROM APPLICATION A " +
                 "JOIN STUDENT S ON A.STUDENT_ID = S.STUDENT_ID " +
-                "WHERE A.APPLICATION_ID = ? AND S.COLLEGE_ID = ?";
+                "JOIN RECRUITMENT_DRIVE R ON A.DRIVE_ID = R.DRIVE_ID " +
+                "WHERE A.APPLICATION_ID = ? AND S.COLLEGE_ID = ? " +
+                "AND (UPPER(R.DRIVE_TYPE) = 'ON CAMPUS' OR UPPER(R.DRIVE_TYPE) = 'CAMPUS' OR UPPER(R.DRIVE_TYPE) = 'ON-CAMPUS')";
 
         String updateSql =
                 "UPDATE APPLICATION " +

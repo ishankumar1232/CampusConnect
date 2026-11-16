@@ -11,12 +11,24 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 public class UserManagementServlet extends HttpServlet {
 
     protected void doGet(HttpServletRequest request,
             HttpServletResponse response)
             throws ServletException, IOException {
+
+        // ================= SESSION CHECK =================
+
+        HttpSession session = request.getSession(false);
+
+        if (session == null || session.getAttribute("admin") == null) {
+
+            response.sendRedirect(request.getContextPath()
+                    + "/superadmin/login.jsp");
+            return;
+        }
 
         UserDAO dao = new UserDAO();
 
@@ -37,4 +49,3 @@ public class UserManagementServlet extends HttpServlet {
     }
 
 }
-

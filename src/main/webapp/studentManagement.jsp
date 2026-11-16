@@ -12,7 +12,6 @@
     String adminName =
         (String) session.getAttribute("adminName");
 
-
     if(collegeId == null)
     {
         response.sendRedirect("collegeAdminLogin.jsp");
@@ -20,7 +19,6 @@
     }
 
 %>
-
 
 <!DOCTYPE html>
 
@@ -31,7 +29,7 @@
 <meta charset="UTF-8">
 
 <title>Student Management</title>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 <style>
 
@@ -42,7 +40,6 @@
 * {
     box-sizing: border-box;
 }
-
 
 body {
 
@@ -55,7 +52,6 @@ body {
     color: #183b5b;
 
 }
-
 
 /* =========================================
    HEADER
@@ -84,7 +80,6 @@ body {
 
 }
 
-
 .header-icon {
 
     width: 52px;
@@ -105,7 +100,6 @@ body {
 
 }
 
-
 .header h1 {
 
     margin: 0;
@@ -113,7 +107,6 @@ body {
     font-size: 29px;
 
 }
-
 
 .header p {
 
@@ -124,7 +117,6 @@ body {
     color: #c9deec;
 
 }
-
 
 /* =========================================
    CONTAINER
@@ -140,7 +132,6 @@ body {
 
 }
 
-
 /* =========================================
    BACK
 ========================================= */
@@ -150,7 +141,6 @@ body {
     margin-bottom: 20px;
 
 }
-
 
 .back a {
 
@@ -170,13 +160,11 @@ body {
 
 }
 
-
 .back a:hover {
 
     background: #e8f4fc;
 
 }
-
 
 /* =========================================
    PAGE TITLE
@@ -188,7 +176,6 @@ body {
 
 }
 
-
 .page-title h2 {
 
     margin: 0;
@@ -199,7 +186,6 @@ body {
 
 }
 
-
 .page-title p {
 
     margin: 7px 0 0;
@@ -209,7 +195,6 @@ body {
     font-size: 13px;
 
 }
-
 
 /* =========================================
    TABLE CARD
@@ -230,7 +215,6 @@ body {
 
 }
 
-
 /* =========================================
    CARD HEADER
 ========================================= */
@@ -249,7 +233,6 @@ body {
 
 }
 
-
 .card-header h3 {
 
     margin: 0;
@@ -260,7 +243,6 @@ body {
 
 }
 
-
 .college-id {
 
     font-size: 12px;
@@ -269,13 +251,11 @@ body {
 
 }
 
-
 .college-id strong {
 
     color: #1685ed;
 
 }
-
 
 /* =========================================
    TABLE WRAPPER
@@ -288,7 +268,6 @@ body {
     overflow-x: auto;
 
 }
-
 
 /* =========================================
    TABLE
@@ -303,7 +282,6 @@ table {
     border-collapse: collapse;
 
 }
-
 
 th {
 
@@ -321,7 +299,6 @@ th {
 
 }
 
-
 td {
 
     padding: 15px 12px;
@@ -336,20 +313,17 @@ td {
 
 }
 
-
 tbody tr:hover {
 
     background: #f7fbfe;
 
 }
 
-
 tbody tr:last-child td {
 
     border-bottom: none;
 
 }
-
 
 /* =========================================
    STUDENT ID
@@ -363,7 +337,6 @@ tbody tr:last-child td {
 
 }
 
-
 /* =========================================
    STUDENT NAME
 ========================================= */
@@ -376,7 +349,6 @@ tbody tr:last-child td {
 
 }
 
-
 /* =========================================
    EMAIL
 ========================================= */
@@ -386,7 +358,6 @@ tbody tr:last-child td {
     color: #61788a;
 
 }
-
 
 /* =========================================
    COURSE
@@ -410,7 +381,6 @@ tbody tr:last-child td {
 
 }
 
-
 /* =========================================
    GENDER
 ========================================= */
@@ -420,7 +390,6 @@ tbody tr:last-child td {
     color: #526979;
 
 }
-
 
 /* =========================================
    STATUS
@@ -440,7 +409,6 @@ tbody tr:last-child td {
 
 }
 
-
 .active {
 
     background: #e6f8ed;
@@ -449,7 +417,6 @@ tbody tr:last-child td {
 
 }
 
-
 .inactive {
 
     background: #ffe8e8;
@@ -457,7 +424,6 @@ tbody tr:last-child td {
     color: #d33b3b;
 
 }
-
 
 /* =========================================
    EMPTY DATA
@@ -470,7 +436,6 @@ tbody tr:last-child td {
     text-align: center;
 
 }
-
 
 .no-data-icon {
 
@@ -494,7 +459,6 @@ tbody tr:last-child td {
 
 }
 
-
 .no-data h3 {
 
     margin: 15px 0 7px;
@@ -502,7 +466,6 @@ tbody tr:last-child td {
     color: #34546b;
 
 }
-
 
 .no-data p {
 
@@ -513,7 +476,6 @@ tbody tr:last-child td {
     font-size: 13px;
 
 }
-
 
 /* =========================================
    NOTE
@@ -539,7 +501,6 @@ tbody tr:last-child td {
 
 }
 
-
 /* =========================================
    MOBILE
 ========================================= */
@@ -553,13 +514,11 @@ tbody tr:last-child td {
 
     }
 
-
     .header h1 {
 
         font-size: 22px;
 
     }
-
 
     .container {
 
@@ -567,13 +526,11 @@ tbody tr:last-child td {
 
     }
 
-
     .card-header {
 
         display: block;
 
     }
-
 
     .college-id {
 
@@ -587,9 +544,7 @@ tbody tr:last-child td {
 
 </head>
 
-
 <body>
-
 
 <!-- =========================================
      HEADER
@@ -597,13 +552,11 @@ tbody tr:last-child td {
 
 <div class="header">
 
-
     <div class="header-icon">
 
         &#127891;
 
     </div>
-
 
     <div>
 
@@ -611,17 +564,13 @@ tbody tr:last-child td {
             Student Management
         </h1>
 
-
         <p>
             Manage and view students of your college
         </p>
 
     </div>
 
-
 </div>
-
-
 
 <!-- =========================================
      MAIN
@@ -629,20 +578,17 @@ tbody tr:last-child td {
 
 <div class="container">
 
-
     <!-- BACK -->
 
     <div class="back">
 
         <a href="collegeAdminDashboard.jsp">
 
-            &#8592; Back to Dashboard
+            <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
 
         </a>
 
     </div>
-
-
 
     <!-- PAGE TITLE -->
 
@@ -654,7 +600,6 @@ tbody tr:last-child td {
 
         </h2>
 
-
         <p>
 
             View student information, academic course and account status.
@@ -663,24 +608,19 @@ tbody tr:last-child td {
 
     </div>
 
-
-
     <!-- =====================================
          CARD
     ====================================== -->
 
     <div class="card">
 
-
         <div class="card-header">
-
 
             <h3>
 
                 &#127891; Student Directory
 
             </h3>
-
 
             <div class="college-id">
 
@@ -692,15 +632,11 @@ tbody tr:last-child td {
 
             </div>
 
-
         </div>
-
-
 
         <!-- TABLE -->
 
         <div class="table-wrapper">
-
 
         <%
 
@@ -710,14 +646,12 @@ tbody tr:last-child td {
 
             ResultSet rs = null;
 
-
             try
             {
 
                 Class.forName(
                     "oracle.jdbc.driver.OracleDriver"
                 );
-
 
                 con = DriverManager.getConnection(
 
@@ -728,7 +662,6 @@ tbody tr:last-child td {
                     "campus123"
 
                 );
-
 
                 String sql =
 
@@ -741,26 +674,20 @@ tbody tr:last-child td {
 
                     "ORDER BY STUDENT_ID";
 
-
                 ps = con.prepareStatement(sql);
-
 
                 ps.setInt(
                     1,
                     collegeId.intValue()
                 );
 
-
                 rs = ps.executeQuery();
-
 
                 boolean found = false;
 
         %>
 
-
         <table>
-
 
             <thead>
 
@@ -798,9 +725,7 @@ tbody tr:last-child td {
 
             </thead>
 
-
             <tbody>
-
 
         <%
 
@@ -809,15 +734,12 @@ tbody tr:last-child td {
 
                     found = true;
 
-
                     String status =
                         rs.getString("STATUS");
 
         %>
 
-
                 <tr>
-
 
                     <!-- STUDENT ID -->
 
@@ -831,8 +753,6 @@ tbody tr:last-child td {
 
                     </td>
 
-
-
                     <!-- NAME -->
 
                     <td>
@@ -844,8 +764,6 @@ tbody tr:last-child td {
                         </span>
 
                     </td>
-
-
 
                     <!-- EMAIL -->
 
@@ -859,8 +777,6 @@ tbody tr:last-child td {
 
                     </td>
 
-
-
                     <!-- PHONE -->
 
                     <td>
@@ -868,8 +784,6 @@ tbody tr:last-child td {
                         <%=rs.getString("PHONE")%>
 
                     </td>
-
-
 
                     <!-- COURSE -->
 
@@ -886,8 +800,6 @@ tbody tr:last-child td {
 
                     </td>
 
-
-
                     <!-- GENDER -->
 
                     <td>
@@ -900,12 +812,9 @@ tbody tr:last-child td {
 
                     </td>
 
-
-
                     <!-- STATUS -->
 
                     <td>
-
 
                         <%
 
@@ -940,31 +849,24 @@ tbody tr:last-child td {
 
                         %>
 
-
                     </td>
 
-
                 </tr>
-
 
         <%
 
                 }
-
 
                 if(!found)
                 {
 
         %>
 
-
                 <tr>
 
                     <td colspan="7">
 
-
                         <div class="no-data">
-
 
                             <div class="no-data-icon">
 
@@ -972,13 +874,11 @@ tbody tr:last-child td {
 
                             </div>
 
-
                             <h3>
 
                                 No Students Found
 
                             </h3>
-
 
                             <p>
 
@@ -987,14 +887,11 @@ tbody tr:last-child td {
 
                             </p>
 
-
                         </div>
-
 
                     </td>
 
                 </tr>
-
 
         <%
 
@@ -1006,28 +903,21 @@ tbody tr:last-child td {
 
         %>
 
-
                 <tr>
 
                     <td colspan="7">
-
-
                         <div class="no-data">
-
-
                             <div class="no-data-icon">
 
                                 &#9888;
 
                             </div>
 
-
                             <h3>
 
                                 Unable to Load Students
 
                             </h3>
-
 
                             <p>
 
@@ -1036,14 +926,11 @@ tbody tr:last-child td {
 
                             </p>
 
-
                         </div>
-
 
                     </td>
 
                 </tr>
-
 
         <%
 
@@ -1062,7 +949,6 @@ tbody tr:last-child td {
                     }
                 }
 
-
                 if(ps != null)
                 {
                     try
@@ -1073,7 +959,6 @@ tbody tr:last-child td {
                     {
                     }
                 }
-
 
                 if(con != null)
                 {
@@ -1090,18 +975,13 @@ tbody tr:last-child td {
 
         %>
 
-
             </tbody>
 
         </table>
 
-
         </div>
 
-
     </div>
-
-
 
     <!-- =====================================
          NOTE
@@ -1117,11 +997,7 @@ tbody tr:last-child td {
         currently logged-in college.
 
     </div>
-
-
 </div>
-
-
 </body>
 
 </html>

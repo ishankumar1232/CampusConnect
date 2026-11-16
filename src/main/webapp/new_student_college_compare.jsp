@@ -15,7 +15,6 @@
 
 <title>College Details | CampusConnect</title>
 
-
 <style>
 
 /* =========================
@@ -46,7 +45,6 @@ body {
 
     color: #26364f;
 }
-
 
 /* =========================
    HEADER
@@ -125,7 +123,6 @@ body {
     transform: translateY(-1px);
 }
 
-
 /* =========================
    MAIN
 ========================= */
@@ -138,7 +135,6 @@ body {
 
     margin: 42px auto 70px;
 }
-
 
 /* =========================
    TITLE
@@ -169,7 +165,6 @@ body {
     font-size: 15px;
 }
 
-
 /* =========================
    COLLEGE CARD
 ========================= */
@@ -190,7 +185,6 @@ body {
         rgba(15,45,90,0.12);
 }
 
-
 /* =========================
    COLLEGE TOP
 ========================= */
@@ -201,7 +195,6 @@ body {
 
     min-height: 350px;
 }
-
 
 /* =========================
    IMAGE
@@ -238,7 +231,6 @@ body {
 
     transform: scale(1.03);
 }
-
 
 /* =========================
    FLOATING LOGO
@@ -281,7 +273,6 @@ body {
 
     border-radius: 12px;
 }
-
 
 /* =========================
    COLLEGE BASIC
@@ -362,7 +353,6 @@ body {
         rgba(33,133,75,0.10);
 }
 
-
 /* =========================
    SECTION
 ========================= */
@@ -429,7 +419,6 @@ body {
         );
 }
 
-
 /* =========================
    INFO GRID
 ========================= */
@@ -489,7 +478,6 @@ body {
     word-break: break-word;
 }
 
-
 /* =========================
    ADDRESS
 ========================= */
@@ -511,7 +499,6 @@ body {
 
     line-height: 1.6;
 }
-
 
 /* =========================
    COURSES
@@ -554,7 +541,6 @@ body {
     transform: translateY(-2px);
 }
 
-
 /* =========================
    DEPARTMENTS
 ========================= */
@@ -595,7 +581,6 @@ body {
 
     transform: translateY(-2px);
 }
-
 
 /* =========================
    ACTIONS
@@ -704,7 +689,6 @@ body {
     transform: translateY(-2px);
 }
 
-
 /* =========================
    ERROR
 ========================= */
@@ -741,7 +725,6 @@ body {
     margin-bottom: 20px;
 }
 
-
 /* =========================
    FOOTER
 ========================= */
@@ -760,7 +743,6 @@ body {
 
     font-size: 13px;
 }
-
 
 /* =========================
    RESPONSIVE
@@ -830,7 +812,6 @@ body {
     }
 }
 
-
 @media(max-width: 520px) {
 
     .header {
@@ -883,9 +864,7 @@ body {
 
 </head>
 
-
 <body>
-
 
 <!-- =========================
      HEADER
@@ -899,7 +878,6 @@ body {
 
     </div>
 
-
     <a href="new_student_colleges.jsp"
        class="back-btn-top">
 
@@ -909,27 +887,22 @@ body {
 
 </div>
 
-
-
 <!-- =========================
      MAIN
 ========================= -->
 
 <div class="container">
 
-
 <%
 
 String collegeId =
     request.getParameter("collegeId");
-
 
 if(collegeId == null ||
    collegeId.trim().equals(""))
 {
 
 %>
-
 
 <div class="page-title">
 
@@ -943,7 +916,6 @@ if(collegeId == null ||
 
 </div>
 
-
 <div class="error-box">
 
     <h2>
@@ -954,7 +926,6 @@ if(collegeId == null ||
         No college was selected.
     </p>
 
-
     <a href="new_student_colleges.jsp"
        class="back-btn">
 
@@ -963,7 +934,6 @@ if(collegeId == null ||
     </a>
 
 </div>
-
 
 <%
 
@@ -978,14 +948,12 @@ PreparedStatement ps = null;
 
 ResultSet rs = null;
 
-
 try
 {
 
     Class.forName(
         "oracle.jdbc.driver.OracleDriver"
     );
-
 
     con = DriverManager.getConnection(
 
@@ -995,7 +963,6 @@ try
 
         "campus123"
     );
-
 
     String sql =
 
@@ -1023,9 +990,7 @@ try
 
         "AND STATUS = 'APPROVED'";
 
-
     ps = con.prepareStatement(sql);
-
 
     ps.setInt(
 
@@ -1035,15 +1000,12 @@ try
 
     );
 
-
     rs = ps.executeQuery();
-
 
     if(rs.next())
     {
 
 %>
-
 
 <!-- =========================
      PAGE TITLE
@@ -1061,17 +1023,13 @@ try
 
 </div>
 
-
-
 <!-- =========================
      COLLEGE HEADER
 ========================= -->
 
 <div class="college-card">
 
-
     <div class="college-top">
-
 
 <%
 
@@ -1081,16 +1039,13 @@ String logoImage =
 String coverImage =
     rs.getString("COVER_IMAGE");
 
-
 String logoPath =
     request.getContextPath()
     + "/images/college-logo.png";
 
-
 String coverPath =
     request.getContextPath()
     + "/image/college-banner.png";
-
 
 if(logoImage != null &&
    !logoImage.trim().equals(""))
@@ -1101,7 +1056,6 @@ if(logoImage != null &&
         + "/college_images/"
         + logoImage;
 }
-
 
 if(coverImage != null &&
    !coverImage.trim().equals(""))
@@ -1115,14 +1069,12 @@ if(coverImage != null &&
 
 %>
 
-
         <!-- COLLEGE IMAGE -->
 
         <div class="college-image">
 
             <img src="<%=coverPath%>"
                  alt="College Cover Image">
-
 
             <!-- FLOATING LOGO -->
 
@@ -1134,8 +1086,6 @@ if(coverImage != null &&
             </div>
 
         </div>
-
-
 
         <!-- COLLEGE BASIC -->
 
@@ -1149,14 +1099,12 @@ if(coverImage != null &&
 
             </h2>
 
-
             <div class="location">
 
                 <%=rs.getString("CITY")%>,
                 <%=rs.getString("STATE")%>
 
             </div>
-
 
             <span class="available">
 
@@ -1166,12 +1114,9 @@ if(coverImage != null &&
 
         </div>
 
-
     </div>
 
 </div>
-
-
 
 <!-- =========================
      INFORMATION
@@ -1183,9 +1128,7 @@ if(coverImage != null &&
         College Information
     </h3>
 
-
     <div class="info-grid">
-
 
         <div class="info-box">
 
@@ -1203,8 +1146,6 @@ if(coverImage != null &&
 
         </div>
 
-
-
         <div class="info-box">
 
             <span class="info-label">
@@ -1220,8 +1161,6 @@ if(coverImage != null &&
             </span>
 
         </div>
-
-
 
         <div class="info-box">
 
@@ -1239,8 +1178,6 @@ if(coverImage != null &&
 
         </div>
 
-
-
         <div class="info-box">
 
             <span class="info-label">
@@ -1256,8 +1193,6 @@ if(coverImage != null &&
             </span>
 
         </div>
-
-
 
         <div class="info-box">
 
@@ -1275,8 +1210,6 @@ if(coverImage != null &&
 
         </div>
 
-
-
         <div class="info-box">
 
             <span class="info-label">
@@ -1293,12 +1226,9 @@ if(coverImage != null &&
 
         </div>
 
-
     </div>
 
 </div>
-
-
 
 <!-- =========================
      ADDRESS
@@ -1309,7 +1239,6 @@ if(coverImage != null &&
     <h3>
         College Address
     </h3>
-
 
     <div class="address-box">
 
@@ -1329,8 +1258,6 @@ if(coverImage != null &&
 
 </div>
 
-
-
 <!-- =========================
      COURSES
 ========================= -->
@@ -1341,9 +1268,7 @@ if(coverImage != null &&
         Available Courses
     </h3>
 
-
     <div class="course-list">
-
 
 <%
 
@@ -1351,26 +1276,22 @@ PreparedStatement psCourse = null;
 
 ResultSet rsCourse = null;
 
-
 try
 {
 
     psCourse = con.prepareStatement(
-
-        "SELECT COURSE_ID, COURSE_NAME " +
-
-        "FROM COURSE " +
-
-        "ORDER BY COURSE_NAME"
+        "SELECT C.COURSE_ID, C.COURSE_NAME, D.DEPARTMENT_NAME " +
+        "FROM COURSE C " +
+        "JOIN DEPARTMENT D ON C.DEPARTMENT_ID = D.DEPARTMENT_ID " +
+        "WHERE D.COLLEGE_ID = ? " +
+        "ORDER BY C.COURSE_NAME"
     );
-
+    psCourse.setInt(1, Integer.parseInt(collegeId));
 
     rsCourse =
         psCourse.executeQuery();
 
-
     boolean courseFound = false;
-
 
     while(rsCourse.next())
     {
@@ -1378,7 +1299,6 @@ try
         courseFound = true;
 
 %>
-
 
         <div class="course-item">
 
@@ -1388,24 +1308,20 @@ try
 
         </div>
 
-
 <%
 
     }
-
 
     if(!courseFound)
     {
 
 %>
 
-
         <div class="course-item">
 
-            No courses available.
+            No courses available for this college.
 
         </div>
-
 
 <%
 
@@ -1426,12 +1342,9 @@ finally
 
 %>
 
-
     </div>
 
 </div>
-
-
 
 <!-- =========================
      DEPARTMENTS
@@ -1443,9 +1356,7 @@ finally
         Departments
     </h3>
 
-
     <div class="department-list">
-
 
 <%
 
@@ -1453,26 +1364,21 @@ PreparedStatement psDepartment = null;
 
 ResultSet rsDepartment = null;
 
-
 try
 {
 
     psDepartment = con.prepareStatement(
-
         "SELECT DEPARTMENT_ID, DEPARTMENT_NAME " +
-
         "FROM DEPARTMENT " +
-
+        "WHERE COLLEGE_ID = ? " +
         "ORDER BY DEPARTMENT_NAME"
     );
-
+    psDepartment.setInt(1, Integer.parseInt(collegeId));
 
     rsDepartment =
         psDepartment.executeQuery();
 
-
     boolean departmentFound = false;
-
 
     while(rsDepartment.next())
     {
@@ -1480,7 +1386,6 @@ try
         departmentFound = true;
 
 %>
-
 
         <div class="department-item">
 
@@ -1490,24 +1395,20 @@ try
 
         </div>
 
-
 <%
 
     }
-
 
     if(!departmentFound)
     {
 
 %>
 
-
         <div class="department-item">
 
-            No departments available.
+            No departments available for this college.
 
         </div>
-
 
 <%
 
@@ -1528,19 +1429,15 @@ finally
 
 %>
 
-
     </div>
 
 </div>
-
-
 
 <!-- =========================
      ACTIONS
 ========================= -->
 
 <div class="actions">
-
 
     <a
         href="new_student_admission_request.jsp?collegeId=<%=rs.getInt("COLLEGE_ID")%>"
@@ -1550,7 +1447,6 @@ finally
 
     </a>
 
-
     <a
         href="new_student_colleges.jsp"
         class="back-btn">
@@ -1559,9 +1455,7 @@ finally
 
     </a>
 
-
 </div>
-
 
 <%
 
@@ -1571,7 +1465,6 @@ finally
     {
 
 %>
-
 
 <!-- =========================
      NOT FOUND
@@ -1584,7 +1477,6 @@ finally
     </h1>
 
 </div>
-
 
 <div class="error-box">
 
@@ -1599,7 +1491,6 @@ finally
 
     </p>
 
-
     <a
         href="new_student_colleges.jsp"
         class="back-btn">
@@ -1609,7 +1500,6 @@ finally
     </a>
 
 </div>
-
 
 <%
 
@@ -1621,7 +1511,6 @@ catch(Exception e)
 {
 
 %>
-
 
 <!-- =========================
      DATABASE ERROR
@@ -1640,7 +1529,6 @@ catch(Exception e)
     </p>
 
 </div>
-
 
 <%
 
@@ -1674,10 +1562,7 @@ finally
 
 %>
 
-
 </div>
-
-
 
 <!-- =========================
      FOOTER
@@ -1690,7 +1575,6 @@ finally
     Campus Recruitment Management System
 
 </div>
-
 
 </body>
 

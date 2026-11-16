@@ -52,11 +52,7 @@
 
 <%
 
-    // =========================================================
-
     // GET COMPANY DETAILS FROM SESSION
-
-    // =========================================================
 
     String companyName = (String) session.getAttribute("companyName");
 
@@ -76,11 +72,7 @@
 
     }
 
-    // =========================================================
-
     // DEFAULT VALUES
-
-    // =========================================================
 
     if (companyName == null || companyName.trim().equals("")) {
 
@@ -94,25 +86,110 @@
 
     }
 
-    String companyLogoFallback = "images/company/default-logo.png";
+    // Fresh fetch directly from database for the logged in company
+    String dbLogo = null;
+    String dbBanner = null;
+    try (Connection conImg = DBConnection.getConnection();
+         PreparedStatement psImg = conImg.prepareStatement("SELECT LOGO, BANNER FROM COMPANY WHERE COMPANY_ID = ?")) {
+        psImg.setInt(1, companyId);
+        try (ResultSet rsImg = psImg.executeQuery()) {
+            if (rsImg.next()) {
+                dbLogo = rsImg.getString("LOGO");
+                dbBanner = rsImg.getString("BANNER");
+            }
+        }
+    } catch (Exception e) {
+        // Fallback to session
+    }
 
-    String companyBannerFallback = "images/company/default-banner.png";
+    String cNameLower = companyName != null ? companyName.toLowerCase(java.util.Locale.ROOT) : "";
+    boolean isTcs = cNameLower.contains("tcs") || cNameLower.contains("tata consultancy");
+    boolean isGoogle = cNameLower.contains("google");
+    boolean isInfosys = cNameLower.contains("infosys");
+    boolean isMeta = cNameLower.contains("meta");
 
-    companyLogo = safeCompanyImagePath(companyLogo, companyLogoFallback);
+    // LOGO DETECTION:
+    // Only use custom image if user uploaded one or if it matches their brand
+    String activeLogo = (dbLogo != null && !dbLogo.trim().isEmpty()) ? dbLogo.trim() : companyLogo;
+    boolean hasCustomLogo = false;
 
-    companyBanner = safeCompanyImagePath(companyBanner, companyBannerFallback);
+    if (activeLogo != null && !activeLogo.trim().isEmpty()) {
+        String normLogo = activeLogo.replace('\\', '/').toLowerCase(java.util.Locale.ROOT);
+        if (normLogo.contains("tcs-logo")) {
+            hasCustomLogo = isTcs;
+            activeLogo = isTcs ? "images/company/tcs-logo.png" : "";
+        } else if (normLogo.contains("default-logo")) {
+            hasCustomLogo = false;
+            activeLogo = "";
+        } else {
+            hasCustomLogo = true;
+        }
+    }
+
+    if (!hasCustomLogo) {
+        if (isMeta) {
+            activeLogo = "images/company/meta-logo.png";
+            hasCustomLogo = true;
+        } else if (isGoogle) {
+            activeLogo = "images/company/google-logo.png";
+            hasCustomLogo = true;
+        } else if (isInfosys) {
+            activeLogo = "images/company/infosys-logo.png";
+            hasCustomLogo = true;
+        } else if (isTcs) {
+            activeLogo = "images/company/tcs-logo.png";
+            hasCustomLogo = true;
+        } else {
+            activeLogo = "";
+            hasCustomLogo = false;
+        }
+    }
+
+    // BANNER DETECTION:
+    // Only use custom banner image if user uploaded one or matches their brand
+    String activeBanner = (dbBanner != null && !dbBanner.trim().isEmpty()) ? dbBanner.trim() : companyBanner;
+    boolean hasCustomBanner = false;
+
+    if (activeBanner != null && !activeBanner.trim().isEmpty()) {
+        String normBanner = activeBanner.replace('\\', '/').toLowerCase(java.util.Locale.ROOT);
+        if (normBanner.contains("tcs-banner")) {
+            hasCustomBanner = isTcs;
+            activeBanner = isTcs ? "images/company/tcs-banner.png" : "";
+        } else if (normBanner.contains("default-banner")) {
+            hasCustomBanner = false;
+            activeBanner = "";
+        } else {
+            hasCustomBanner = true;
+        }
+    }
+
+    if (!hasCustomBanner) {
+        if (isMeta) {
+            activeBanner = "images/company/meta-banner.png";
+            hasCustomBanner = true;
+        } else if (isGoogle) {
+            activeBanner = "images/company/google-dashboard.png";
+            hasCustomBanner = true;
+        } else if (isInfosys) {
+            activeBanner = "images/company/infosys-dashboard.png";
+            hasCustomBanner = true;
+        } else if (isTcs) {
+            activeBanner = "images/company/tcs-banner.png";
+            hasCustomBanner = true;
+        } else {
+            activeBanner = "";
+            hasCustomBanner = false;
+        }
+    }
+
+    session.setAttribute("companyLogo", activeLogo);
+    session.setAttribute("companyBanner", activeBanner);
 
     String contextPath = request.getContextPath();
-
-    String companyLogoUrl = contextPath + "/" + companyLogo;
-
-    String companyBannerUrl = contextPath + "/" + companyBanner;
-
-    // =========================================================
+    String companyLogoUrl = (hasCustomLogo && !activeLogo.isEmpty()) ? (contextPath + "/" + safeCompanyImagePath(activeLogo, "")) : "";
+    String companyBannerUrl = (hasCustomBanner && !activeBanner.isEmpty()) ? (contextPath + "/" + safeCompanyImagePath(activeBanner, "")) : "";
 
     // COMPANY INITIAL
-
-    // =========================================================
 
     String companyInitial = companyName.substring(0, 1).toUpperCase();
 
@@ -302,11 +379,11 @@
 
     <link rel="stylesheet"
 
-          href="https\://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <link rel="stylesheet"
 
-          href="css/company-dashboard.css?v=11">
+          href="css/company-dashboard.css?v=12">
 
     <style>
 
@@ -377,6 +454,27 @@
         .account-menu-link i{width:17px;text-align:center;color:#8394aa}.account-menu-link:hover{background:#f4f7fb;color:#2065c6}.account-menu-link.logout{margin-top:5px;border-top:1px solid #edf1f6;border-radius:0 0 9px 9px;padding-top:14px;color:#c84c55}.account-menu-link.logout i{color:#c84c55}
 
         @media(max-width:600px){.topbar-menu{right:-8px;width:320px}.top-header .header-right{gap:8px}.profile-info{display:none}.account-trigger{gap:7px}.header-divider{margin:0 3px}}
+
+        .hero-monogram {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 52px;
+            font-weight: 800;
+            color: #1769e0;
+            background: linear-gradient(135deg, #ffffff 0%, #eaf2fd 100%);
+            border-radius: 18px;
+            text-transform: uppercase;
+            box-shadow: inset 0 2px 6px rgba(23,105,224,0.12);
+            user-select: none;
+        }
+
+        .image-overlay.hero-default-gradient {
+            background: radial-gradient(circle at 80% 30%, rgba(23,105,224,0.30) 0%, transparent 60%),
+                        linear-gradient(90deg, rgba(7,52,93,0.98) 0%, rgba(14,68,118,0.90) 60%, rgba(18,90,155,0.70) 100%);
+        }
 
     </style>
 
@@ -792,11 +890,13 @@
 
                 <div class="hero-image">
 
-                    <img src="<%= companyBannerUrl %>"
+                    <% if (hasCustomBanner && !companyBannerUrl.isEmpty()) { %>
+                        <img src="<%= companyBannerUrl %>"
+                             alt="<%= companyName %> Banner"
+                             onerror="this.style.display='none';">
+                    <% } %>
 
-                         alt="<%= companyName %> Banner">
-
-                    <div class="image-overlay"></div>
+                    <div class="image-overlay <%= !hasCustomBanner ? "hero-default-gradient" : "" %>"></div>
 
                 </div>
 
@@ -808,9 +908,14 @@
 
                     <div class="hero-logo">
 
-                        <img src="<%= companyLogoUrl %>"
-
-                             alt="<%= companyName %> Logo">
+                        <% if (hasCustomLogo && !companyLogoUrl.isEmpty()) { %>
+                            <img src="<%= companyLogoUrl %>"
+                                 alt="<%= companyName %> Logo"
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                            <div class="hero-monogram" style="display:none;"><%= companyInitial %></div>
+                        <% } else { %>
+                            <div class="hero-monogram"><%= companyInitial %></div>
+                        <% } %>
 
                     </div>
 
@@ -879,97 +984,41 @@
                 </div>
 
                 <!-- =================================================
-
                      HERO FEATURES
-
-                     \================================================= -->
-
+                     ================================================= -->
                 <div class="hero-features">
-
                     <!-- HIRE -->
-
                     <div class="feature-item">
-
                         <div class="feature-icon">
-
-                            ♟
-
+                            <i class="fa-solid fa-user-graduate"></i>
                         </div>
-
-                        <div>
-
-                            <strong>
-
-                                Hire
-
-                            </strong>
-
-                            <span>
-
-                                Top Talent
-
-                            </span>
-
+                        <div class="feature-text">
+                            <strong>Hire</strong>
+                            <span>Top Talent</span>
                         </div>
-
                     </div>
 
                     <!-- BUILD -->
-
                     <div class="feature-item">
-
                         <div class="feature-icon">
-
-                            ◈
-
+                            <i class="fa-solid fa-users-gear"></i>
                         </div>
-
-                        <div>
-
-                            <strong>
-
-                                Build
-
-                            </strong>
-
-                            <span>
-
-                                Stronger Teams
-
-                            </span>
-
+                        <div class="feature-text">
+                            <strong>Build</strong>
+                            <span>Stronger Teams</span>
                         </div>
-
                     </div>
 
                     <!-- SHAPE -->
-
                     <div class="feature-item">
-
                         <div class="feature-icon">
-
-                            ▥
-
+                            <i class="fa-solid fa-chart-line"></i>
                         </div>
-
-                        <div>
-
-                            <strong>
-
-                                Shape
-
-                            </strong>
-
-                            <span>
-
-                                A Better Tomorrow
-
-                            </span>
-
+                        <div class="feature-text">
+                            <strong>Shape</strong>
+                            <span>A Better Tomorrow</span>
                         </div>
-
                     </div>
-
                 </div>
 
                 <!-- =================================================
@@ -992,7 +1041,7 @@
 
                     <strong>
 
-                        — <%= companyName %>
+                        &mdash; <%= companyName %>
 
                     </strong>
 
@@ -1036,7 +1085,7 @@
 
                     <a href="view-recruitment-drives.jsp">
 
-                        View all →
+                        View all &rarr;
 
                     </a>
 
@@ -1069,134 +1118,44 @@
                     </div>
 
                     <a href="company-applicants.jsp">
-
-                        View all →
-
+                        View all &rarr;
                     </a>
-
-</head>
-
-
-
-
-
-<body>
-
-
-
-
-
-<!-- =========================================================
-
-     MAIN WRAPPER
-
-     ========================================================= -->
-
-
-
-<div class="dashboard-wrapper">
-
-
-
-
-
-    <!-- =====================================================
-
-         SIDEBAR
-
-         ===================================================== -->
-
-
-
-    <aside class="sidebar">
-
-
-
-
-
-        <!-- BRAND -->
-
-        <div class="sidebar-logo">
-
-
-
-            <div class="brand-name">
-
-                Campus<span>Connect</span>
-
-            </div>
-
-
-
-            <div class="brand-subtitle">
-
-                COMPANY PORTAL
+                </div>
 
                 <!-- INTERVIEWS -->
-
                 <div class="stat-card">
-
                     <div class="stat-icon blue">
-
                         ◷
-
                     </div>
-
                     <div class="stat-info">
-
                         <strong>
-
                             <%= dashboardDataError ? "—" : scheduledInterviews %>
-
                         </strong>
-
                         <span>
-
                             Interviews Scheduled
-
                         </span>
-
                     </div>
-
                     <a href="company-interviews.jsp">
-
-                        View all →
-
+                        View all &rarr;
                     </a>
-
                 </div>
 
                 <!-- OFFERS -->
-
                 <div class="stat-card">
-
                     <div class="stat-icon green">
-
                         ✓
-
                     </div>
-
                     <div class="stat-info">
-
                         <strong>
-
                             <%= dashboardDataError ? "—" : totalOffers %>
-
                         </strong>
-
                         <span>
-
                             Offers Made
-
                         </span>
-
-
+                    </div>
                     <a href="company-offers.jsp">
-
-                        View all →
-
+                        View all &rarr;
                     </a>
-
                 </div>
 
             </section>
@@ -1209,22 +1168,15 @@
 
             <section class="quick-actions">
 
-
+                <div class="section-heading">
                     <h2>
-
                         Quick Actions
-
                     </h2>
-
                     <p>
-
                         Jump straight into your most common
-
                         recruitment tasks
-
                     </p>
-
-                <i class="fa-solid fa-house"></i>
+                </div>
 
                 <div class="quick-grid">
 
@@ -1258,14 +1210,13 @@
 
                             <a href="company-profile.jsp">
 
-                                Open →
+                                Open &rarr;
 
                             </a>
 
                         </div>
 
                     </div>
-
 
                     <div class="quick-card">
 
@@ -1295,7 +1246,7 @@
 
                             <a href="recruitment-drive.jsp">
 
-                                Open →
+                                Open &rarr;
 
                             </a>
 
@@ -1333,14 +1284,13 @@
 
                             <a href="view-recruitment-drives.jsp">
 
-                                Open →
+                                Open &rarr;
 
                             </a>
 
                         </div>
 
                     </div>
-
 
                     <div class="quick-card">
 
@@ -1370,7 +1320,7 @@
 
                             <a href="company-reports.jsp">
 
-                                Open →
+                                Open &rarr;
 
                             </a>
 
@@ -1391,22 +1341,15 @@
             <section class="activity-section">
 
                 <div class="section-heading">
-
                     <h2>
-
                         Recruitment Activity
-
                     </h2>
-
                     <p>
-
                         A live summary of your drives and applicants
-
                     </p>
+                </div>
 
-                    Create Drive
-
-                                <div class="activity-box">
+                <div class="activity-box">
 
                     <% if (dashboardDataError) { %>
 
@@ -1450,7 +1393,7 @@
 
                                 </div>
 
-                                <a href="view-recruitment-drives.jsp">View all drives <span aria-hidden="true">→</span></a>
+                                <a href="view-recruitment-drives.jsp">View all drives <span aria-hidden="true">&rarr;</span></a>
 
                             </div>
 
@@ -1478,7 +1421,7 @@
 
                                 <article class="activity-row">
 
-                                    <div class="activity-row-icon" aria-hidden="true">↗</div>
+                                    <div class="activity-row-icon" aria-hidden="true">&#8599;</div>
 
                                     <div class="activity-row-content">
 
@@ -1494,7 +1437,7 @@
 
                                     </div>
 
-                                    <a class="activity-manage" href="edit-recruitment-drive.jsp?driveId=<%= drive.get("id") %>">Manage <span aria-hidden="true">→</span></a>
+                                    <a class="activity-manage" href="edit-recruitment-drive.jsp?driveId=<%= drive.get("id") %>">Manage <span aria-hidden="true">&rarr;</span></a>
 
                                 </article>
 
@@ -1514,71 +1457,41 @@
 
 </div>
 
-
+<script>
 (function () {
-
     var controls = [
-
         { button: document.getElementById("notificationButton"), menu: document.getElementById("notificationMenu") },
-
         { button: document.getElementById("accountButton"), menu: document.getElementById("accountMenu") }
-
     ];
-
     function closeAll(except) {
-
         controls.forEach(function (control) {
-
             if (control !== except) {
-
                 control.menu.hidden = true;
-
                 control.button.setAttribute("aria-expanded", "false");
-
             }
-
         });
-
-
+    }
     controls.forEach(function (control) {
-
         control.button.addEventListener("click", function (event) {
-
             event.stopPropagation();
-
             var shouldOpen = control.menu.hidden;
-
             closeAll(control);
-
             control.menu.hidden = !shouldOpen;
-
             control.button.setAttribute("aria-expanded", String(shouldOpen));
-
         });
-
         control.menu.addEventListener("click", function (event) { event.stopPropagation(); });
-
     });
-
     document.addEventListener("click", function () { closeAll(null); });
-
     document.addEventListener("keydown", function (event) {
-
         if (event.key === "Escape") {
-
             closeAll(null);
-
             var focused = controls.filter(function (control) { return document.activeElement === control.button; })[0];
-
             if (focused) focused.button.focus();
-
         }
-
     });
-
 }());
-
 </script>
 
+</body>
 
 </html>

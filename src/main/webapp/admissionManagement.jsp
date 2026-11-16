@@ -12,15 +12,33 @@
     String adminName =
         (String) session.getAttribute("adminName");
 
-
     if(collegeId == null)
     {
         response.sendRedirect("collegeAdminLogin.jsp");
         return;
     }
 
-%>
+    double defaultFee = 50000.0;
+    try {
+        Class.forName("oracle.jdbc.driver.OracleDriver");
+        try (Connection conDef = DriverManager.getConnection(
+                "jdbc:oracle:thin:@localhost:1521:XE",
+                "CAMPUSCONNECT",
+                "campus123");
+             PreparedStatement psDef = conDef.prepareStatement(
+                "SELECT NVL(DEFAULT_ADMISSION_FEE, 50000) FROM COLLEGE WHERE COLLEGE_ID=?")) {
+            psDef.setInt(1, collegeId);
+            try (ResultSet rsDef = psDef.executeQuery()) {
+                if (rsDef.next()) {
+                    defaultFee = rsDef.getDouble(1);
+                }
+            }
+        }
+    } catch (Exception e) {
+        // Fallback default
+    }
 
+%>
 
 <!DOCTYPE html>
 
@@ -31,7 +49,7 @@
 <meta charset="UTF-8">
 
 <title>Admission Management</title>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 <style>
 
@@ -42,7 +60,6 @@
 * {
     box-sizing: border-box;
 }
-
 
 body {
 
@@ -55,7 +72,6 @@ body {
     color: #183b5b;
 
 }
-
 
 /* ==============================
    HEADER
@@ -84,7 +100,6 @@ body {
 
 }
 
-
 .header-icon {
 
     width: 52px;
@@ -105,7 +120,6 @@ body {
 
 }
 
-
 .header h1 {
 
     margin: 0;
@@ -113,7 +127,6 @@ body {
     font-size: 29px;
 
 }
-
 
 .header p {
 
@@ -124,7 +137,6 @@ body {
     color: #c9deec;
 
 }
-
 
 /* ==============================
    CONTAINER
@@ -140,7 +152,6 @@ body {
 
 }
 
-
 /* ==============================
    BACK
 ============================== */
@@ -150,7 +161,6 @@ body {
     margin-bottom: 20px;
 
 }
-
 
 .back a {
 
@@ -170,13 +180,11 @@ body {
 
 }
 
-
 .back a:hover {
 
     background: #e8f4fc;
 
 }
-
 
 /* ==============================
    PAGE TITLE
@@ -194,7 +202,6 @@ body {
 
 }
 
-
 .page-title h2 {
 
     margin: 0;
@@ -205,7 +212,6 @@ body {
 
 }
 
-
 .page-title p {
 
     margin: 7px 0 0;
@@ -215,7 +221,6 @@ body {
     font-size: 13px;
 
 }
-
 
 /* ==============================
    TABLE CARD
@@ -236,7 +241,6 @@ body {
 
 }
 
-
 /* ==============================
    TABLE TOP
 ============================== */
@@ -255,7 +259,6 @@ body {
 
 }
 
-
 .table-header h3 {
 
     margin: 0;
@@ -266,7 +269,6 @@ body {
 
 }
 
-
 .college-id {
 
     color: #718493;
@@ -274,7 +276,6 @@ body {
     font-size: 12px;
 
 }
-
 
 /* ==============================
    TABLE
@@ -288,7 +289,6 @@ body {
 
 }
 
-
 table {
 
     width: 100%;
@@ -298,7 +298,6 @@ table {
     border-collapse: collapse;
 
 }
-
 
 th {
 
@@ -316,7 +315,6 @@ th {
 
 }
 
-
 td {
 
     padding: 15px 12px;
@@ -331,20 +329,17 @@ td {
 
 }
 
-
 tbody tr:hover {
 
     background: #f7fbfe;
 
 }
 
-
 tbody tr:last-child td {
 
     border-bottom: none;
 
 }
-
 
 /* ==============================
    ADMISSION ID
@@ -358,7 +353,6 @@ tbody tr:last-child td {
 
 }
 
-
 /* ==============================
    NAME
 ============================== */
@@ -371,7 +365,6 @@ tbody tr:last-child td {
 
 }
 
-
 /* ==============================
    EMAIL
 ============================== */
@@ -381,7 +374,6 @@ tbody tr:last-child td {
     color: #61788a;
 
 }
-
 
 /* ==============================
    STATUS
@@ -401,7 +393,6 @@ tbody tr:last-child td {
 
 }
 
-
 .pending {
 
     background: #fff1d8;
@@ -409,7 +400,6 @@ tbody tr:last-child td {
     color: #c87500;
 
 }
-
 
 /* ==============================
    ACTION
@@ -421,13 +411,11 @@ tbody tr:last-child td {
 
 }
 
-
 .action form {
 
     display: inline;
 
 }
-
 
 .approve-btn {
 
@@ -451,13 +439,11 @@ tbody tr:last-child td {
 
 }
 
-
 .approve-btn:hover {
 
     background: #128a45;
 
 }
-
 
 .reject-btn {
 
@@ -479,13 +465,11 @@ tbody tr:last-child td {
 
 }
 
-
 .reject-btn:hover {
 
     background: #c93737;
 
 }
-
 
 /* ==============================
    EMPTY
@@ -498,7 +482,6 @@ tbody tr:last-child td {
     text-align: center;
 
 }
-
 
 .empty-icon {
 
@@ -522,7 +505,6 @@ tbody tr:last-child td {
 
 }
 
-
 .empty h3 {
 
     margin: 15px 0 7px;
@@ -530,7 +512,6 @@ tbody tr:last-child td {
     color: #34546b;
 
 }
-
 
 .empty p {
 
@@ -541,7 +522,6 @@ tbody tr:last-child td {
     font-size: 13px;
 
 }
-
 
 /* ==============================
    NOTE
@@ -567,7 +547,6 @@ tbody tr:last-child td {
 
 }
 
-
 /* ==============================
    MOBILE
 ============================== */
@@ -581,20 +560,17 @@ tbody tr:last-child td {
 
     }
 
-
     .header h1 {
 
         font-size: 22px;
 
     }
 
-
     .container {
 
         width: 94%;
 
     }
-
 
     .page-title {
 
@@ -608,9 +584,7 @@ tbody tr:last-child td {
 
 </head>
 
-
 <body>
-
 
 <!-- ==============================
      HEADER
@@ -618,13 +592,11 @@ tbody tr:last-child td {
 
 <div class="header">
 
-
     <div class="header-icon">
 
         🎓
 
     </div>
-
 
     <div>
 
@@ -632,17 +604,13 @@ tbody tr:last-child td {
             Admission Management
         </h1>
 
-
         <p>
             Review and manage student admission requests
         </p>
 
     </div>
 
-
 </div>
-
-
 
 <!-- ==============================
      MAIN CONTAINER
@@ -650,25 +618,21 @@ tbody tr:last-child td {
 
 <div class="container">
 
-
     <!-- BACK -->
 
     <div class="back">
 
         <a href="collegeAdminDashboard.jsp">
 
-            ← Back to Dashboard
+            <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
 
         </a>
 
     </div>
 
-
-
     <!-- PAGE TITLE -->
 
     <div class="page-title">
-
 
         <div>
 
@@ -676,17 +640,13 @@ tbody tr:last-child td {
                 📋 Pending Admission Requests
             </h2>
 
-
             <p>
                 Review applications submitted to your college.
             </p>
 
         </div>
 
-
     </div>
-
-
 
     <!-- ==============================
          TABLE CARD
@@ -694,31 +654,33 @@ tbody tr:last-child td {
 
     <div class="table-card">
 
-
         <div class="table-header">
-
 
             <h3>
                 🎓 Admission Applications
             </h3>
 
+            <div style="display:flex; align-items:center; gap:15px; flex-wrap:wrap;">
 
-            <div class="college-id">
+                <div style="background:#eaf5ff; border:1px solid #bcdbf7; color:#0e5a9b; padding:6px 14px; border-radius:8px; font-size:13px; font-weight:600;">
+                    College Default Fee: <strong>₹<%=String.format("%,.0f", defaultFee)%></strong>
+                    <a href="collegeProfile.jsp" style="margin-left:8px; color:#1685ed; text-decoration:underline; font-size:12px;">Edit in Profile</a>
+                </div>
 
-                College ID:
-                <strong>
-                    <%=collegeId%>
-                </strong>
+                <div class="college-id">
+
+                    College ID:
+                    <strong>
+                        <%=collegeId%>
+                    </strong>
+
+                </div>
 
             </div>
 
-
         </div>
 
-
-
         <div class="table-wrapper">
-
 
         <%
 
@@ -728,7 +690,6 @@ tbody tr:last-child td {
                 Class.forName(
                     "oracle.jdbc.driver.OracleDriver"
                 );
-
 
                 Connection con =
                     DriverManager.getConnection(
@@ -741,46 +702,43 @@ tbody tr:last-child td {
 
                     );
 
-
                 String sql =
 
-                    "SELECT ADMISSION_ID, " +
-                    "APPLICANT_NAME, " +
-                    "APPLICANT_EMAIL, " +
-                    "APPLICANT_PHONE, " +
-                    "APPLICANT_COURSE_ID, " +
-                    "ADMISSION_DATE, " +
-                    "STATUS " +
+                    "SELECT A.ADMISSION_ID, " +
+                    "A.APPLICANT_NAME, " +
+                    "A.APPLICANT_EMAIL, " +
+                    "A.APPLICANT_PHONE, " +
+                    "A.APPLICANT_COURSE_ID, " +
+                    "A.ADMISSION_DATE, " +
+                    "A.STATUS, " +
+                    "NVL(A.ADMISSION_FEE, NVL(C.DEFAULT_ADMISSION_FEE, 50000)) AS DECIDED_FEE, " +
+                    "CO.COURSE_NAME " +
 
-                    "FROM ADMISSION " +
+                    "FROM ADMISSION A " +
+                    "JOIN COLLEGE C ON A.COLLEGE_ID = C.COLLEGE_ID " +
+                    "LEFT JOIN COURSE CO ON A.APPLICANT_COURSE_ID = CO.COURSE_ID " +
 
-                    "WHERE COLLEGE_ID=? " +
-                    "AND STATUS='PENDING' " +
+                    "WHERE A.COLLEGE_ID=? " +
+                    "AND A.STATUS='PENDING' " +
 
-                    "ORDER BY ADMISSION_ID";
-
+                    "ORDER BY A.ADMISSION_ID";
 
                 PreparedStatement ps =
                     con.prepareStatement(sql);
-
 
                 ps.setInt(
                     1,
                     collegeId.intValue()
                 );
 
-
                 ResultSet rs =
                     ps.executeQuery();
-
 
                 boolean found = false;
 
         %>
 
-
         <table>
-
 
             <tr>
 
@@ -793,15 +751,11 @@ tbody tr:last-child td {
                 </th>
 
                 <th>
-                    📧 Email
+                    📧 Contact Info
                 </th>
 
                 <th>
-                    📞 Phone
-                </th>
-
-                <th>
-                    📚 Course ID
+                    📚 Course
                 </th>
 
                 <th>
@@ -813,11 +767,14 @@ tbody tr:last-child td {
                 </th>
 
                 <th>
+                    💰 Decided Fee (₹)
+                </th>
+
+                <th>
                     ⚙ Action
                 </th>
 
             </tr>
-
 
         <%
 
@@ -828,9 +785,7 @@ tbody tr:last-child td {
 
         %>
 
-
             <tr>
-
 
                 <!-- ADMISSION ID -->
 
@@ -844,7 +799,6 @@ tbody tr:last-child td {
 
                 </td>
 
-
                 <!-- NAME -->
 
                 <td>
@@ -857,8 +811,7 @@ tbody tr:last-child td {
 
                 </td>
 
-
-                <!-- EMAIL -->
+                <!-- CONTACT -->
 
                 <td>
 
@@ -868,27 +821,21 @@ tbody tr:last-child td {
 
                     </span>
 
-                </td>
-
-
-                <!-- PHONE -->
-
-                <td>
-
-                    <%=rs.getString("APPLICANT_PHONE")%>
+                    <div style="font-size:12px; color:#718493; margin-top:3px;">
+                        📞 <%=rs.getString("APPLICANT_PHONE")%>
+                    </div>
 
                 </td>
-
 
                 <!-- COURSE -->
 
                 <td>
 
-                    📚
-                    <%=rs.getInt("APPLICANT_COURSE_ID")%>
+                    <span style="display:inline-block; background:#eaf3fc; color:#1258c4; padding:5px 10px; border-radius:6px; font-weight:bold; font-size:12px;">
+                        📚 <%= (rs.getString("COURSE_NAME") != null ? rs.getString("COURSE_NAME") : "Course #" + rs.getInt("APPLICANT_COURSE_ID")) %>
+                    </span>
 
                 </td>
-
 
                 <!-- DATE -->
 
@@ -897,7 +844,6 @@ tbody tr:last-child td {
                     <%=rs.getDate("ADMISSION_DATE")%>
 
                 </td>
-
 
                 <!-- STATUS -->
 
@@ -911,17 +857,43 @@ tbody tr:last-child td {
 
                 </td>
 
+                <!-- DECIDED FEE -->
+
+                <td>
+
+                    <div style="display:inline-flex; align-items:center; background:#f0f6ff; border:1px solid #c3daf5; border-radius:8px; padding:3px 8px;">
+
+                        <span style="font-weight:bold; color:#1769e0; margin-right:4px;">
+                            ₹
+                        </span>
+
+                        <input
+                            type="number"
+                            name="admissionFee"
+                            form="approveForm_<%=rs.getInt("ADMISSION_ID")%>"
+                            value="<%=String.format("%.0f", rs.getDouble("DECIDED_FEE"))%>"
+                            min="0"
+                            step="500"
+                            style="width:95px; padding:6px 4px; border:none; background:transparent; font-weight:bold; color:#183f60; font-size:13px; outline:none;"
+                            title="College decides this admission fee"
+                            required
+                        >
+
+                    </div>
+
+                </td>
 
                 <!-- ACTION -->
 
                 <td class="action">
 
-
                     <!-- APPROVE -->
 
                     <form
+                        id="approveForm_<%=rs.getInt("ADMISSION_ID")%>"
                         action="AdmissionStatusController"
                         method="post"
+                        style="display:inline;"
                     >
 
                         <input
@@ -930,17 +902,16 @@ tbody tr:last-child td {
                             value="<%=rs.getInt("ADMISSION_ID")%>"
                         >
 
-
                         <input
                             type="hidden"
                             name="status"
                             value="APPROVED"
                         >
 
-
                         <button
                             type="submit"
                             class="approve-btn"
+                            title="Approve with decided fee"
                         >
 
                             ✓ Approve
@@ -949,13 +920,12 @@ tbody tr:last-child td {
 
                     </form>
 
-
-
                     <!-- REJECT -->
 
                     <form
                         action="AdmissionStatusController"
                         method="post"
+                        style="display:inline;"
                     >
 
                         <input
@@ -964,17 +934,16 @@ tbody tr:last-child td {
                             value="<%=rs.getInt("ADMISSION_ID")%>"
                         >
 
-
                         <input
                             type="hidden"
                             name="status"
                             value="REJECTED"
                         >
 
-
                         <button
                             type="submit"
                             class="reject-btn"
+                            onclick="return confirm('Are you sure you want to reject this admission request?');"
                         >
 
                             ✕ Reject
@@ -983,31 +952,24 @@ tbody tr:last-child td {
 
                     </form>
 
-
                 </td>
 
-
             </tr>
-
 
         <%
 
                 }
-
 
                 if(!found)
                 {
 
         %>
 
-
             <tr>
 
                 <td colspan="8">
 
-
                     <div class="empty">
-
 
                         <div class="empty-icon">
 
@@ -1015,13 +977,11 @@ tbody tr:last-child td {
 
                         </div>
 
-
                         <h3>
 
                             No Pending Admissions
 
                         </h3>
-
 
                         <p>
 
@@ -1030,19 +990,15 @@ tbody tr:last-child td {
 
                         </p>
 
-
                     </div>
-
 
                 </td>
 
             </tr>
 
-
         <%
 
                 }
-
 
                 rs.close();
 
@@ -1050,21 +1006,17 @@ tbody tr:last-child td {
 
                 con.close();
 
-
             }
             catch(Exception e)
             {
 
         %>
 
-
             <tr>
 
                 <td colspan="8">
 
-
                     <div class="empty">
-
 
                         <div class="empty-icon">
 
@@ -1072,13 +1024,11 @@ tbody tr:last-child td {
 
                         </div>
 
-
                         <h3>
 
                             Unable to Load Admissions
 
                         </h3>
-
 
                         <p>
 
@@ -1087,14 +1037,11 @@ tbody tr:last-child td {
 
                         </p>
 
-
                     </div>
-
 
                 </td>
 
             </tr>
-
 
         <%
 
@@ -1102,16 +1049,11 @@ tbody tr:last-child td {
 
         %>
 
-
         </table>
-
 
         </div>
 
-
     </div>
-
-
 
     <!-- NOTE -->
 
@@ -1124,9 +1066,7 @@ tbody tr:last-child td {
 
     </div>
 
-
 </div>
-
 
 </body>
 

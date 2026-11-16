@@ -75,7 +75,6 @@ public class SelectionController extends HttpServlet {
             rs.close();
             ps.close();
 
-
             // Check if selection already exists
             String checkSelection =
                 "SELECT SELECTION_ID " +
@@ -133,7 +132,6 @@ public class SelectionController extends HttpServlet {
 
                 rs.close();
                 ps.close();
-
 
                 // Insert selection
                 String insertSql =

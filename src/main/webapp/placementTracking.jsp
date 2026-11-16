@@ -1,3 +1,4 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.sql.*" %>
 
 <%
@@ -13,6 +14,7 @@
 <html>
 <head>
     <title>Placement Tracking</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
     <style>
         body {
@@ -83,7 +85,7 @@
 </div>
 
 <div class="back">
-    <a href="collegeAdminDashboard.jsp">← Back to Dashboard</a>
+    <a href="collegeAdminDashboard.jsp"><i class="fa-solid fa-arrow-left"></i> Back to Dashboard</a>
 </div>
 
 <div class="box">

@@ -1,24 +1,29 @@
 package com.campusconnect.bean;
-
 import java.sql.*;
 import java.sql.Date;
+import com.campusconnect.util.DBConnection;
 
 public class Admission
 {
     private int admissionId;
     private int studentId;
     private int collegeId;
-
     private String applicantName;
     private String applicantEmail;
     private String applicantPhone;
-
     private int applicantCourseId;
-
     private Date admissionDate;
     private String status;
     private Date approvedDate;
+    private double admissionFee;
 
+    public double getAdmissionFee() {
+        return admissionFee;
+    }
+
+    public void setAdmissionFee(double admissionFee) {
+        this.admissionFee = admissionFee;
+    }
 
     public int getAdmissionId()
     {
@@ -30,7 +35,6 @@ public class Admission
         this.admissionId = admissionId;
     }
 
-
     public int getStudentId()
     {
         return studentId;
@@ -40,7 +44,6 @@ public class Admission
     {
         this.studentId = studentId;
     }
-
 
     public int getCollegeId()
     {
@@ -52,7 +55,6 @@ public class Admission
         this.collegeId = collegeId;
     }
 
-
     public String getApplicantName()
     {
         return applicantName;
@@ -62,7 +64,6 @@ public class Admission
     {
         this.applicantName = applicantName;
     }
-
 
     public String getApplicantEmail()
     {
@@ -74,7 +75,6 @@ public class Admission
         this.applicantEmail = applicantEmail;
     }
 
-
     public String getApplicantPhone()
     {
         return applicantPhone;
@@ -84,7 +84,6 @@ public class Admission
     {
         this.applicantPhone = applicantPhone;
     }
-
 
     public int getApplicantCourseId()
     {
@@ -96,7 +95,6 @@ public class Admission
         this.applicantCourseId = applicantCourseId;
     }
 
-
     public Date getAdmissionDate()
     {
         return admissionDate;
@@ -106,7 +104,6 @@ public class Admission
     {
         this.admissionDate = admissionDate;
     }
-
 
     public String getStatus()
     {
@@ -118,7 +115,6 @@ public class Admission
         this.status = status;
     }
 
-
     public Date getApprovedDate()
     {
         return approvedDate;
@@ -129,204 +125,101 @@ public class Admission
         this.approvedDate = approvedDate;
     }
 
-
     public boolean InsertMethod()
     {
-        boolean x = false;
+        String idSql = "SELECT NVL(MAX(ADMISSION_ID),0)+1 FROM ADMISSION";
+        String q =
+            "INSERT INTO ADMISSION " +
+            "(ADMISSION_ID, STUDENT_ID, COLLEGE_ID, " +
+            "APPLICANT_NAME, APPLICANT_EMAIL, " +
+            "APPLICANT_PHONE, APPLICANT_COURSE_ID, " +
+            "ADMISSION_DATE, STATUS, ADMISSION_FEE) " +
+            "VALUES (?, NULL, ?, ?, ?, ?, ?, SYSDATE, 'PENDING', " +
+            "NVL((SELECT DEFAULT_ADMISSION_FEE FROM COLLEGE WHERE COLLEGE_ID=?), 50000))";
 
-        Connection con = null;
-        Statement stmt = null;
-        ResultSet rs = null;
-
-        try
+        try (Connection con = DBConnection.getConnection();
+             Statement stmt = con.createStatement();
+             ResultSet rs = stmt.executeQuery(idSql))
         {
-            Class.forName(
-                "oracle.jdbc.driver.OracleDriver"
-            );
-
-            con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
-            stmt = con.createStatement();
-
-
-            /* =========================
-               GENERATE NEW ADMISSION ID
-               ========================= */
-
             int newId = 1;
-
-            rs = stmt.executeQuery(
-                "SELECT MAX(ADMISSION_ID) FROM ADMISSION"
-            );
-
             if(rs.next())
             {
-                if(rs.getObject(1) != null)
-                {
-                    newId =
-                        rs.getInt(1) + 1;
-                }
+                newId = rs.getInt(1);
             }
-
-
-            /*
-             * IMPORTANT:
-             * Store generated ID inside bean
-             */
-
             this.admissionId = newId;
 
-
-            /* =========================
-               INSERT ADMISSION
-               ========================= */
-
-            String q =
-                "INSERT INTO ADMISSION " +
-                "(ADMISSION_ID, STUDENT_ID, COLLEGE_ID, " +
-                "APPLICANT_NAME, APPLICANT_EMAIL, " +
-                "APPLICANT_PHONE, APPLICANT_COURSE_ID, " +
-                "ADMISSION_DATE, STATUS) " +
-
-                "VALUES (" +
-                newId + ", NULL, " +
-                collegeId + ", '" +
-                applicantName + "', '" +
-                applicantEmail + "', '" +
-                applicantPhone + "', " +
-                applicantCourseId +
-                ", SYSDATE, 'PENDING')";
-
-
-            int i =
-                stmt.executeUpdate(q);
-
-
-            if(i > 0)
+            try (PreparedStatement ps = con.prepareStatement(q))
             {
-                x = true;
+                ps.setInt(1, newId);
+                ps.setInt(2, collegeId);
+                ps.setString(3, applicantName);
+                ps.setString(4, applicantEmail);
+                ps.setString(5, applicantPhone);
+                ps.setInt(6, applicantCourseId);
+                ps.setInt(7, collegeId);
+
+                int i = ps.executeUpdate();
+                return i > 0;
             }
-
-
-            rs.close();
-            stmt.close();
-            con.close();
         }
         catch(Exception e)
         {
-            System.out.println(e);
-        }
-
-        return x;
-    }
- // Count Pending Admission Requests
-
-    public int getPendingAdmissionCount(int collegeId)
-
-    {
-
-        int count = 0;
-
-        try
-
-        {
-
-            Class.forName(
-                "oracle.jdbc.driver.OracleDriver"
-            );
-
-            Connection con = DriverManager.getConnection(
-
-                "jdbc:oracle:thin:@localhost:1521:XE",
-
-                "CAMPUSCONNECT",
-
-                "campus123"
-
-            );
-
-            String sql =
-                "SELECT COUNT(*) FROM ADMISSION " +
-                "WHERE COLLEGE_ID=? AND STATUS='PENDING'";
-
-            PreparedStatement ps =
-                con.prepareStatement(sql);
-
-            ps.setInt(1, collegeId);
-
-            ResultSet rs =
-                ps.executeQuery();
-
-            if(rs.next())
-
-            {
-
-                count = rs.getInt(1);
-
-            }
-
-            rs.close();
-
-            ps.close();
-
-            con.close();
-
-        }
-
-        catch(Exception e)
-
-        {
-
             e.printStackTrace();
+            return false;
+        }
+    }
 
+    // Count Pending Admission Requests
+    public int getPendingAdmissionCount(int collegeId)
+    {
+        int count = 0;
+        String sql =
+            "SELECT COUNT(*) FROM ADMISSION " +
+            "WHERE COLLEGE_ID=? AND STATUS='PENDING'";
+
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql))
+        {
+            ps.setInt(1, collegeId);
+            try (ResultSet rs = ps.executeQuery())
+            {
+                if(rs.next())
+                {
+                    count = rs.getInt(1);
+                }
+            }
+        }
+        catch(Exception e)
+        {
+            e.printStackTrace();
         }
 
         return count;
-
     }
+
     public boolean updateAdmissionStatus(int admissionId, String status) {
+        return updateAdmissionStatus(admissionId, status, 50000.0);
+    }
 
-        boolean x = false;
+    public boolean updateAdmissionStatus(int admissionId, String status, double admissionFee) {
+        String sql =
+            "UPDATE ADMISSION " +
+            "SET STATUS=?, APPROVED_DATE=SYSDATE, ADMISSION_FEE=? " +
+            "WHERE ADMISSION_ID=?";
 
-        try {
-
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-
-            Connection con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
-            String sql =
-                "UPDATE ADMISSION " +
-                "SET STATUS=?, APPROVED_DATE=SYSDATE " +
-                "WHERE ADMISSION_ID=?";
-
-            PreparedStatement ps = con.prepareStatement(sql);
-
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql))
+        {
             ps.setString(1, status);
-            ps.setInt(2, admissionId);
+            ps.setDouble(2, admissionFee);
+            ps.setInt(3, admissionId);
 
             int i = ps.executeUpdate();
-
-            if(i > 0) {
-                x = true;
-            }
-
-            ps.close();
-            con.close();
-
-        } catch(Exception e) {
-
-            e.printStackTrace();
-
+            return i > 0;
         }
-
-        return x;
+        catch(Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

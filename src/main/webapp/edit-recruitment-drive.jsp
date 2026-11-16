@@ -1,3 +1,4 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.sql.ResultSet" %>
 <%@ page import="java.text.SimpleDateFormat" %>
 <%@ page import="com.campusconnect.bean.RecruitmentDrive" %>
@@ -8,6 +9,16 @@
     if (companyId == null) {
         response.sendRedirect("company-login.jsp");
         return;
+    }
+
+    String companyName = (String) session.getAttribute("companyName");
+    String email = (String) session.getAttribute("email");
+
+    if (companyName == null || companyName.trim().isEmpty()) {
+        companyName = "Company";
+    }
+    if (email == null) {
+        email = "";
     }
 
     String driveId = request.getParameter("driveId");
@@ -304,16 +315,15 @@
 
 </div>
 
-
 <div class="container">
 
     <div class="company-card">
 
         <div class="company-info">
 
-            <h2>TCS</h2>
+            <h2><%= companyName %></h2>
 
-            <p>tcs@gmail.com</p>
+            <p><%= email %></p>
 
         </div>
 
@@ -322,7 +332,6 @@
         </div>
 
     </div>
-
 
     <div class="form-card">
 
@@ -336,12 +345,10 @@
 
         </div>
 
-
         <form method="post"
               action="recruitment-drive-update.jsp">
 
             <div class="grid">
-
 
                 <!-- DRIVE ID -->
 
@@ -358,7 +365,6 @@
                            value="<%= rs.getInt("DRIVE_ID") %>">
 
                 </div>
-
 
                 <!-- DRIVE TYPE -->
 
@@ -384,7 +390,6 @@
 
                 </div>
 
-
                 <!-- JOB TITLE -->
 
                 <div class="full">
@@ -400,7 +405,6 @@
 
                 </div>
 
-
                 <!-- DESCRIPTION -->
 
                 <div class="full">
@@ -413,7 +417,6 @@
                               required><%= rs.getString("DESCRIPTION") %></textarea>
 
                 </div>
-
 
                 <!-- VACANCY -->
 
@@ -430,7 +433,6 @@
                            required>
 
                 </div>
-
 
                 <!-- CGPA -->
 
@@ -450,7 +452,6 @@
 
                 </div>
 
-
                 <!-- BRANCH -->
 
                 <div>
@@ -465,7 +466,6 @@
                            required>
 
                 </div>
-
 
                 <!-- SALARY -->
 
@@ -484,7 +484,6 @@
 
                 </div>
 
-
                 <!-- SKILLS -->
 
                 <div class="full">
@@ -497,7 +496,6 @@
                               required><%= rs.getString("REQUIRED_SKILLS") %></textarea>
 
                 </div>
-
 
                 <!-- DEADLINE -->
 
@@ -519,7 +517,6 @@
                     </div>
 
                 </div>
-
 
                 <!-- STATUS -->
 
@@ -543,9 +540,7 @@
 
                 </div>
 
-
             </div>
-
 
             <div class="actions">
 

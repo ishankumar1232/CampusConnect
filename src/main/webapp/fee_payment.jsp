@@ -1,3 +1,4 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.sql.*" %>
 
 <%
@@ -40,6 +41,7 @@
             "A.APPLICANT_PHONE, " +
             "A.ADMISSION_DATE, " +
             "A.STATUS, " +
+            "NVL(A.ADMISSION_FEE, NVL(C.DEFAULT_ADMISSION_FEE, 50000)) AS DECIDED_FEE, " +
             "C.COLLEGE_NAME, " +
             "CO.COURSE_NAME " +
             "FROM ADMISSION A " +
@@ -68,11 +70,11 @@
                 admissionDate = rs.getDate("ADMISSION_DATE").toString();
             }
 
-            /*
-             * Temporary admission fee.
-             * Later you can keep this amount in a database table.
-             */
-            amount = 50000;
+            amount = rs.getDouble("DECIDED_FEE");
+            if(amount <= 0)
+            {
+                amount = 50000;
+            }
         }
         else
         {
@@ -98,7 +100,6 @@
     }
 %>
 
-
 <!DOCTYPE html>
 
 <html lang="en">
@@ -111,7 +112,6 @@
       content="width=device-width, initial-scale=1.0">
 
 <title>Fee Payment | CampusConnect</title>
-
 
 <style>
 
@@ -126,7 +126,6 @@ body {
     background: #f4f7fb;
     color: #26364f;
 }
-
 
 /* HEADER */
 
@@ -171,7 +170,6 @@ body {
     background: rgba(255,255,255,0.15);
 }
 
-
 /* MAIN */
 
 .container {
@@ -181,7 +179,6 @@ body {
 
     margin: 45px auto;
 }
-
 
 /* TITLE */
 
@@ -205,7 +202,6 @@ body {
     font-size: 15px;
 }
 
-
 /* MAIN GRID */
 
 .payment-grid {
@@ -217,7 +213,6 @@ body {
 
     align-items: start;
 }
-
 
 /* CARD */
 
@@ -241,7 +236,6 @@ body {
 
     margin-bottom: 22px;
 }
-
 
 /* STUDENT DETAILS */
 
@@ -279,7 +273,6 @@ body {
     word-break: break-word;
 }
 
-
 /* STATUS */
 
 .status {
@@ -297,7 +290,6 @@ body {
 
     font-weight: bold;
 }
-
 
 /* AMOUNT */
 
@@ -332,7 +324,6 @@ body {
 
     font-weight: bold;
 }
-
 
 /* PAYMENT METHOD */
 
@@ -383,7 +374,6 @@ body {
         0 0 0 3px rgba(23,105,224,0.10);
 }
 
-
 /* TRANSACTION */
 
 .transaction-info {
@@ -401,7 +391,6 @@ body {
 
     margin-bottom: 20px;
 }
-
 
 /* PAY BUTTON */
 
@@ -429,7 +418,6 @@ body {
     background: #0d54bd;
 }
 
-
 /* NOTE */
 
 .note {
@@ -450,7 +438,6 @@ body {
     line-height: 1.5;
 }
 
-
 /* FOOTER */
 
 .footer {
@@ -467,7 +454,6 @@ body {
     font-size: 13px;
 }
 
-
 /* RESPONSIVE */
 
 @media(max-width: 750px)
@@ -482,7 +468,6 @@ body {
 }
 
 </style>
-
 
 <script>
 
@@ -505,9 +490,7 @@ function validatePayment()
 
 </head>
 
-
 <body>
-
 
 <!-- HEADER -->
 
@@ -519,7 +502,6 @@ function validatePayment()
 
     </div>
 
-
     <a href="index.jsp"
        class="back-btn">
 
@@ -529,12 +511,9 @@ function validatePayment()
 
 </div>
 
-
-
 <!-- MAIN -->
 
 <div class="container">
-
 
     <!-- TITLE -->
 
@@ -550,10 +529,7 @@ function validatePayment()
 
     </div>
 
-
-
     <div class="payment-grid">
-
 
         <!-- =========================
              ADMISSION DETAILS
@@ -564,7 +540,6 @@ function validatePayment()
             <h2>
                 Admission Details
             </h2>
-
 
             <div class="detail-row">
 
@@ -578,7 +553,6 @@ function validatePayment()
 
             </div>
 
-
             <div class="detail-row">
 
                 <span class="label">
@@ -590,7 +564,6 @@ function validatePayment()
                 </span>
 
             </div>
-
 
             <div class="detail-row">
 
@@ -604,7 +577,6 @@ function validatePayment()
 
             </div>
 
-
             <div class="detail-row">
 
                 <span class="label">
@@ -616,7 +588,6 @@ function validatePayment()
                 </span>
 
             </div>
-
 
             <div class="detail-row">
 
@@ -630,7 +601,6 @@ function validatePayment()
 
             </div>
 
-
             <div class="detail-row">
 
                 <span class="label">
@@ -642,7 +612,6 @@ function validatePayment()
                 </span>
 
             </div>
-
 
             <div class="detail-row">
 
@@ -656,7 +625,6 @@ function validatePayment()
 
             </div>
 
-
             <div class="detail-row">
 
                 <span class="label">
@@ -669,10 +637,7 @@ function validatePayment()
 
             </div>
 
-
         </div>
-
-
 
         <!-- =========================
              PAYMENT
@@ -684,19 +649,17 @@ function validatePayment()
                 Make Payment
             </h2>
 
-
             <div class="amount-box">
 
                 <span class="amount-label">
-                    Admission Fee
+                    Decided Admission Fee (<%=collegeName%>)
                 </span>
 
                 <span class="amount">
-                    ₹ <%=String.format("%.2f", amount)%>
+                    ₹ <%=String.format("%,.2f", amount)%>
                 </span>
 
             </div>
-
 
             <form name="paymentForm"
 
@@ -706,7 +669,6 @@ function validatePayment()
 
                   onsubmit="return validatePayment();">
 
-
                 <!-- ADMISSION ID -->
 
                 <input type="hidden"
@@ -715,7 +677,6 @@ function validatePayment()
 
                        value="<%=admissionId%>">
 
-
                 <!-- AMOUNT -->
 
                 <input type="hidden"
@@ -723,8 +684,6 @@ function validatePayment()
                        name="amount"
 
                        value="<%=amount%>">
-
-
 
                 <!-- PAYMENT METHOD -->
 
@@ -737,7 +696,6 @@ function validatePayment()
                         <span class="required">*</span>
 
                     </label>
-
 
                     <select name="paymentMethod"
                             required>
@@ -762,8 +720,6 @@ function validatePayment()
 
                 </div>
 
-
-
                 <!-- TRANSACTION ID -->
 
                 <div class="form-group">
@@ -771,7 +727,6 @@ function validatePayment()
                     <label>
                         Transaction ID
                     </label>
-
 
                     <input type="text"
 
@@ -783,16 +738,12 @@ function validatePayment()
 
                 </div>
 
-
-
                 <div class="transaction-info">
 
                     Please enter the transaction/reference ID
                     received after completing your payment.
 
                 </div>
-
-
 
                 <!-- PAY -->
 
@@ -803,9 +754,7 @@ function validatePayment()
 
                 </button>
 
-
             </form>
-
 
             <!-- NOTE -->
 
@@ -818,16 +767,11 @@ function validatePayment()
 
             </div>
 
-
         </div>
-
 
     </div>
 
-
 </div>
-
-
 
 <!-- FOOTER -->
 
@@ -837,7 +781,6 @@ function validatePayment()
     Campus Recruitment Management System
 
 </div>
-
 
 </body>
 

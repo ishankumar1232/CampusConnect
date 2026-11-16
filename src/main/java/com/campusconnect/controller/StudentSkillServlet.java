@@ -7,9 +7,15 @@ import jakarta.servlet.http.*;
 
 import com.campusconnect.bean.StudentSkill;
 
-
 public class StudentSkillServlet extends HttpServlet
 {
+    public void doGet(HttpServletRequest req,
+                      HttpServletResponse res)
+                      throws IOException, ServletException
+    {
+        doPost(req, res);
+    }
+
     public void doPost(HttpServletRequest req,
                        HttpServletResponse res)
                        throws IOException, ServletException
@@ -32,20 +38,16 @@ public class StudentSkillServlet extends HttpServlet
                 return;
             }
 
-
             int studentId =
                 (Integer)session.getAttribute("studentId");
 
-
             String action =
                 req.getParameter("action");
-
 
             StudentSkill skill =
                 new StudentSkill();
 
             skill.setStudentId(studentId);
-
 
             // ================= DELETE =================
 
@@ -59,10 +61,8 @@ public class StudentSkillServlet extends HttpServlet
 
                 skill.setSkillId(skillId);
 
-
                 boolean x =
                     skill.DeleteMethod();
-
 
                 if(x)
                 {
@@ -92,7 +92,6 @@ public class StudentSkillServlet extends HttpServlet
                 return;
             }
 
-
             // ================= FORM DATA =================
 
             String skillId =
@@ -101,9 +100,7 @@ public class StudentSkillServlet extends HttpServlet
             String skillName =
                 req.getParameter("skillName");
 
-
             skill.setSkillName(skillName);
-
 
             // ================= UPDATE =================
 
@@ -114,10 +111,8 @@ public class StudentSkillServlet extends HttpServlet
                     Integer.parseInt(skillId)
                 );
 
-
                 boolean x =
                     skill.UpdateMethod();
-
 
                 if(x)
                 {
@@ -145,14 +140,12 @@ public class StudentSkillServlet extends HttpServlet
                 }
             }
 
-
             // ================= ADD =================
 
             else
             {
                 boolean x =
                     skill.InsertMethod();
-
 
                 if(x)
                 {

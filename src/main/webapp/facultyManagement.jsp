@@ -17,7 +17,6 @@
 
 %>
 
-
 <!DOCTYPE html>
 
 <html>
@@ -27,7 +26,7 @@
 <meta charset="UTF-8">
 
 <title>Faculty Management</title>
-
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
 
 <style>
 
@@ -38,7 +37,6 @@
 * {
     box-sizing: border-box;
 }
-
 
 body {
 
@@ -51,7 +49,6 @@ body {
     color: #183b5b;
 
 }
-
 
 /* =========================================
    HEADER
@@ -80,7 +77,6 @@ body {
 
 }
 
-
 .header-icon {
 
     width: 52px;
@@ -101,7 +97,6 @@ body {
 
 }
 
-
 .header h1 {
 
     margin: 0;
@@ -109,7 +104,6 @@ body {
     font-size: 29px;
 
 }
-
 
 .header p {
 
@@ -120,7 +114,6 @@ body {
     color: #c9deec;
 
 }
-
 
 /* =========================================
    CONTAINER
@@ -136,7 +129,6 @@ body {
 
 }
 
-
 /* =========================================
    BACK
 ========================================= */
@@ -146,7 +138,6 @@ body {
     margin-bottom: 20px;
 
 }
-
 
 .back a {
 
@@ -166,13 +157,11 @@ body {
 
 }
 
-
 .back a:hover {
 
     background: #e8f4fc;
 
 }
-
 
 /* =========================================
    BOX
@@ -195,7 +184,6 @@ body {
 
 }
 
-
 /* =========================================
    BOX HEADER
 ========================================= */
@@ -211,7 +199,6 @@ body {
     margin-bottom: 20px;
 
 }
-
 
 .box-title-icon {
 
@@ -233,7 +220,6 @@ body {
 
 }
 
-
 .box-title h2 {
 
     margin: 0;
@@ -243,7 +229,6 @@ body {
     font-size: 22px;
 
 }
-
 
 /* =========================================
    ADD FACULTY FORM
@@ -266,7 +251,6 @@ body {
 
 }
 
-
 input,
 select {
 
@@ -286,7 +270,6 @@ select {
 
 }
 
-
 input:focus,
 select:focus {
 
@@ -296,7 +279,6 @@ select:focus {
         0 0 0 3px rgba(22,133,237,0.10);
 
 }
-
 
 .add-btn {
 
@@ -320,13 +302,11 @@ select:focus {
 
 }
 
-
 .add-btn:hover {
 
     background: #0874d1;
 
 }
-
 
 /* =========================================
    FORM NOTE
@@ -341,7 +321,6 @@ select:focus {
     font-size: 12px;
 
 }
-
 
 /* =========================================
    FACULTY LIST
@@ -359,7 +338,6 @@ select:focus {
 
 }
 
-
 .list-header h2 {
 
     margin: 0;
@@ -370,7 +348,6 @@ select:focus {
 
 }
 
-
 .college-id {
 
     color: #718493;
@@ -379,13 +356,11 @@ select:focus {
 
 }
 
-
 .college-id strong {
 
     color: #1685ed;
 
 }
-
 
 /* =========================================
    TABLE
@@ -399,7 +374,6 @@ select:focus {
 
 }
 
-
 table {
 
     width: 100%;
@@ -409,7 +383,6 @@ table {
     border-collapse: collapse;
 
 }
-
 
 th {
 
@@ -427,7 +400,6 @@ th {
 
 }
 
-
 td {
 
     padding: 15px 12px;
@@ -442,20 +414,17 @@ td {
 
 }
 
-
 tbody tr:hover {
 
     background: #f7fbfe;
 
 }
 
-
 tbody tr:last-child td {
 
     border-bottom: none;
 
 }
-
 
 /* =========================================
    FACULTY ID
@@ -469,7 +438,6 @@ tbody tr:last-child td {
 
 }
 
-
 /* =========================================
    FACULTY NAME
 ========================================= */
@@ -482,7 +450,6 @@ tbody tr:last-child td {
 
 }
 
-
 /* =========================================
    EMAIL
 ========================================= */
@@ -492,7 +459,6 @@ tbody tr:last-child td {
     color: #61788a;
 
 }
-
 
 /* =========================================
    DEPARTMENT
@@ -515,7 +481,6 @@ tbody tr:last-child td {
     font-weight: bold;
 
 }
-
 
 /* =========================================
    DELETE
@@ -541,13 +506,11 @@ tbody tr:last-child td {
 
 }
 
-
 .delete:hover {
 
     background: #c93737;
 
 }
-
 
 /* =========================================
    EMPTY
@@ -560,7 +523,6 @@ tbody tr:last-child td {
     text-align: center;
 
 }
-
 
 .no-data-icon {
 
@@ -584,7 +546,6 @@ tbody tr:last-child td {
 
 }
 
-
 .no-data h3 {
 
     margin: 15px 0 7px;
@@ -592,7 +553,6 @@ tbody tr:last-child td {
     color: #34546b;
 
 }
-
 
 .no-data p {
 
@@ -603,7 +563,6 @@ tbody tr:last-child td {
     font-size: 13px;
 
 }
-
 
 /* =========================================
    NOTE
@@ -629,7 +588,6 @@ tbody tr:last-child td {
 
 }
 
-
 /* =========================================
    MOBILE
 ========================================= */
@@ -643,7 +601,6 @@ tbody tr:last-child td {
 
     }
 
-
     .add-btn {
 
         width: 100%;
@@ -651,7 +608,6 @@ tbody tr:last-child td {
     }
 
 }
-
 
 @media(max-width: 600px)
 {
@@ -662,13 +618,11 @@ tbody tr:last-child td {
 
     }
 
-
     .header h1 {
 
         font-size: 22px;
 
     }
-
 
     .container {
 
@@ -676,20 +630,17 @@ tbody tr:last-child td {
 
     }
 
-
     .form-row {
 
         grid-template-columns: 1fr;
 
     }
 
-
     .list-header {
 
         display: block;
 
     }
-
 
     .college-id {
 
@@ -703,9 +654,7 @@ tbody tr:last-child td {
 
 </head>
 
-
 <body>
-
 
 <!-- =========================================
      HEADER
@@ -713,13 +662,11 @@ tbody tr:last-child td {
 
 <div class="header">
 
-
     <div class="header-icon">
 
         &#128105;
 
     </div>
-
 
     <div>
 
@@ -727,17 +674,13 @@ tbody tr:last-child td {
             Faculty Management
         </h1>
 
-
         <p>
             Manage faculty members and departments
         </p>
 
     </div>
 
-
 </div>
-
-
 
 <!-- =========================================
      MAIN
@@ -745,20 +688,17 @@ tbody tr:last-child td {
 
 <div class="container">
 
-
     <!-- BACK -->
 
     <div class="back">
 
         <a href="collegeAdminDashboard.jsp">
 
-            &#8592; Back to Dashboard
+            <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
 
         </a>
 
     </div>
-
-
 
     <!-- =====================================
          ADD FACULTY
@@ -766,9 +706,7 @@ tbody tr:last-child td {
 
     <div class="box">
 
-
         <div class="box-title">
-
 
             <div class="box-title-icon">
 
@@ -776,23 +714,18 @@ tbody tr:last-child td {
 
             </div>
 
-
             <h2>
 
                 Add Faculty
 
             </h2>
 
-
         </div>
-
-
 
         <form
             action="FacultyController"
             method="post"
         >
-
 
             <input
                 type="hidden"
@@ -800,9 +733,7 @@ tbody tr:last-child td {
                 value="add"
             >
 
-
             <div class="form-row">
-
 
                 <!-- NAME -->
 
@@ -813,7 +744,6 @@ tbody tr:last-child td {
                     required
                 >
 
-
                 <!-- EMAIL -->
 
                 <input
@@ -822,7 +752,6 @@ tbody tr:last-child td {
                     placeholder="Email"
                     required
                 >
-
 
                 <!-- PHONE -->
 
@@ -833,7 +762,6 @@ tbody tr:last-child td {
                     required
                 >
 
-
                 <!-- DEPARTMENT -->
 
                 <select
@@ -841,13 +769,11 @@ tbody tr:last-child td {
                     required
                 >
 
-
                     <option value="">
 
                         Select Department
 
                     </option>
-
 
         <%
 
@@ -857,14 +783,12 @@ tbody tr:last-child td {
 
             ResultSet rs1 = null;
 
-
             try
             {
 
                 Class.forName(
                     "oracle.jdbc.driver.OracleDriver"
                 );
-
 
                 con1 =
                     DriverManager.getConnection(
@@ -877,7 +801,6 @@ tbody tr:last-child td {
 
                     );
 
-
                 String sql1 =
 
                     "SELECT DEPARTMENT_ID, " +
@@ -889,26 +812,21 @@ tbody tr:last-child td {
 
                     "ORDER BY DEPARTMENT_NAME";
 
-
                 ps1 =
                     con1.prepareStatement(sql1);
-
 
                 ps1.setInt(
                     1,
                     collegeId
                 );
 
-
                 rs1 =
                     ps1.executeQuery();
-
 
                 while(rs1.next())
                 {
 
         %>
-
 
                     <option
                         value="<%=rs1.getInt("DEPARTMENT_ID")%>"
@@ -917,7 +835,6 @@ tbody tr:last-child td {
                         <%=rs1.getString("DEPARTMENT_NAME")%>
 
                     </option>
-
 
         <%
 
@@ -929,13 +846,11 @@ tbody tr:last-child td {
 
         %>
 
-
                     <option value="">
 
                         Error loading departments
 
                     </option>
-
 
         <%
 
@@ -954,7 +869,6 @@ tbody tr:last-child td {
                     }
                 }
 
-
                 if(ps1 != null)
                 {
                     try
@@ -965,7 +879,6 @@ tbody tr:last-child td {
                     {
                     }
                 }
-
 
                 if(con1 != null)
                 {
@@ -982,9 +895,7 @@ tbody tr:last-child td {
 
         %>
 
-
                 </select>
-
 
                 <!-- ADD BUTTON -->
 
@@ -997,12 +908,9 @@ tbody tr:last-child td {
 
                 </button>
 
-
             </div>
 
-
         </form>
-
 
         <div class="form-note">
 
@@ -1013,10 +921,7 @@ tbody tr:last-child td {
 
         </div>
 
-
     </div>
-
-
 
     <!-- =====================================
          FACULTY LIST
@@ -1024,16 +929,13 @@ tbody tr:last-child td {
 
     <div class="box">
 
-
         <div class="list-header">
-
 
             <h2>
 
                 &#128101; Faculty List
 
             </h2>
-
 
             <div class="college-id">
 
@@ -1045,13 +947,9 @@ tbody tr:last-child td {
 
             </div>
 
-
         </div>
 
-
-
         <div class="table-wrapper">
-
 
         <%
 
@@ -1061,14 +959,12 @@ tbody tr:last-child td {
 
             ResultSet rs2 = null;
 
-
             try
             {
 
                 Class.forName(
                     "oracle.jdbc.driver.OracleDriver"
                 );
-
 
                 con2 =
                     DriverManager.getConnection(
@@ -1080,7 +976,6 @@ tbody tr:last-child td {
                         "campus123"
 
                     );
-
 
                 String sql2 =
 
@@ -1100,28 +995,22 @@ tbody tr:last-child td {
 
                     "ORDER BY F.FACULTY_ID";
 
-
                 ps2 =
                     con2.prepareStatement(sql2);
-
 
                 ps2.setInt(
                     1,
                     collegeId
                 );
 
-
                 rs2 =
                     ps2.executeQuery();
-
 
                 boolean found = false;
 
         %>
 
-
         <table>
-
 
             <thead>
 
@@ -1155,9 +1044,7 @@ tbody tr:last-child td {
 
             </thead>
 
-
             <tbody>
-
 
         <%
 
@@ -1168,9 +1055,7 @@ tbody tr:last-child td {
 
         %>
 
-
                 <tr>
-
 
                     <!-- FACULTY ID -->
 
@@ -1184,8 +1069,6 @@ tbody tr:last-child td {
 
                     </td>
 
-
-
                     <!-- NAME -->
 
                     <td>
@@ -1197,8 +1080,6 @@ tbody tr:last-child td {
                         </span>
 
                     </td>
-
-
 
                     <!-- EMAIL -->
 
@@ -1212,8 +1093,6 @@ tbody tr:last-child td {
 
                     </td>
 
-
-
                     <!-- PHONE -->
 
                     <td>
@@ -1221,8 +1100,6 @@ tbody tr:last-child td {
                         <%=rs2.getString("PHONE")%>
 
                     </td>
-
-
 
                     <!-- DEPARTMENT -->
 
@@ -1238,18 +1115,14 @@ tbody tr:last-child td {
 
                     </td>
 
-
-
                     <!-- DELETE -->
 
                     <td>
-
 
                         <form
                             action="FacultyController"
                             method="post"
                         >
-
 
                             <input
                                 type="hidden"
@@ -1257,13 +1130,11 @@ tbody tr:last-child td {
                                 value="delete"
                             >
 
-
                             <input
                                 type="hidden"
                                 name="facultyId"
                                 value="<%=rs2.getInt("FACULTY_ID")%>"
                             >
-
 
                             <button
                                 type="submit"
@@ -1275,34 +1146,26 @@ tbody tr:last-child td {
 
                             </button>
 
-
                         </form>
-
 
                     </td>
 
-
                 </tr>
-
 
         <%
 
                 }
-
 
                 if(!found)
                 {
 
         %>
 
-
                 <tr>
 
                     <td colspan="6">
 
-
                         <div class="no-data">
-
 
                             <div class="no-data-icon">
 
@@ -1310,13 +1173,11 @@ tbody tr:last-child td {
 
                             </div>
 
-
                             <h3>
 
                                 No Faculty Found
 
                             </h3>
-
 
                             <p>
 
@@ -1325,14 +1186,11 @@ tbody tr:last-child td {
 
                             </p>
 
-
                         </div>
-
 
                     </td>
 
                 </tr>
-
 
         <%
 
@@ -1344,14 +1202,11 @@ tbody tr:last-child td {
 
         %>
 
-
                 <tr>
 
                     <td colspan="6">
 
-
                         <div class="no-data">
-
 
                             <div class="no-data-icon">
 
@@ -1359,13 +1214,11 @@ tbody tr:last-child td {
 
                             </div>
 
-
                             <h3>
 
                                 Unable to Load Faculty
 
                             </h3>
-
 
                             <p>
 
@@ -1374,14 +1227,11 @@ tbody tr:last-child td {
 
                             </p>
 
-
                         </div>
-
 
                     </td>
 
                 </tr>
-
 
         <%
 
@@ -1400,7 +1250,6 @@ tbody tr:last-child td {
                     }
                 }
 
-
                 if(ps2 != null)
                 {
                     try
@@ -1411,7 +1260,6 @@ tbody tr:last-child td {
                     {
                     }
                 }
-
 
                 if(con2 != null)
                 {
@@ -1428,18 +1276,13 @@ tbody tr:last-child td {
 
         %>
 
-
             </tbody>
 
         </table>
 
-
         </div>
 
-
     </div>
-
-
 
     <!-- =====================================
          NOTE
@@ -1456,9 +1299,7 @@ tbody tr:last-child td {
 
     </div>
 
-
 </div>
-
 
 </body>
 

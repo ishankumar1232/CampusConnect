@@ -87,8 +87,12 @@
     String companyBanner = (String) session.getAttribute("companyBanner");
     if (companyName == null || companyName.trim().length() == 0) companyName = "Company";
     if (email == null) email = "";
-    if (companyLogo == null || companyLogo.trim().length() == 0) companyLogo = "images/company/tcs-logo.png";
-    if (companyBanner == null || companyBanner.trim().length() == 0) companyBanner = "images/company/tcs-banner.png";
+    if (companyLogo == null || companyLogo.trim().length() == 0 || (companyLogo.contains("tcs-logo.png") && !companyName.toLowerCase().contains("tcs") && !companyName.toLowerCase().contains("tata consultancy"))) {
+        companyLogo = "images/company/default-logo.png";
+    }
+    if (companyBanner == null || companyBanner.trim().length() == 0 || (companyBanner.contains("tcs-banner.png") && !companyName.toLowerCase().contains("tcs") && !companyName.toLowerCase().contains("tata consultancy"))) {
+        companyBanner = "images/company/default-banner.png";
+    }
     String companyInitial = companyName.substring(0, 1).toUpperCase();
 
     int totalDrives = 0;

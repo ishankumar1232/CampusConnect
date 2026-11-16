@@ -1,3 +1,4 @@
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -51,7 +52,6 @@
             var website = document.forms["myForm"]["website"].value;
             var status = document.forms["myForm"]["status"].value;
 
-
             // Check if all mandatory fields are blank
 
             if ((companyName == "" || companyName == null) &&
@@ -68,7 +68,6 @@
 
                 return false;
             }
-
 
             // Company Name
 
@@ -92,7 +91,6 @@
                 return false;
             }
 
-
             // Email
 
             if (email == "" || email == null)
@@ -103,7 +101,6 @@
 
                 return false;
             }
-
 
             // Phone
 
@@ -136,7 +133,6 @@
                 return false;
             }
 
-
             // Password
 
             if (password == "" || password == null)
@@ -156,7 +152,6 @@
 
                 return false;
             }
-
 
             // Confirm Password
 
@@ -178,7 +173,6 @@
                 return false;
             }
 
-
             // Address
 
             if (address == "" || address == null)
@@ -189,7 +183,6 @@
 
                 return false;
             }
-
 
             // Website
 
@@ -206,7 +199,6 @@
                 }
             }
 
-
             // Status
 
             if (status == "" || status == null)
@@ -217,7 +209,6 @@
 
                 return false;
             }
-
 
             showMessage("Form Submitted Successfully", function () {
                 document.forms["myForm"].submit();
@@ -230,11 +221,9 @@
 
 </head>
 
-
 <body>
 
 <div class="registration-page">
-
 
     <!-- LEFT SIDE -->
 
@@ -263,7 +252,6 @@
 
     </div>
 
-
     <!-- RIGHT SIDE -->
 
     <div class="registration-section">
@@ -279,24 +267,20 @@
                 through CampusConnect.
             </p>
 
-
             <p class="mandatory-note">
                 <span>*</span> Indicates Mandatory Fields
             </p>
-
 
             <form name="myForm"
                   method="post"
                   action="CompanyServlet"
                   onsubmit="return validateForm();">
 
-
                 <!-- COMPANY INFORMATION -->
 
                 <div class="form-section">
 
                     <h3>Company Information</h3>
-
 
                     <div class="form-row">
 
@@ -314,7 +298,6 @@
 
                         </div>
 
-
                         <div class="form-group">
 
                             <label>
@@ -329,7 +312,6 @@
                         </div>
 
                     </div>
-
 
                     <div class="form-row">
 
@@ -348,7 +330,6 @@
 
                         </div>
 
-
                         <div class="form-group">
 
                             <label>
@@ -362,7 +343,6 @@
                         </div>
 
                     </div>
-
 
                     <div class="form-group full-width">
 
@@ -379,13 +359,11 @@
 
                 </div>
 
-
                 <!-- ACCOUNT INFORMATION -->
 
                 <div class="form-section">
 
                     <h3>Account Information</h3>
-
 
                     <div class="form-row">
 
@@ -402,7 +380,6 @@
 
                         </div>
 
-
                         <div class="form-group">
 
                             <label>
@@ -417,7 +394,6 @@
                         </div>
 
                     </div>
-
 
                     <div class="form-group status-field">
 
@@ -435,7 +411,6 @@
 
                 </div>
 
-
                 <!-- BUTTONS -->
 
                 <div class="form-buttons">
@@ -450,9 +425,7 @@
 
                 </div>
 
-
             </form>
-
 
             <div class="login-link">
 
@@ -469,7 +442,6 @@
     </div>
 
 </div>
-
 
 <div class="message-overlay" id="messageOverlay" aria-hidden="true">
     <div class="message-box"

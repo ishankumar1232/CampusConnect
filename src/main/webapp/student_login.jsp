@@ -425,7 +425,6 @@ function validateForm() {
     return true;
 }
 
-
 /* Show popup after invalid login redirect */
 window.addEventListener("DOMContentLoaded", function() {
 
@@ -495,7 +494,6 @@ window.addEventListener("DOMContentLoaded", function() {
 
     </div>
 
-
     <div class="right-panel">
 
         <h2>Student Sign In</h2>
@@ -508,7 +506,6 @@ window.addEventListener("DOMContentLoaded", function() {
             <span class="required">*</span>
             Indicates mandatory fields
         </p>
-
 
         <form name="loginForm"
               method="post"
@@ -536,7 +533,6 @@ window.addEventListener("DOMContentLoaded", function() {
 
             </div>
 
-
             <div class="form-group">
 
                 <label>
@@ -558,7 +554,6 @@ window.addEventListener("DOMContentLoaded", function() {
 
             </div>
 
-
             <div class="options">
 
                 <label class="remember">
@@ -575,7 +570,6 @@ window.addEventListener("DOMContentLoaded", function() {
 
             </div>
 
-
             <div class="buttons">
 
                 <input type="submit"
@@ -589,7 +583,6 @@ window.addEventListener("DOMContentLoaded", function() {
             </div>
 
         </form>
-
 
         <div class="bottom-links">
 

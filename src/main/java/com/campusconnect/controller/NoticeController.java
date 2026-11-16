@@ -2,7 +2,6 @@ package com.campusconnect.controller;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
@@ -12,7 +11,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import com.campusconnect.util.DBConnection;
+
 public class NoticeController extends HttpServlet {
+
+    public void doGet(HttpServletRequest req, HttpServletResponse res)
+            throws IOException, ServletException {
+        if(req.getParameter("action") != null) {
+            doPost(req, res);
+        } else {
+            res.sendRedirect(req.getContextPath() + "/noticeManagement.jsp");
+        }
+    }
 
     public void doPost(HttpServletRequest req, HttpServletResponse res)
             throws IOException, ServletException {
@@ -29,20 +39,7 @@ public class NoticeController extends HttpServlet {
 
         String action = req.getParameter("action");
 
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
-
-        try {
-
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-
-            con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
+        try (Connection con = DBConnection.getConnection()) {
 
             // ADD NOTICE
             if("add".equals(action)) {
@@ -53,25 +50,18 @@ public class NoticeController extends HttpServlet {
                 String content =
                     req.getParameter("content");
 
-
                 // Generate Notice ID
                 String idSql =
                     "SELECT NVL(MAX(NOTICE_ID),0)+1 " +
                     "FROM NOTICE";
 
-                ps = con.prepareStatement(idSql);
-
-                rs = ps.executeQuery();
-
                 int noticeId = 1;
-
-                if(rs.next()) {
-                    noticeId = rs.getInt(1);
+                try (PreparedStatement psId = con.prepareStatement(idSql);
+                     ResultSet rsId = psId.executeQuery()) {
+                    if(rsId.next()) {
+                        noticeId = rsId.getInt(1);
+                    }
                 }
-
-                rs.close();
-                ps.close();
-
 
                 // Insert Notice
                 String insertSql =
@@ -80,19 +70,15 @@ public class NoticeController extends HttpServlet {
                     "NOTICE_DATE, STATUS) " +
                     "VALUES (?, ?, ?, ?, SYSDATE, 'ACTIVE')";
 
-                ps = con.prepareStatement(insertSql);
-
-                ps.setInt(1, noticeId);
-                ps.setInt(2, collegeId);
-                ps.setString(3, title);
-                ps.setString(4, content);
-
-                ps.executeUpdate();
-
-                ps.close();
+                try (PreparedStatement psInsert = con.prepareStatement(insertSql)) {
+                    psInsert.setInt(1, noticeId);
+                    psInsert.setInt(2, collegeId);
+                    psInsert.setString(3, title);
+                    psInsert.setString(4, content);
+                    psInsert.executeUpdate();
+                }
 
             }
-
 
             // DELETE NOTICE
             else if("delete".equals(action)) {
@@ -100,25 +86,19 @@ public class NoticeController extends HttpServlet {
                 String noticeId =
                     req.getParameter("noticeId");
 
-
                 // Delete only from logged-in college
                 String deleteSql =
                     "DELETE FROM NOTICE " +
                     "WHERE NOTICE_ID=? " +
                     "AND COLLEGE_ID=?";
 
-                ps = con.prepareStatement(deleteSql);
-
-                ps.setInt(1, Integer.parseInt(noticeId));
-                ps.setInt(2, collegeId);
-
-                ps.executeUpdate();
-
-                ps.close();
+                try (PreparedStatement psDelete = con.prepareStatement(deleteSql)) {
+                    psDelete.setInt(1, Integer.parseInt(noticeId));
+                    psDelete.setInt(2, collegeId);
+                    psDelete.executeUpdate();
+                }
 
             }
-
-            con.close();
 
             res.sendRedirect(
                 req.getContextPath() +
@@ -132,20 +112,6 @@ public class NoticeController extends HttpServlet {
                 e.getMessage() +
                 "</h2>"
             );
-
-        } finally {
-
-            if(rs != null) {
-                try { rs.close(); } catch(Exception e) {}
-            }
-
-            if(ps != null) {
-                try { ps.close(); } catch(Exception e) {}
-            }
-
-            if(con != null) {
-                try { con.close(); } catch(Exception e) {}
-            }
 
         }
     }

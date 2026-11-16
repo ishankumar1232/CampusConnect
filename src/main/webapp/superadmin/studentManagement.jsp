@@ -1,508 +1,265 @@
-<%@ page language="java" contentType="text/html; charset=UTF-8"
-pageEncoding="UTF-8"%>
-
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%@ page import="java.util.ArrayList"%>
 <%@ page import="com.campusconnect.bean.Student"%>
+<%@ page import="com.campusconnect.bean.SuperAdmin"%>
+<%@ page import="com.campusconnect.dao.StudentDAO"%>
 
 <%
-ArrayList<Student> list=(ArrayList<Student>)request.getAttribute("studentList");
-
-int totalStudents=0;
-int activeStudents=0;
-int inactiveStudents=0;
-
-if(list!=null){
-
-    totalStudents=list.size();
-
-    for(Student s:list){
-
-        if("ACTIVE".equalsIgnoreCase(s.getStatus())){
-
-            activeStudents++;
-
-        }else{
-
-            inactiveStudents++;
-
-        }
-
+    SuperAdmin admin = (SuperAdmin) session.getAttribute("admin");
+    if (admin == null) {
+        response.sendRedirect(request.getContextPath() + "/superadmin/login.jsp");
+        return;
     }
 
-}
+    ArrayList<Student> list = (ArrayList<Student>) request.getAttribute("studentList");
+    if (list == null) {
+        StudentDAO dao = new StudentDAO();
+        list = dao.getAllStudents();
+    }
+
+    int totalStudents = 0;
+    int activeStudents = 0;
+    int inactiveStudents = 0;
+
+    if (list != null) {
+        totalStudents = list.size();
+        for (Student s : list) {
+            if ("ACTIVE".equalsIgnoreCase(s.getStatus())) {
+                activeStudents++;
+            } else {
+                inactiveStudents++;
+            }
+        }
+    }
+
+    String success = request.getParameter("success");
+    String error = request.getParameter("error");
+    request.setAttribute("activeNav", "students");
 %>
 
 <!DOCTYPE html>
-
-<html>
-
+<html lang="en">
 <head>
-
 <meta charset="UTF-8">
-
-<title>Student Management</title>
-
-<style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Arial,Helvetica,sans-serif;
-}
-
-body{
-
-background:#eef3fb;
-
-}
-
-.container{
-
-width:96%;
-margin:25px auto;
-
-}
-
-.header{
-
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:20px;
-
-}
-
-.header h2{
-
-color:#0B3D91;
-font-size:34px;
-
-}
-
-.back-btn{
-
-background:#0B3D91;
-color:white;
-text-decoration:none;
-padding:10px 18px;
-border-radius:6px;
-font-weight:bold;
-
-}
-
-.back-btn:hover{
-
-background:#072c69;
-
-}
-
-.cards{
-
-display:flex;
-gap:20px;
-margin-bottom:25px;
-flex-wrap:wrap;
-
-}
-
-.card{
-
-flex:1;
-min-width:220px;
-background:white;
-padding:20px;
-border-radius:10px;
-box-shadow:0 2px 8px rgba(0,0,0,.15);
-text-align:center;
-
-}
-
-.card h3{
-
-color:#555;
-margin-bottom:10px;
-
-}
-
-.card p{
-
-font-size:30px;
-font-weight:bold;
-color:#0B3D91;
-
-}
-
-.search-box{
-
-margin-bottom:20px;
-
-}
-
-.search-box input{
-
-width:100%;
-padding:12px;
-font-size:15px;
-border-radius:6px;
-border:1px solid #bbb;
-
-}
-
-table{
-
-width:100%;
-border-collapse:collapse;
-background:white;
-box-shadow:0 4px 10px rgba(0,0,0,.15);
-
-}
-
-th{
-
-background:#0B3D91;
-color:white;
-padding:14px;
-
-}
-
-td{
-
-padding:12px;
-text-align:center;
-border-bottom:1px solid #ddd;
-
-}
-
-tr:nth-child(even){
-
-background:#f9fbff;
-
-}
-
-tr:hover{
-
-background:#eef5ff;
-
-}
-
-.status-active{
-
-background:#28a745;
-color:white;
-padding:5px 12px;
-border-radius:20px;
-font-size:13px;
-font-weight:bold;
-
-}
-
-.status-inactive{
-
-background:#dc3545;
-color:white;
-padding:5px 12px;
-border-radius:20px;
-font-size:13px;
-font-weight:bold;
-
-}
-
-.btn{
-
-padding:8px 14px;
-color:white;
-text-decoration:none;
-border-radius:5px;
-font-size:13px;
-margin:2px;
-display:inline-block;
-
-}
-
-.view{
-
-background:#0B3D91;
-
-}
-
-.activate{
-
-background:#28a745;
-
-}
-
-.deactivate{
-
-background:#dc3545;
-
-}
-
-.btn:hover{
-
-opacity:.85;
-
-}
-
-</style>
-
-<script>
-
-function searchStudent(){
-
-var input=document.getElementById("search").value.toUpperCase();
-
-var table=document.getElementById("studentTable");
-
-var tr=table.getElementsByTagName("tr");
-
-for(var i=1;i<tr.length;i++){
-
-var txt=tr[i].textContent||tr[i].innerText;
-
-if(txt.toUpperCase().indexOf(input)>-1){
-
-tr[i].style.display="";
-
-}else{
-
-tr[i].style.display="none";
-
-}
-
-}
-
-}
-
-</script>
-
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Student Directory | CampusConnect</title>
+
+<!-- Google Fonts & FontAwesome -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link rel="stylesheet" href="<%=request.getContextPath()%>/css/superadmin-dashboard.css">
 </head>
-
 <body>
 
-<div class="container">
+<!-- Navigation Include -->
+<%@ include file="superAdminNav.jsp" %>
 
-<div class="header">
+<!-- Main Content -->
+<main class="main">
 
-<h2>Student Management</h2>
+    <!-- Page Toolbar -->
+    <div class="page-toolbar">
+        <div class="page-title-block">
+            <h1>Platform Students Directory</h1>
+            <p>Comprehensive roster of candidates enrolled across all affiliated college institutions.</p>
+        </div>
+    </div>
 
-<a href="<%=request.getContextPath()%>/DashboardServlet"
-class="back-btn">
+    <!-- Feedback Alerts -->
+    <% if ("activated".equalsIgnoreCase(success)) { %>
+        <div class="alert alert-success">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>Student account activated successfully.</span>
+        </div>
+    <% } else if ("deactivated".equalsIgnoreCase(success)) { %>
+        <div class="alert alert-warning">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            <span>Student account deactivated successfully.</span>
+        </div>
+    <% } else if (error != null) { %>
+        <div class="alert alert-danger">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>Operation could not be completed. Please check server logs.</span>
+        </div>
+    <% } %>
 
-← Dashboard
+    <!-- KPI Metric Cards -->
+    <div class="stats-grid">
+        <div class="kpi-card">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-title">Total Candidates</span>
+                    <div class="kpi-value"><%=totalStudents%></div>
+                </div>
+                <div class="kpi-icon teal"><i class="fa-solid fa-user-graduate"></i></div>
+            </div>
+            <div class="kpi-subtext">Students registered across colleges</div>
+        </div>
 
-</a>
+        <div class="kpi-card">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-title">Active Accounts</span>
+                    <div class="kpi-value" style="color: #16a34a;"><%=activeStudents%></div>
+                </div>
+                <div class="kpi-icon green"><i class="fa-solid fa-user-check"></i></div>
+            </div>
+            <div class="kpi-subtext">Eligible for drives & applications</div>
+        </div>
 
-</div>
+        <div class="kpi-card">
+            <div class="kpi-header">
+                <div>
+                    <span class="kpi-title">Inactive Accounts</span>
+                    <div class="kpi-value" style="color: #dc2626;"><%=inactiveStudents%></div>
+                </div>
+                <div class="kpi-icon red"><i class="fa-solid fa-user-slash"></i></div>
+            </div>
+            <div class="kpi-subtext">Suspended or unverified profiles</div>
+        </div>
+    </div>
 
-<div class="cards">
+    <!-- Content Card with Live Search & Filter -->
+    <div class="content-card">
+        <div class="content-card-header">
+            <div class="content-card-title">
+                <i class="fa-solid fa-users" style="color: #2563eb;"></i>
+                <span>Enrolled Candidates Directory (<span id="visibleStuCount"><%=totalStudents%></span>)</span>
+            </div>
+            <div class="filter-bar">
+                <div class="search-box">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <input type="text" id="stuSearch" placeholder="Search by name, email, phone, college..." onkeyup="filterStudentTable()">
+                </div>
+                <select id="stuStatusFilter" class="filter-select" onchange="filterStudentTable()">
+                    <option value="">All Statuses</option>
+                    <option value="ACTIVE">Active Only</option>
+                    <option value="INACTIVE">Inactive Only</option>
+                </select>
+            </div>
+        </div>
 
-<div class="card">
+        <div class="table-responsive">
+            <table class="data-table" id="studentTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Student Name</th>
+                        <th>College ID</th>
+                        <th>Email Address</th>
+                        <th>Phone</th>
+                        <th>Gender</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Administrative Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <%
+                    if (list != null && !list.isEmpty()) {
+                        for (Student s : list) {
+                            String rawStatus = s.getStatus() != null ? s.getStatus().trim() : "ACTIVE";
+                            String badgeClass = "ACTIVE".equalsIgnoreCase(rawStatus) ? "badge-approved" : "badge-rejected";
+                            String initial = s.getName() != null && s.getName().length() > 0 ? s.getName().substring(0, 1).toUpperCase() : "S";
+                    %>
+                    <tr data-status="<%=rawStatus.toUpperCase()%>">
+                        <td><strong>#<%=s.getStudentId()%></strong></td>
+                        <td>
+                            <a href="${pageContext.request.contextPath}/StudentDetailsServlet?id=<%=s.getStudentId()%>"
+                               style="display: flex; align-items: center; gap: 10px; color: #2563eb; font-weight: 700;">
+                                <div class="profile-avatar" style="width: 32px; height: 32px; font-size: 13px; flex-shrink: 0;">
+                                    <%=initial%>
+                                </div>
+                                <span><%=s.getName()%></span>
+                            </a>
+                        </td>
+                        <td>
+                            <span class="badge badge-neutral">College #<%=s.getCollegeId()%></span>
+                        </td>
+                        <td>
+                            <a href="mailto:<%=s.getEmail()%>" style="color: #64748b; font-size: 13px;">
+                                <i class="fa-regular fa-envelope" style="margin-right: 4px;"></i>
+                                <%=s.getEmail()%>
+                            </a>
+                        </td>
+                        <td><%=s.getPhone() != null && !s.getPhone().isEmpty() ? s.getPhone() : "N/A"%></td>
+                        <td><%=s.getGender() != null ? s.getGender() : "N/A"%></td>
+                        <td>
+                            <span class="badge <%=badgeClass%>"><%=rawStatus%></span>
+                        </td>
+                        <td style="text-align: right;">
+                            <div style="display: inline-flex; gap: 6px;">
+                                <a href="${pageContext.request.contextPath}/StudentDetailsServlet?id=<%=s.getStudentId()%>"
+                                   class="btn btn-outline btn-sm" title="View Full Academic Dossier">
+                                    <i class="fa-solid fa-eye"></i>
+                                    <span>Profile</span>
+                                </a>
+                                <% if (!"ACTIVE".equalsIgnoreCase(rawStatus)) { %>
+                                    <a href="${pageContext.request.contextPath}/ActivateStudentServlet?id=<%=s.getStudentId()%>"
+                                       class="btn btn-success btn-sm"
+                                       title="Activate Student"
+                                       onclick="return confirm('Activate <%=s.getName()%>?');">
+                                        <i class="fa-solid fa-check"></i>
+                                        <span>Activate</span>
+                                    </a>
+                                <% } else { %>
+                                    <a href="${pageContext.request.contextPath}/DeactivateStudentServlet?id=<%=s.getStudentId()%>"
+                                       class="btn btn-danger btn-sm"
+                                       title="Deactivate Student"
+                                       onclick="return confirm('Deactivate <%=s.getName()%>?');">
+                                        <i class="fa-solid fa-ban"></i>
+                                        <span>Deactivate</span>
+                                    </a>
+                                <% } %>
+                            </div>
+                        </td>
+                    </tr>
+                    <%
+                        }
+                    } else {
+                    %>
+                    <tr>
+                        <td colspan="8" style="text-align: center; color: var(--text-muted); padding: 40px;">
+                            <i class="fa-solid fa-user-graduate" style="font-size: 28px; margin-bottom: 10px; display: block;"></i>
+                            No students currently registered across any institutions.
+                        </td>
+                    </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-<h3>Total Students</h3>
+</main>
 
-<p><%=totalStudents%></p>
+<footer class="footer">
+    &copy; CampusConnect Platform. Super Administrator Control Center.
+</footer>
 
-</div>
+<script>
+function filterStudentTable() {
+    const search = document.getElementById('stuSearch').value.toLowerCase();
+    const status = document.getElementById('stuStatusFilter').value.toUpperCase();
+    const rows = document.querySelectorAll('#studentTable tbody tr');
+    let visible = 0;
 
-<div class="card">
+    rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        const rowStatus = row.getAttribute('data-status') || '';
+        const matchesSearch = text.includes(search);
+        const matchesStatus = !status || rowStatus === status;
 
-<h3>Active Students</h3>
+        if (matchesSearch && matchesStatus) {
+            row.style.display = '';
+            visible++;
+        } else {
+            row.style.display = 'none';
+        }
+    });
 
-<p style="color:green;"><%=activeStudents%></p>
-
-</div>
-
-<div class="card">
-
-<h3>Inactive Students</h3>
-
-<p style="color:red;"><%=inactiveStudents%></p>
-
-</div>
-
-</div>
-
-<div class="search-box">
-
-<input type="text"
-id="search"
-onkeyup="searchStudent()"
-placeholder="Search Student Name / College / Course / Email">
-
-</div>
-
-<table id="studentTable">
-
-<tr>
-
-<th>ID</th>
-
-<th>College</th>
-
-<th>Course</th>
-
-<th>Name</th>
-
-<th>Email</th>
-
-<th>Phone</th>
-
-<th>Gender</th>
-
-<th>Status</th>
-
-<th>Action</th>
-
-</tr>
-
-<%
-if(list!=null && !list.isEmpty()){
-
-for(Student s:list){
-%>
-
-<tr>
-
-<td><%=s.getStudentId()%></td>
-
-<td><%=s.getCollegeName()%></td>
-
-<td><%=s.getCourseName()%></td>
-
-<td><%=s.getName()%></td>
-
-<td><%=s.getEmail()%></td>
-
-<td><%=s.getPhone()%></td>
-
-<td><%=s.getGender()%></td>
-
-<td>
-
-<%
-if("ACTIVE".equalsIgnoreCase(s.getStatus())){
-%>
-
-<span class="status-active">
-
-ACTIVE
-
-</span>
-
-<%
-}else{
-%>
-
-<span class="status-inactive">
-
-INACTIVE
-
-</span>
-
-<%
+    const countElem = document.getElementById('visibleStuCount');
+    if (countElem) countElem.innerText = visible;
 }
-%>
-
-</td>
-
-<td>
-
-<a href="<%=request.getContextPath()%>/StudentDetailsServlet?id=<%=s.getStudentId()%>"
-class="btn view">
-
-View
-
-</a>
-
-<%
-if("ACTIVE".equalsIgnoreCase(s.getStatus())){
-%>
-
-<a href="<%=request.getContextPath()%>/DeactivateStudentServlet?id=<%=s.getStudentId()%>"
-class="btn deactivate"
-onclick="return confirm('Deactivate this student?');">
-
-Deactivate
-
-</a>
-
-<%
-}else{
-%>
-
-<a href="<%=request.getContextPath()%>/ActivateStudentServlet?id=<%=s.getStudentId()%>"
-class="btn activate"
-onclick="return confirm('Activate this student?');">
-
-Activate
-
-</a>
-
-<%
-}
-%>
-
-</td>
-
-</tr>
-
-<%
-}
-
-}else{
-%>
-
-<tr>
-
-<td colspan="9"
-style="padding:30px;
-font-size:18px;
-font-weight:bold;
-color:red;">
-
-No Student Found
-
-</td>
-
-</tr>
-
-<%
-}
-%>
-
-</table>
-
-<br><br>
-
-<div style="text-align:center;
-padding:18px;
-background:white;
-box-shadow:0 2px 8px rgba(0,0,0,.15);
-border-radius:8px;
-font-size:15px;
-color:#555;">
-
-<b>CampusConnect Recruitment Management System</b>
-
-<br><br>
-
-Super Admin Student Management Module
-
-<br><br>
-
-Developed Using
-
-<b>Java • JSP • Servlet • Oracle Database</b>
-
-<br><br>
-
-© 2026 CampusConnect. All Rights Reserved.
-
-</div>
-
-</div>
+</script>
 
 </body>
-
 </html>

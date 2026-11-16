@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <web-app xmlns="https://jakarta.ee/xml/ns/jakartaee"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
-         https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd"
          version="6.0">
 
     <display-name>CampusConnect</display-name>
@@ -85,6 +82,19 @@
     </servlet-mapping>
 
 
+    <!-- ================= COLLEGE DETAILS ================= -->
+
+    <servlet>
+        <servlet-name>CollegeDetailsServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.CollegeDetailsServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CollegeDetailsServlet</servlet-name>
+        <url-pattern>/CollegeDetailsServlet</url-pattern>
+    </servlet-mapping>
+
+
     <!-- ================= COMPANY MANAGEMENT ================= -->
 
     <servlet>
@@ -117,6 +127,57 @@
     <servlet-mapping>
         <servlet-name>RejectCompanyServlet</servlet-name>
         <url-pattern>/RejectCompanyServlet</url-pattern>
+    </servlet-mapping>
+
+
+    <!-- ================= COMPANY DETAILS ================= -->
+
+    <servlet>
+        <servlet-name>CompanyDetailsServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.CompanyDetailsServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>CompanyDetailsServlet</servlet-name>
+        <url-pattern>/CompanyDetailsServlet</url-pattern>
+    </servlet-mapping>
+
+    <!-- ================= COMPANY AUTH & PROFILE ================= -->
+
+    <servlet>
+        <servlet-name>CompanyLoginServlet</servlet-name>
+        <servlet-class>com.campusconnect.controller.CompanyLoginServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CompanyLoginServlet</servlet-name>
+        <url-pattern>/CompanyLoginServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CompanyLogoutServlet</servlet-name>
+        <servlet-class>com.campusconnect.controller.CompanyLogoutServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CompanyLogoutServlet</servlet-name>
+        <url-pattern>/CompanyLogoutServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CompanyServlet</servlet-name>
+        <servlet-class>com.campusconnect.controller.CompanyServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CompanyServlet</servlet-name>
+        <url-pattern>/CompanyServlet</url-pattern>
+    </servlet-mapping>
+
+    <servlet>
+        <servlet-name>CompanyUpdateServlet</servlet-name>
+        <servlet-class>com.campusconnect.controller.CompanyUpdateServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>CompanyUpdateServlet</servlet-name>
+        <url-pattern>/CompanyUpdateServlet</url-pattern>
     </servlet-mapping>
 
 
@@ -237,6 +298,19 @@
     </servlet-mapping>
 
 
+    <!-- ================= DRIVE DETAILS ================= -->
+
+    <servlet>
+        <servlet-name>DriveDetailsServlet</servlet-name>
+        <servlet-class>com.campusconnect.servlet.DriveDetailsServlet</servlet-class>
+    </servlet>
+
+    <servlet-mapping>
+        <servlet-name>DriveDetailsServlet</servlet-name>
+        <url-pattern>/DriveDetailsServlet</url-pattern>
+    </servlet-mapping>
+
+
     <!-- ================= SYSTEM REPORT ================= -->
 
     <servlet>
@@ -338,6 +412,11 @@
     </servlet-mapping>
 
     <servlet-mapping>
+        <servlet-name>StudentLogin</servlet-name>
+        <url-pattern>/StudentLogin</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
         <servlet-name>StudentSkillServlet</servlet-name>
         <url-pattern>/studentSkill</url-pattern>
     </servlet-mapping>
@@ -355,6 +434,11 @@
     <servlet-mapping>
         <servlet-name>StudentApplicationServlet</servlet-name>
         <url-pattern>/studentApply</url-pattern>
+    </servlet-mapping>
+
+    <servlet-mapping>
+        <servlet-name>StudentApplicationServlet</servlet-name>
+        <url-pattern>/studentApplication</url-pattern>
     </servlet-mapping>
 
     <servlet-mapping>
@@ -536,6 +620,46 @@
 <servlet-mapping>
     <servlet-name>SystemSettingsServlet</servlet-name>
     <url-pattern>/SystemSettingsServlet</url-pattern>
+</servlet-mapping>
+
+<servlet>
+    <servlet-name>RegisterCollegeServlet</servlet-name>
+    <servlet-class>com.campusconnect.servlet.RegisterCollegeServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>RegisterCollegeServlet</servlet-name>
+    <url-pattern>/RegisterCollegeServlet</url-pattern>
+</servlet-mapping>
+
+<servlet>
+    <servlet-name>AddCollegeServlet</servlet-name>
+    <servlet-class>com.campusconnect.servlet.AddCollegeServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>AddCollegeServlet</servlet-name>
+    <url-pattern>/AddCollegeServlet</url-pattern>
+</servlet-mapping>
+
+<servlet>
+    <servlet-name>EditCollegeServlet</servlet-name>
+    <servlet-class>com.campusconnect.servlet.EditCollegeServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>EditCollegeServlet</servlet-name>
+    <url-pattern>/EditCollegeServlet</url-pattern>
+</servlet-mapping>
+
+<servlet>
+    <servlet-name>AddCollegeAdminServlet</servlet-name>
+    <servlet-class>com.campusconnect.servlet.AddCollegeAdminServlet</servlet-class>
+</servlet>
+
+<servlet-mapping>
+    <servlet-name>AddCollegeAdminServlet</servlet-name>
+    <url-pattern>/AddCollegeAdminServlet</url-pattern>
 </servlet-mapping>
 </web-app>
 

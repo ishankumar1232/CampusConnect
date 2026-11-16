@@ -22,9 +22,7 @@ public class DashboardServlet extends HttpServlet {
             HttpServletResponse res)
             throws IOException, ServletException {
 
-        // ===========================================
         // SESSION CHECK
-        // ===========================================
 
         HttpSession session = req.getSession(false);
 
@@ -35,9 +33,7 @@ public class DashboardServlet extends HttpServlet {
             return;
         }
 
-        // ===========================================
         // LOAD DASHBOARD DATA
-        // ===========================================
 
         DashboardDAO dashboardDAO = new DashboardDAO();
 
@@ -46,9 +42,7 @@ public class DashboardServlet extends HttpServlet {
 
         req.setAttribute("dashboard", dashboard);
 
-        // ===========================================
         // LOAD ACTIVITY LOG
-        // ===========================================
 
         SystemActivityLogDAO logDAO =
                 new SystemActivityLogDAO();
@@ -58,15 +52,12 @@ public class DashboardServlet extends HttpServlet {
 
         req.setAttribute("activityList", activityList);
 
-        // ===========================================
         // OPEN DASHBOARD
-        // ===========================================
 
         RequestDispatcher rd =
                 req.getRequestDispatcher("/superadmin/dashboard.jsp");
 
         rd.forward(req, res);
     }
-    
     
 }

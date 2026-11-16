@@ -23,8 +23,6 @@ import jakarta.servlet.http.Part;
 
 import com.campusconnect.util.DBConnection;
 
-@WebServlet("/CompanyUpdateServlet")
-
 @MultipartConfig(
     fileSizeThreshold = 1024 * 1024,
     maxFileSize = 5 * 1024 * 1024,
@@ -35,9 +33,7 @@ public class CompanyUpdateServlet extends HttpServlet {
 
     private static final String UPLOAD_FOLDER = "images/company/";
 
-    // ==========================================
     // SAVE UPLOADED IMAGE
-    // ==========================================
 
     private String saveImage(Part part, String uploadPath)
             throws IOException, ServletException {
@@ -108,10 +104,7 @@ public class CompanyUpdateServlet extends HttpServlet {
         return UPLOAD_FOLDER + fileName;
     }
 
-
-    // ==========================================
     // SEND JSON RESPONSE
-    // ==========================================
 
     private void sendJson(
             HttpServletResponse response,
@@ -130,10 +123,7 @@ public class CompanyUpdateServlet extends HttpServlet {
         );
     }
 
-
-    // ==========================================
     // COMPANY PROFILE UPDATE
-    // ==========================================
 
     @Override
     protected void doPost(
@@ -171,8 +161,10 @@ public class CompanyUpdateServlet extends HttpServlet {
         String phone = request.getParameter("phone");
         String address = request.getParameter("address");
         String website = request.getParameter("website");
+        String description = request.getParameter("description");
 
         companyName = companyName == null ? "" : companyName.trim();
+        description = description == null ? "" : description.trim();
 
         if (companyName.isEmpty()) {
 
@@ -222,7 +214,6 @@ public class CompanyUpdateServlet extends HttpServlet {
             logoPath = saveImage(logoPart, uploadPath);
             bannerPath = saveImage(bannerPart, uploadPath);
 
-
             // Update Oracle database
             String sql =
                 "UPDATE COMPANY SET " +
@@ -230,6 +221,7 @@ public class CompanyUpdateServlet extends HttpServlet {
                 "PHONE = ?, " +
                 "ADDRESS = ?, " +
                 "WEBSITE = ?, " +
+                "DESCRIPTION = ?, " +
                 "LOGO = NVL(?, LOGO), " +
                 "BANNER = NVL(?, BANNER) " +
                 "WHERE COMPANY_ID = ?";
@@ -241,9 +233,10 @@ public class CompanyUpdateServlet extends HttpServlet {
                 ps.setString(2, phone);
                 ps.setString(3, address);
                 ps.setString(4, website);
-                ps.setString(5, logoPath);
-                ps.setString(6, bannerPath);
-                ps.setInt(7, companyId);
+                ps.setString(5, description);
+                ps.setString(6, logoPath);
+                ps.setString(7, bannerPath);
+                ps.setInt(8, companyId);
 
                 int updated = ps.executeUpdate();
 

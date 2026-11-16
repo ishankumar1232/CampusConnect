@@ -15,202 +15,111 @@ public class StudentAcademicServlet extends HttpServlet
     {
         res.setContentType("text/html");
 
-        PrintWriter pw = res.getWriter();
-
+        HttpSession session = null;
         try
         {
-            HttpSession session =
-                req.getSession(false);
+            session = req.getSession(false);
 
             // ================= LOGIN CHECK =================
 
-            if(session == null ||
-               session.getAttribute("studentId") == null)
+            if(session == null || session.getAttribute("studentId") == null)
             {
                 res.sendRedirect("student_login.jsp");
                 return;
             }
 
-            int studentId =
-                (Integer)session.getAttribute("studentId");
+            int studentId = (Integer)session.getAttribute("studentId");
+            String action = req.getParameter("action");
 
-
-            String action =
-                req.getParameter("action");
-
-
-            StudentAcademic academic =
-                new StudentAcademic();
-
+            StudentAcademic academic = new StudentAcademic();
             academic.setStudentId(studentId);
-
 
             // ================= DELETE =================
 
             if("delete".equals(action))
             {
-                String id =
-                    req.getParameter("academicId");
-
-                int academicId =
-                    Integer.parseInt(id);
-
+                String id = req.getParameter("academicId");
+                int academicId = Integer.parseInt(id);
                 academic.setAcademicId(academicId);
 
-                boolean x =
-                    academic.DeleteMethod();
+                boolean x = academic.DeleteMethod();
 
                 if(x)
                 {
-                    res.sendRedirect(
-                        "student_academic_view.jsp"
-                    );
+                    session.setAttribute("academicMsg", "Academic record deleted successfully.");
+                    res.sendRedirect("student_academic_view.jsp");
                 }
                 else
                 {
-                    pw.println("<html>");
-                    pw.println("<body>");
-                    pw.println("<h2>Delete Failed</h2>");
-                    pw.println(
-                        "<a href='student_academic_view.jsp'>" +
-                        "Back" +
-                        "</a>"
-                    );
-                    pw.println("</body>");
-                    pw.println("</html>");
+                    session.setAttribute("academicError", "Unable to delete academic record.");
+                    res.sendRedirect("student_academic_view.jsp");
                 }
 
                 return;
             }
 
-
             // ================= FORM DATA =================
 
-            String academicId =
-                req.getParameter("academicId");
+            String academicId = req.getParameter("academicId");
+            String qualification = req.getParameter("qualification");
+            String year = req.getParameter("year");
+            String percentage = req.getParameter("percentage");
+            String cgpa = req.getParameter("cgpa");
+            String backlogs = req.getParameter("backlogs");
 
-            String qualification =
-                req.getParameter("qualification");
+            if (qualification != null) qualification = qualification.trim();
+            if (backlogs == null || backlogs.trim().isEmpty()) backlogs = "0";
 
-            String year =
-                req.getParameter("year");
-
-            String percentage =
-                req.getParameter("percentage");
-
-            String cgpa =
-                req.getParameter("cgpa");
-
-            String backlogs =
-                req.getParameter("backlogs");
-
-
-            academic.setQualification(
-                qualification
-            );
-
-            academic.setYear(
-                Integer.parseInt(year)
-            );
-
-            academic.setPercentage(
-                Double.parseDouble(percentage)
-            );
-
-            academic.setCgpa(
-                Double.parseDouble(cgpa)
-            );
-
-            academic.setBacklogs(
-                Integer.parseInt(backlogs)
-            );
-
+            academic.setQualification(qualification);
+            academic.setYear(Integer.parseInt(year.trim()));
+            academic.setPercentage(Double.parseDouble(percentage.trim()));
+            academic.setCgpa(Double.parseDouble(cgpa.trim()));
+            academic.setBacklogs(Integer.parseInt(backlogs.trim()));
 
             // ================= UPDATE =================
 
-            if(academicId != null &&
-               !academicId.equals(""))
+            if(academicId != null && !academicId.trim().equals(""))
             {
-                academic.setAcademicId(
-                    Integer.parseInt(academicId)
-                );
-
-                boolean x =
-                    academic.UpdateMethod();
+                academic.setAcademicId(Integer.parseInt(academicId.trim()));
+                boolean x = academic.UpdateMethod();
 
                 if(x)
                 {
-                    res.sendRedirect(
-                        "student_academic_view.jsp"
-                    );
+                    session.setAttribute("academicMsg", "Academic details updated successfully!");
+                    res.sendRedirect("student_academic_view.jsp");
                 }
                 else
                 {
-                    pw.println("<html>");
-                    pw.println("<body>");
-                    pw.println(
-                        "<h2>Academic Details Update Failed</h2>"
-                    );
-                    pw.println(
-                        "<a href='student_academic_view.jsp'>" +
-                        "Back" +
-                        "</a>"
-                    );
-                    pw.println("</body>");
-                    pw.println("</html>");
+                    session.setAttribute("academicError", "Academic details update failed. Please try again.");
+                    res.sendRedirect("student_academic.jsp?editId=" + academicId);
                 }
             }
-
 
             // ================= ADD =================
 
             else
             {
-                boolean x =
-                    academic.InsertMethod();
+                boolean x = academic.InsertMethod();
 
                 if(x)
                 {
-                    res.sendRedirect(
-                        "student_academic_view.jsp"
-                    );
+                    session.setAttribute("academicMsg", "Academic details added successfully!");
+                    res.sendRedirect("student_academic_view.jsp");
                 }
                 else
                 {
-                    pw.println("<html>");
-                    pw.println("<body>");
-                    pw.println(
-                        "<h2>Academic Details Add Failed</h2>"
-                    );
-                    pw.println(
-                        "<a href='student_academic.jsp'>" +
-                        "Back" +
-                        "</a>"
-                    );
-                    pw.println("</body>");
-                    pw.println("</html>");
+                    session.setAttribute("academicError", "Failed to add academic record. Please try again.");
+                    res.sendRedirect("student_academic.jsp");
                 }
             }
         }
         catch(Exception e)
         {
-            pw.println("<html>");
-            pw.println("<body>");
-
-            pw.println("<h2>Error</h2>");
-
-            pw.println(
-                "<p>" + e.getMessage() + "</p>"
-            );
-
-            pw.println(
-                "<a href='student_dashboard.jsp'>" +
-                "Back to Dashboard" +
-                "</a>"
-            );
-
-            pw.println("</body>");
-            pw.println("</html>");
+            e.printStackTrace();
+            if (session != null) {
+                session.setAttribute("academicError", "An unexpected error occurred: " + e.getMessage());
+            }
+            res.sendRedirect("student_academic_view.jsp");
         }
     }
 }

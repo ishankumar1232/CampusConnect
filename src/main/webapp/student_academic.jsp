@@ -54,49 +54,50 @@
     }
 
     String editId = request.getParameter("editId");
+    boolean editMode = (editId != null && !editId.trim().isEmpty());
 
     String qualificationValue = "";
     String yearValue = "";
     String percentageValue = "";
     String cgpaValue = "";
-    String backlogsValue = "";
+    String backlogsValue = "0";
 
-    if (editId != null && !editId.equals("")) {
-        Connection con2 = null;
-        PreparedStatement ps2 = null;
-        ResultSet rs2 = null;
-
+    if (editMode) {
         try {
             Class.forName("oracle.jdbc.driver.OracleDriver");
-            con2 = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
+            try (
+                Connection con2 = DriverManager.getConnection(
+                    "jdbc:oracle:thin:@localhost:1521:XE",
+                    "CAMPUSCONNECT",
+                    "campus123"
+                );
+                PreparedStatement ps2 = con2.prepareStatement(
+                    "SELECT QUALIFICATION, YEAR, PERCENTAGE, CGPA, BACKLOGS FROM STUDENT_ACADEMIC WHERE ACADEMIC_ID=? AND STUDENT_ID=?"
+                )
+            ) {
+                ps2.setInt(1, Integer.parseInt(editId.trim()));
+                ps2.setInt(2, studentId);
+                try (ResultSet rs2 = ps2.executeQuery()) {
+                    if (rs2.next()) {
+                        qualificationValue = rs2.getString("QUALIFICATION");
+                        yearValue = String.valueOf(rs2.getInt("YEAR"));
+                        percentageValue = String.valueOf(rs2.getDouble("PERCENTAGE"));
+                        cgpaValue = String.valueOf(rs2.getDouble("CGPA"));
+                        backlogsValue = String.valueOf(rs2.getInt("BACKLOGS"));
 
-            String sql = "SELECT QUALIFICATION, YEAR, PERCENTAGE, CGPA, BACKLOGS FROM STUDENT_ACADEMIC WHERE ACADEMIC_ID=? AND STUDENT_ID=?";
-            ps2 = con2.prepareStatement(sql);
-            ps2.setInt(1, Integer.parseInt(editId));
-            ps2.setInt(2, studentId);
-            rs2 = ps2.executeQuery();
-
-            if (rs2.next()) {
-                qualificationValue = rs2.getString("QUALIFICATION");
-                yearValue = String.valueOf(rs2.getInt("YEAR"));
-                percentageValue = String.valueOf(rs2.getDouble("PERCENTAGE"));
-                cgpaValue = String.valueOf(rs2.getDouble("CGPA"));
-                backlogsValue = String.valueOf(rs2.getInt("BACKLOGS"));
+                        if (qualificationValue == null) qualificationValue = "";
+                    }
+                }
             }
         } catch (Exception e) {
             application.log("Error loading academic record for edit", e);
-        } finally {
-            try {
-                if (rs2 != null) rs2.close();
-                if (ps2 != null) ps2.close();
-                if (con2 != null) con2.close();
-            } catch (Exception e) {}
         }
     }
+
+    String flashMsg = (String) session1.getAttribute("academicMsg");
+    session1.removeAttribute("academicMsg");
+    String flashErr = (String) session1.getAttribute("academicError");
+    session1.removeAttribute("academicError");
 %>
 
 <!DOCTYPE html>
@@ -104,69 +105,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Academic Details | CampusConnect</title>
+<title><%= editMode ? "Edit Academic Record" : "Add Academic Details" %> | CampusConnect</title>
 
 <!-- Google Fonts & FontAwesome Icons -->
 <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
-<script>
-function validateForm() {
-    var qualification = document.forms["academicForm"]["qualification"].value.trim();
-    var year = document.forms["academicForm"]["year"].value.trim();
-    var percentage = document.forms["academicForm"]["percentage"].value.trim();
-    var cgpa = document.forms["academicForm"]["cgpa"].value.trim();
-    var backlogs = document.forms["academicForm"]["backlogs"].value.trim();
-
-    if (qualification == "") {
-        alert("Qualification is required");
-        document.forms["academicForm"]["qualification"].focus();
-        return false;
-    }
-    if (year == "") {
-        alert("Year is required");
-        document.forms["academicForm"]["year"].focus();
-        return false;
-    }
-    if (percentage == "") {
-        alert("Percentage is required");
-        document.forms["academicForm"]["percentage"].focus();
-        return false;
-    }
-    if (percentage < 0 || percentage > 100) {
-        alert("Percentage must be between 0 and 100");
-        document.forms["academicForm"]["percentage"].focus();
-        return false;
-    }
-    if (cgpa == "") {
-        alert("CGPA is required");
-        document.forms["academicForm"]["cgpa"].focus();
-        return false;
-    }
-    if (cgpa < 0 || cgpa > 10) {
-        alert("CGPA must be between 0 and 10");
-        document.forms["academicForm"]["cgpa"].focus();
-        return false;
-    }
-    if (backlogs == "") {
-        alert("Backlogs is required");
-        document.forms["academicForm"]["backlogs"].focus();
-        return false;
-    }
-    if (backlogs < 0) {
-        alert("Backlogs cannot be negative");
-        document.forms["academicForm"]["backlogs"].focus();
-        return false;
-    }
-    return true;
-}
-</script>
 
 <style>
 :root {
     --bg-color: #f8fafc;
     --card-bg: #ffffff;
     --primary: #2563eb;
+    --primary-hover: #1d4ed8;
     --primary-light: #eff6ff;
     --text-main: #0f172a;
     --text-muted: #64748b;
@@ -196,7 +146,7 @@ a {
     color: inherit;
 }
 
-/* TOP NAVIGATION */
+/* TOPBAR */
 .topbar {
     height: 76px;
     background: linear-gradient(110deg, #08142d, #142b52);
@@ -289,8 +239,8 @@ a {
 }
 
 .logout:hover {
-    background: var(--blue);
-    border-color: var(--blue);
+    background: var(--primary);
+    border-color: var(--primary);
 }
 
 /* SIDEBAR */
@@ -342,7 +292,7 @@ a {
     margin-left: 88px;
     margin-top: 76px;
     padding: 32px 36px 40px;
-    max-width: 1700px;
+    max-width: 1280px;
     width: calc(100% - 88px);
 }
 
@@ -357,127 +307,282 @@ a {
 
 .page-title h1 {
     font-size: 24px;
-    font-weight: 750;
+    font-weight: 800;
     color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .page-title p {
-    font-size: 13px;
+    font-size: 13.5px;
     color: var(--text-muted);
     margin-top: 4px;
 }
 
-/* FORM CARD CONTAINER */
-.form-card {
+.btn-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 13px;
+    font-weight: 700;
+    transition: .2s;
+}
+
+.btn-primary {
+    background: var(--primary);
+    color: white;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+.btn-primary:hover { background: var(--primary-hover); }
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #334155;
+}
+.btn-secondary:hover { background: #cbd5e1; }
+
+/* ALERTS */
+.alert {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 22px;
+}
+.alert-success {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+.alert-error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+}
+
+/* TWO COLUMN LAYOUT */
+.academic-layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr);
+    gap: 26px;
+    align-items: start;
+}
+
+.card {
     background: var(--card-bg);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
-    padding: 32px;
-    max-width: 750px;
+    padding: 28px 32px;
 }
 
+.card-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 22px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.card-head h2 {
+    font-size: 17px;
+    font-weight: 800;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* FORM STYLING */
 .form-group {
     margin-bottom: 20px;
 }
 
 .form-group label {
     display: block;
-    font-size: 14px;
-    font-weight: 600;
+    font-size: 13.5px;
+    font-weight: 700;
     color: var(--text-main);
     margin-bottom: 8px;
 }
 
-.form-group input {
-    width: 100%;
-    padding: 12px 16px;
-    border-radius: var(--radius-md);
-    border: 1px solid var(--border-color);
-    background: #fdfdfd;
-    font-size: 14px;
-    color: var(--text-main);
-    outline: none;
-    transition: .2s;
+.input-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
 }
 
-.form-group input:focus {
+.input-icon {
+    position: absolute;
+    left: 14px;
+    color: #94a3b8;
+    font-size: 15px;
+    pointer-events: none;
+}
+
+.form-control {
+    width: 100%;
+    padding: 12px 16px 12px 42px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius-md);
+    background: #f8fafc;
+    font-size: 14px;
+    color: var(--text-main);
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+.form-control:focus {
     border-color: var(--primary);
-    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-    background: white;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+}
+
+.inline-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.quick-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 9px;
+}
+
+.pill-item {
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 11.5px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid #e2e8f0;
+    transition: .15s;
+}
+
+.pill-item:hover {
+    background: #dbeafe;
+    color: #1d4ed8;
+    border-color: #bfdbfe;
+}
+
+.field-hint {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 6px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
 }
 
 .form-actions {
     display: flex;
+    align-items: center;
     gap: 12px;
-    margin-top: 30px;
+    margin-top: 28px;
 }
 
 .btn-submit {
+    padding: 12px 26px;
+    border-radius: 10px;
     background: var(--primary);
     color: white;
-    padding: 12px 24px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
     border: none;
+    font-size: 14px;
+    font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     transition: .2s;
 }
-
-.btn-submit:hover {
-    background: #1d4ed8;
-    transform: translateY(-2px);
-}
+.btn-submit:hover { background: var(--primary-hover); }
 
 .btn-reset {
-    background: #f1f5f9;
-    color: var(--text-muted);
     padding: 12px 20px;
     border-radius: 10px;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid var(--border-color);
     font-size: 14px;
     font-weight: 600;
-    border: 1px solid var(--border-color);
     cursor: pointer;
+    text-decoration: none;
     transition: .2s;
 }
+.btn-reset:hover { background: #e2e8f0; }
 
-.btn-reset:hover {
-    background: #e2e8f0;
-}
-
-.nav-links-bottom {
-    margin-top: 24px;
+/* GUIDELINES CARD */
+.guide-list {
     display: flex;
-    gap: 20px;
-    font-size: 14px;
-    font-weight: 600;
+    flex-direction: column;
+    gap: 16px;
 }
 
-.nav-links-bottom a {
+.guide-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.guide-icon {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    background: var(--primary-light);
     color: var(--primary);
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    flex-shrink: 0;
 }
 
-.nav-links-bottom a:hover {
-    text-decoration: underline;
+.guide-text h4 {
+    font-size: 13.5px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 3px;
 }
 
-/* FOOTER */
-.footer {
-    text-align: center;
+.guide-text p {
+    font-size: 12.5px;
     color: var(--text-muted);
-    font-size: 12px;
-    padding: 20px 10px;
-    border-top: 1px solid var(--border-color);
-    margin-top: 40px;
+    line-height: 1.45;
+}
+
+/* RESPONSIVE */
+@media(max-width: 992px) {
+    .academic-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media(max-width: 768px) {
+    .main {
+        margin-left: 70px;
+        width: calc(100% - 70px);
+        padding: 24px 20px;
+    }
+    .sidebar { width: 70px; }
+    .side-link { width: 56px; }
+    .inline-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
 
 <body>
 
-<!-- TOP HEADER -->
+<!-- TOPBAR -->
 <header class="topbar">
     <a href="student_dashboard.jsp" class="brand">
         <div class="brand-mark"><i class="fa-solid fa-graduation-cap"></i></div>
@@ -489,7 +594,7 @@ a {
             <a href="student_profile.jsp" class="profile-link" title="Open My Profile">
                 <% if (profileImage != null && !profileImage.trim().isEmpty()) { %>
                     <img class="profile-photo"
-                         src="<%= request.getContextPath() %>/profile_images/<%= URLEncoder.encode(profileImage, StandardCharsets.UTF_8.name()) %>"
+                         src="profile_images/<%= URLEncoder.encode(profileImage, StandardCharsets.UTF_8.name()) %>"
                          alt="Student Profile">
                 <% } else { %>
                     <div class="profile-initial"><%= firstLetter %></div>
@@ -526,91 +631,260 @@ a {
 
     <div class="page-header-bar">
         <div class="page-title">
-            <h1>Academic Details</h1>
-            <p><span style="color:red">*</span> Indicates Mandatory Fields</p>
+            <h1><i class="fa-solid fa-graduation-cap" style="color: var(--primary);"></i> <%= editMode ? "Update Academic Record" : "Add Academic Details" %></h1>
+            <p>Enter your degree, passing year, marks, and active backlogs to qualify for recruitment drives.</p>
+        </div>
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="student_academic_view.jsp" class="btn-header btn-secondary">
+                <i class="fa-solid fa-list-check"></i> View Academic Records
+            </a>
+            <a href="student_dashboard.jsp" class="btn-header btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Dashboard
+            </a>
         </div>
     </div>
 
-    <!-- FORM CARD -->
-    <div class="form-card">
-        <form name="academicForm"
-              method="post"
-              action="studentAcademic"
-              onsubmit="return validateForm();">
+    <% if (flashMsg != null) { %>
+        <div class="alert alert-success">
+            <i class="fa-solid fa-circle-check" style="font-size: 18px;"></i>
+            <%= flashMsg %>
+        </div>
+    <% } %>
 
-            <input type="hidden"
-                   name="academicId"
-                   value="<%= editId == null ? "" : editId %>">
+    <% if (flashErr != null) { %>
+        <div class="alert alert-error">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 18px;"></i>
+            <%= flashErr %>
+        </div>
+    <% } %>
 
-            <!-- QUALIFICATION -->
-            <div class="form-group">
-                <label>Qualification <span style="color:red">*</span></label>
-                <input type="text"
-                       name="qualification"
-                       value="<%= qualificationValue %>"
-                       placeholder="Example: B.Tech">
+    <div class="academic-layout">
+
+        <!-- FORM CARD -->
+        <section class="card">
+            <div class="card-head">
+                <h2><i class="fa-solid fa-pen-to-square" style="color: var(--primary);"></i> <%= editMode ? "Edit Record" : "Academic Qualifications Entry" %></h2>
+                <span style="font-size: 12px; color: var(--text-muted);"><strong style="color: #ef4444;">*</strong> Mandatory</span>
             </div>
 
-            <!-- YEAR -->
-            <div class="form-group">
-                <label>Year <span style="color:red">*</span></label>
-                <input type="number"
-                       name="year"
-                       value="<%= yearValue %>"
-                       placeholder="Example: 2026">
+            <form name="academicForm" id="academicForm" method="post" action="studentAcademic" onsubmit="return validateAcademicForm();">
+                <input type="hidden" name="academicId" value="<%= editId == null ? "" : editId %>">
+
+                <!-- QUALIFICATION -->
+                <div class="form-group">
+                    <label for="qualificationInput">Degree / Qualification <span style="color:#ef4444;">*</span></label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-user-graduate input-icon"></i>
+                        <input type="text" id="qualificationInput" name="qualification" class="form-control"
+                               value="<%= qualificationValue %>" placeholder="e.g. B.Tech (Computer Science)" required>
+                    </div>
+                    <div class="quick-pills">
+                        <span class="pill-item" onclick="setQual('B.Tech')">B.Tech</span>
+                        <span class="pill-item" onclick="setQual('B.E.')">B.E.</span>
+                        <span class="pill-item" onclick="setQual('BCA')">BCA</span>
+                        <span class="pill-item" onclick="setQual('MCA')">MCA</span>
+                        <span class="pill-item" onclick="setQual('B.Sc Computer Science')">B.Sc CS</span>
+                        <span class="pill-item" onclick="setQual('Diploma')">Diploma</span>
+                        <span class="pill-item" onclick="setQual('Class 12th / Senior Secondary')">12th</span>
+                        <span class="pill-item" onclick="setQual('Class 10th / Secondary')">10th</span>
+                    </div>
+                </div>
+
+                <!-- PASSING YEAR -->
+                <div class="form-group">
+                    <label for="yearInput">Passing / Completion Year <span style="color:#ef4444;">*</span></label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-calendar-check input-icon"></i>
+                        <input type="number" id="yearInput" name="year" class="form-control"
+                               value="<%= yearValue %>" min="1990" max="2035" placeholder="e.g. 2026" required>
+                    </div>
+                    <div class="quick-pills">
+                        <span class="pill-item" onclick="setYear(2026)">2026</span>
+                        <span class="pill-item" onclick="setYear(2025)">2025</span>
+                        <span class="pill-item" onclick="setYear(2024)">2024</span>
+                        <span class="pill-item" onclick="setYear(2023)">2023</span>
+                    </div>
+                </div>
+
+                <!-- PERCENTAGE & CGPA (INLINE) -->
+                <div class="inline-grid">
+                    <div class="form-group">
+                        <label for="cgpaInput">CGPA (out of 10.0) <span style="color:#ef4444;">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-award input-icon"></i>
+                            <input type="number" id="cgpaInput" name="cgpa" class="form-control"
+                                   value="<%= cgpaValue %>" step="0.01" min="0" max="10" placeholder="e.g. 8.50" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="percentageInput">Percentage (%) <span style="color:#ef4444;">*</span></label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-percent input-icon"></i>
+                            <input type="number" id="percentageInput" name="percentage" class="form-control"
+                                   value="<%= percentageValue %>" step="0.01" min="0" max="100" placeholder="e.g. 80.75" required>
+                        </div>
+                    </div>
+                </div>
+                <div class="field-hint">
+                    <i class="fa-solid fa-calculator" style="color:var(--primary);"></i>
+                    Entering CGPA automatically calculates standard Percentage (&times; 9.5). You can adjust either value.
+                </div>
+
+                <!-- BACKLOGS -->
+                <div class="form-group" style="margin-top: 18px;">
+                    <label for="backlogsInput">Active Backlogs <span style="color:#ef4444;">*</span></label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-triangle-exclamation input-icon"></i>
+                        <input type="number" id="backlogsInput" name="backlogs" class="form-control"
+                               value="<%= backlogsValue %>" min="0" max="50" placeholder="0 if all cleared" required>
+                    </div>
+                    <div class="quick-pills">
+                        <span class="pill-item" onclick="setBacklogs(0)"><i class="fa-solid fa-check" style="color:#16a34a;"></i> 0 (Clean / All Clear)</span>
+                        <span class="pill-item" onclick="setBacklogs(1)">1 Backlog</span>
+                        <span class="pill-item" onclick="setBacklogs(2)">2 Backlogs</span>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-submit">
+                        <i class="fa-solid <%= editMode ? "fa-floppy-disk" : "fa-plus" %>"></i>
+                        <%= editMode ? "Update Academic Record" : "Save Academic Details" %>
+                    </button>
+                    <a href="student_academic_view.jsp" class="btn-reset">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </section>
+
+        <!-- ELIGIBILITY GUIDELINES -->
+        <aside class="card">
+            <div class="card-head">
+                <h2><i class="fa-solid fa-circle-info" style="color: var(--primary);"></i> Placement Eligibility Guide</h2>
             </div>
 
-            <!-- PERCENTAGE -->
-            <div class="form-group">
-                <label>Percentage <span style="color:red">*</span></label>
-                <input type="number"
-                       name="percentage"
-                       value="<%= percentageValue %>"
-                       step="0.01"
-                       placeholder="Example: 85.50">
-            </div>
+            <div class="guide-list">
+                <div class="guide-item">
+                    <div class="guide-icon"><i class="fa-solid fa-sliders"></i></div>
+                    <div class="guide-text">
+                        <h4>Drive Cutoff Requirements</h4>
+                        <p>Most corporate recruiting partners require a minimum aggregate of <strong>60% or 6.5 CGPA</strong> and 0 active backlogs to qualify for test links.</p>
+                    </div>
+                </div>
 
-            <!-- CGPA -->
-            <div class="form-group">
-                <label>CGPA <span style="color:red">*</span></label>
-                <input type="number"
-                       name="cgpa"
-                       value="<%= cgpaValue %>"
-                       step="0.01"
-                       placeholder="Example: 8.50">
-            </div>
+                <div class="guide-item">
+                    <div class="guide-icon"><i class="fa-solid fa-id-card-clip"></i></div>
+                    <div class="guide-text">
+                        <h4>Recruiter Candidate Dossier</h4>
+                        <p>All academic details registered here appear directly on your dossier when recruiters evaluate your job applications.</p>
+                    </div>
+                </div>
 
-            <!-- BACKLOGS -->
-            <div class="form-group">
-                <label>Backlogs <span style="color:red">*</span></label>
-                <input type="number"
-                       name="backlogs"
-                       value="<%= backlogsValue %>"
-                       min="0"
-                       placeholder="Example: 0">
-            </div>
+                <div class="guide-item">
+                    <div class="guide-icon"><i class="fa-solid fa-layer-group"></i></div>
+                    <div class="guide-text">
+                        <h4>Record Multiple Qualifications</h4>
+                        <p>You can add records for Class 10th, Class 12th, Diploma, and Graduation separately to maintain a complete history.</p>
+                    </div>
+                </div>
 
-            <!-- BUTTONS -->
-            <div class="form-actions">
-                <button type="submit" class="btn-submit">
-                    <%= editId == null ? "Submit Record" : "Update Record" %>
-                </button>
-                <button type="reset" class="btn-reset">Reset</button>
+                <div class="guide-item">
+                    <div class="guide-icon"><i class="fa-solid fa-shield-halved"></i></div>
+                    <div class="guide-text">
+                        <h4>Document Verification</h4>
+                        <p>Ensure your marks and passing year match your semester marksheets. Colleges verify these before shortlisting for on-campus drives.</p>
+                    </div>
+                </div>
             </div>
+        </aside>
 
-        </form>
     </div>
-
-    <div class="nav-links-bottom">
-        <a href="student_academic_view.jsp"><i class="fa-solid fa-arrow-left"></i> View Academic Details</a>
-        <a href="student_dashboard.jsp"><i class="fa-solid fa-house"></i> Back to Dashboard</a>
-    </div>
-
-    <footer class="footer">
-        CampusConnect Student Portal &bull; Campus Recruitment Management System
-    </footer>
 
 </main>
+
+<script>
+function setQual(val) {
+    document.getElementById('qualificationInput').value = val;
+    document.getElementById('qualificationInput').focus();
+}
+
+function setYear(val) {
+    document.getElementById('yearInput').value = val;
+    document.getElementById('yearInput').focus();
+}
+
+function setBacklogs(val) {
+    document.getElementById('backlogsInput').value = val;
+    document.getElementById('backlogsInput').focus();
+}
+
+// Auto-convert CGPA and Percentage
+var cgpaInput = document.getElementById('cgpaInput');
+var percInput = document.getElementById('percentageInput');
+
+if (cgpaInput && percInput) {
+    cgpaInput.addEventListener('input', function() {
+        var val = parseFloat(this.value);
+        if (!isNaN(val) && val >= 0 && val <= 10) {
+            // Standard CBSE/AICTE formula: % = CGPA * 9.5
+            var calcPerc = (val * 9.5).toFixed(2);
+            if (calcPerc > 100) calcPerc = 100;
+            percInput.value = calcPerc;
+        }
+    });
+
+    percInput.addEventListener('input', function() {
+        var val = parseFloat(this.value);
+        if (!isNaN(val) && val >= 0 && val <= 100) {
+            // Reciprocal formula: CGPA = % / 9.5
+            var calcCgpa = (val / 9.5).toFixed(2);
+            if (calcCgpa > 10) calcCgpa = 10;
+            cgpaInput.value = calcCgpa;
+        }
+    });
+}
+
+function validateAcademicForm() {
+    var qual = document.getElementById('qualificationInput').value.trim();
+    var year = document.getElementById('yearInput').value.trim();
+    var perc = document.getElementById('percentageInput').value.trim();
+    var cgpa = document.getElementById('cgpaInput').value.trim();
+    var backlogs = document.getElementById('backlogsInput').value.trim();
+
+    if (!qual) {
+        alert("Please enter your qualification or degree.");
+        document.getElementById('qualificationInput').focus();
+        return false;
+    }
+
+    if (!year || isNaN(year) || year < 1990 || year > 2035) {
+        alert("Please enter a valid passing year (1990 - 2035).");
+        document.getElementById('yearInput').focus();
+        return false;
+    }
+
+    if (!cgpa || isNaN(cgpa) || cgpa < 0 || cgpa > 10) {
+        alert("Please enter a valid CGPA between 0.00 and 10.00.");
+        document.getElementById('cgpaInput').focus();
+        return false;
+    }
+
+    if (!perc || isNaN(perc) || perc < 0 || perc > 100) {
+        alert("Please enter a valid percentage between 0.00 and 100.00.");
+        document.getElementById('percentageInput').focus();
+        return false;
+    }
+
+    if (backlogs === "" || isNaN(backlogs) || backlogs < 0) {
+        alert("Please enter backlogs (0 if none).");
+        document.getElementById('backlogsInput').focus();
+        return false;
+    }
+
+    return true;
+}
+</script>
 
 </body>
 </html>

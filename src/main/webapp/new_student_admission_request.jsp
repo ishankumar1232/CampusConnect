@@ -70,7 +70,6 @@
     }
 %>
 
-
 <!DOCTYPE html>
 
 <html lang="en">
@@ -83,7 +82,6 @@
       content="width=device-width, initial-scale=1.0">
 
 <title>Admission Request | CampusConnect</title>
-
 
 <style>
 
@@ -117,7 +115,6 @@ body {
 
     color: #26364f;
 }
-
 
 /* =========================================
    HEADER
@@ -199,7 +196,6 @@ body {
     transform: translateY(-1px);
 }
 
-
 /* =========================================
    MAIN
 ========================================= */
@@ -212,7 +208,6 @@ body {
 
     margin: 42px auto 70px;
 }
-
 
 /* =========================================
    PAGE TITLE
@@ -242,7 +237,6 @@ body {
 
     font-size: 15px;
 }
-
 
 /* =========================================
    SELECTED COLLEGE
@@ -324,7 +318,6 @@ body {
         );
 }
 
-
 /* =========================================
    COLLEGE INFO
 ========================================= */
@@ -389,7 +382,6 @@ body {
     word-break: break-word;
 }
 
-
 /* =========================================
    ADMISSION FORM
 ========================================= */
@@ -421,7 +413,6 @@ body {
 
     line-height: 1.6;
 }
-
 
 /* =========================================
    FORM GRID
@@ -464,7 +455,6 @@ body {
 
     color: #e53935;
 }
-
 
 /* =========================================
    INPUTS
@@ -520,7 +510,6 @@ body {
     min-height: 100px;
 }
 
-
 /* =========================================
    COURSE SELECT
 ========================================= */
@@ -529,7 +518,6 @@ body {
 
     cursor: pointer;
 }
-
 
 /* =========================================
    NOTE
@@ -567,7 +555,6 @@ body {
 
     color: #173c76;
 }
-
 
 /* =========================================
    FORM ACTIONS
@@ -654,7 +641,6 @@ body {
     transform: translateY(-2px);
 }
 
-
 /* =========================================
    FOOTER
 ========================================= */
@@ -673,7 +659,6 @@ body {
 
     font-size: 13px;
 }
-
 
 /* =========================================
    RESPONSIVE
@@ -744,7 +729,6 @@ body {
 
 </style>
 
-
 <script>
 
 function validateForm()
@@ -766,7 +750,6 @@ function validateForm()
         document.forms["admissionForm"]["courseId"]
         .value;
 
-
     /* NAME */
 
     if(name == "")
@@ -780,10 +763,8 @@ function validateForm()
         return false;
     }
 
-
     var namePattern =
         /^[A-Za-z ]+$/;
-
 
     if(!namePattern.test(name))
     {
@@ -798,7 +779,6 @@ function validateForm()
         return false;
     }
 
-
     /* EMAIL */
 
     if(email == "")
@@ -812,10 +792,8 @@ function validateForm()
         return false;
     }
 
-
     var emailPattern =
         /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-
 
     if(!emailPattern.test(email))
     {
@@ -827,7 +805,6 @@ function validateForm()
 
         return false;
     }
-
 
     /* PHONE */
 
@@ -844,10 +821,8 @@ function validateForm()
         return false;
     }
 
-
     var phonePattern =
         /^[0-9]{10}$/;
-
 
     if(!phonePattern.test(phone))
     {
@@ -861,7 +836,6 @@ function validateForm()
 
         return false;
     }
-
 
     /* COURSE */
 
@@ -878,7 +852,6 @@ function validateForm()
         return false;
     }
 
-
     return true;
 }
 
@@ -886,9 +859,7 @@ function validateForm()
 
 </head>
 
-
 <body>
-
 
 <!-- =====================================
      HEADER
@@ -902,7 +873,6 @@ function validateForm()
 
     </div>
 
-
     <a
         href="new_student_colleges.jsp"
         class="back-btn">
@@ -913,14 +883,11 @@ function validateForm()
 
 </div>
 
-
-
 <!-- =====================================
      MAIN
 ===================================== -->
 
 <div class="container">
-
 
     <!-- PAGE TITLE -->
 
@@ -937,8 +904,6 @@ function validateForm()
 
     </div>
 
-
-
     <!-- =================================
          SELECTED COLLEGE
     ================================== -->
@@ -951,9 +916,7 @@ function validateForm()
 
         </h2>
 
-
         <div class="college-info">
-
 
             <!-- COLLEGE ID -->
 
@@ -973,8 +936,6 @@ function validateForm()
 
             </div>
 
-
-
             <!-- COLLEGE NAME -->
 
             <div class="info-box">
@@ -992,8 +953,6 @@ function validateForm()
                 </span>
 
             </div>
-
-
 
             <!-- CITY -->
 
@@ -1013,8 +972,6 @@ function validateForm()
 
             </div>
 
-
-
             <!-- STATE -->
 
             <div class="info-box">
@@ -1033,12 +990,9 @@ function validateForm()
 
             </div>
 
-
         </div>
 
     </div>
-
-
 
     <!-- =================================
          ADMISSION FORM
@@ -1046,13 +1000,11 @@ function validateForm()
 
     <div class="form-card">
 
-
         <h2 class="section-title">
 
             Applicant Details
 
         </h2>
-
 
         <p class="form-description">
 
@@ -1062,14 +1014,11 @@ function validateForm()
 
         </p>
 
-
-
         <form
             name="admissionForm"
             method="post"
             action="NewStudentAdmissionRequest"
             onsubmit="return validateForm();">
-
 
             <!-- COLLEGE ID -->
 
@@ -1078,10 +1027,7 @@ function validateForm()
                 name="collegeId"
                 value="<%=collegeId%>">
 
-
-
             <div class="form-grid">
-
 
                 <!-- NAME -->
 
@@ -1097,7 +1043,6 @@ function validateForm()
 
                     </label>
 
-
                     <input
                         type="text"
                         name="name"
@@ -1106,8 +1051,6 @@ function validateForm()
                         required>
 
                 </div>
-
-
 
                 <!-- EMAIL -->
 
@@ -1123,7 +1066,6 @@ function validateForm()
 
                     </label>
 
-
                     <input
                         type="email"
                         name="email"
@@ -1132,8 +1074,6 @@ function validateForm()
                         required>
 
                 </div>
-
-
 
                 <!-- PHONE -->
 
@@ -1149,7 +1089,6 @@ function validateForm()
 
                     </label>
 
-
                     <input
                         type="text"
                         name="phone"
@@ -1159,8 +1098,6 @@ function validateForm()
                         required>
 
                 </div>
-
-
 
                 <!-- COURSE -->
 
@@ -1176,19 +1113,16 @@ function validateForm()
 
                     </label>
 
-
                     <select
                         name="courseId"
                         class="course-select"
                         required>
-
 
                         <option value="">
 
                             Select Course
 
                         </option>
-
 
 <%
 
@@ -1198,14 +1132,12 @@ PreparedStatement ps2 = null;
 
 ResultSet rs2 = null;
 
-
 try
 {
 
     Class.forName(
         "oracle.jdbc.driver.OracleDriver"
     );
-
 
     con2 =
         DriverManager.getConnection(
@@ -1217,27 +1149,23 @@ try
             "campus123"
         );
 
-
     ps2 =
         con2.prepareStatement(
-
-            "SELECT COURSE_ID, COURSE_NAME " +
-
-            "FROM COURSE " +
-
-            "ORDER BY COURSE_NAME"
+            "SELECT C.COURSE_ID, C.COURSE_NAME " +
+            "FROM COURSE C " +
+            "JOIN DEPARTMENT D ON C.DEPARTMENT_ID = D.DEPARTMENT_ID " +
+            "WHERE D.COLLEGE_ID = ? " +
+            "ORDER BY C.COURSE_NAME"
         );
-
+    ps2.setInt(1, Integer.parseInt(collegeId));
 
     rs2 =
         ps2.executeQuery();
-
 
     while(rs2.next())
     {
 
 %>
-
 
                         <option
                             value="<%=rs2.getInt("COURSE_ID")%>">
@@ -1245,7 +1173,6 @@ try
                             <%=rs2.getString("COURSE_NAME")%>
 
                         </option>
-
 
 <%
 
@@ -1258,13 +1185,11 @@ catch(Exception e)
 
 %>
 
-
                         <option value="">
 
                             Unable to load courses
 
                         </option>
-
 
 <%
 
@@ -1295,15 +1220,11 @@ finally
 
 %>
 
-
                     </select>
 
                 </div>
 
-
             </div>
-
-
 
             <!-- NOTE -->
 
@@ -1318,36 +1239,27 @@ finally
 
             </div>
 
-
-
             <!-- BUTTONS -->
 
             <div class="form-actions">
-
 
                 <input
                     type="submit"
                     value="Submit Admission Request"
                     class="submit-btn">
 
-
                 <input
                     type="reset"
                     value="Reset"
                     class="reset-btn">
 
-
             </div>
-
 
         </form>
 
     </div>
 
-
 </div>
-
-
 
 <!-- =====================================
      FOOTER
@@ -1360,7 +1272,6 @@ finally
     Campus Recruitment Management System
 
 </div>
-
 
 </body>
 

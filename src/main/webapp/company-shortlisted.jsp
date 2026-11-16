@@ -42,13 +42,21 @@ try {
 
     String sql =
         "SELECT A.APPLICATION_ID, A.STUDENT_ID, S.NAME, S.EMAIL, S.PHONE, " +
+        "COL.COLLEGE_NAME, " +
         "R.DRIVE_ID, R.DRIVE_TYPE, R.JOB_TITLE, A.APPLIED_DATE, " +
         "A.STATUS, A.COLLEGE_SHORTLIST_STATUS " +
         "FROM APPLICATION A " +
         "JOIN STUDENT S ON A.STUDENT_ID = S.STUDENT_ID " +
+        "LEFT JOIN COLLEGE COL ON S.COLLEGE_ID = COL.COLLEGE_ID " +
         "JOIN RECRUITMENT_DRIVE R ON A.DRIVE_ID = R.DRIVE_ID " +
         "WHERE R.COMPANY_ID = ? " +
-        "AND UPPER(TRIM(A.COLLEGE_SHORTLIST_STATUS)) = 'SHORTLISTED' " +
+        "AND ( " +
+        "    ( (UPPER(R.DRIVE_TYPE) LIKE '%ON%CAMPUS%' OR UPPER(R.DRIVE_TYPE) = 'CAMPUS') " +
+        "      AND UPPER(TRIM(A.COLLEGE_SHORTLIST_STATUS)) = 'SHORTLISTED' ) " +
+        "    OR " +
+        "    ( (UPPER(R.DRIVE_TYPE) NOT LIKE '%ON%CAMPUS%' AND UPPER(R.DRIVE_TYPE) != 'CAMPUS') " +
+        "      AND UPPER(TRIM(A.STATUS)) = 'SHORTLISTED' ) " +
+        ") " +
         "ORDER BY A.APPLICATION_ID DESC";
 
     ps = con.prepareStatement(sql);
@@ -739,6 +747,60 @@ try {
             background: #eaf3ff;
         }
 
+        .status-na {
+            color: #64748b;
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+        }
+
+        .status-na::before {
+            display: none;
+        }
+
+        .drive-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border-radius: 6px;
+            padding: 4px 8px;
+            font-size: 11px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .drive-badge.on-campus {
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1d4ed8;
+        }
+
+        .drive-badge.off-campus {
+            background: #f0fdfa;
+            border: 1px solid #99f6e4;
+            color: #0f766e;
+        }
+
+        .btn-schedule-sm {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 5px 10px;
+            border-radius: 6px;
+            background: #2563eb;
+            color: #ffffff;
+            font-size: 11px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.15s ease;
+            box-shadow: 0 1px 2px rgba(37,99,235,0.15);
+        }
+
+        .btn-schedule-sm:hover {
+            background: #1d4ed8;
+            color: #ffffff;
+            transform: translateY(-1px);
+        }
+
         .empty-state {
             padding: 54px 20px 58px;
             text-align: center;
@@ -1074,7 +1136,7 @@ try {
             </div>
             <div>
                 <h2>Candidate Overview</h2>
-                <p>Track college shortlisting and your company's current review status.</p>
+                <p>Track verified On-Campus college shortlists and your direct Off-Campus candidate shortlists.</p>
             </div>
         </section>
 
@@ -1130,7 +1192,7 @@ try {
                 </div>
                 <div class="live-indicator">
                     <span class="live-dot"></span>
-                    College-shortlisted records
+                    Verified Shortlisted Pool (On-Campus &amp; Off-Campus)
                 </div>
             </div>
 
@@ -1191,6 +1253,7 @@ try {
                                 <th>Applied Date</th>
                                 <th>Company Decision</th>
                                 <th>College Status</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="candidateTableBody">
@@ -1204,12 +1267,18 @@ try {
                                 String studentName = rs.getString("NAME");
                                 String email = rs.getString("EMAIL");
                                 String phone = rs.getString("PHONE");
+                                String collegeName = rs.getString("COLLEGE_NAME");
                                 String jobTitle = rs.getString("JOB_TITLE");
                                 String driveType = rs.getString("DRIVE_TYPE");
                                 String decision = safeStatus(rs.getString("STATUS"));
                                 String collegeStatus = safeStatus(
                                         rs.getString("COLLEGE_SHORTLIST_STATUS")
                                 );
+
+                                String safeDriveType = driveType == null ? "" : driveType;
+                                boolean isOnCampus = safeDriveType.toUpperCase(Locale.ROOT).contains("ON CAMPUS")
+                                        || (safeDriveType.toUpperCase(Locale.ROOT).contains("CAMPUS")
+                                            && !safeDriveType.toUpperCase(Locale.ROOT).contains("OFF"));
 
                                 if ("SHORTLISTED".equals(decision)) {
                                     approved++;
@@ -1224,10 +1293,13 @@ try {
 
                                 if ("SHORTLISTED".equals(decision)) {
                                     decisionClass = "status-approved";
-                                    decisionLabel = "Approved";
+                                    decisionLabel = isOnCampus ? "Approved" : "Shortlisted by Company";
                                 } else if ("REJECTED".equals(decision)) {
                                     decisionClass = "status-rejected";
                                     decisionLabel = "Rejected";
+                                } else if (!isOnCampus) {
+                                    decisionClass = "status-approved";
+                                    decisionLabel = "Shortlisted by Company";
                                 }
 
                                 String appliedDate = "—";
@@ -1249,8 +1321,6 @@ try {
                                                 .substring(0, 1).toUpperCase();
                                     }
                                 }
-
-                                String safeDriveType = driveType == null ? "" : driveType;
                         %>
                             <tr class="candidate-row"
                                 data-decision="<%= "SHORTLISTED".equals(decision) ? "approved" :
@@ -1263,8 +1333,16 @@ try {
                                     <div class="student-cell">
                                         <div class="student-avatar"><%= esc(initials) %></div>
                                         <div>
-                                            <div class="student-name"><%= esc(studentName) %></div>
+                                            <div class="student-name">
+                                                <a href="company-candidate-details.jsp?appId=<%= applicationId %>" style="color:#0f172a; text-decoration:none; font-weight:750;" title="View <%= esc(studentName) %>'s full profile & resume">
+                                                    <%= esc(studentName) %>
+                                                    <i class="fa-solid fa-arrow-up-right-from-square" style="font-size:9px; opacity:0.6;"></i>
+                                                </a>
+                                            </div>
                                             <div class="student-id">Student ID: <%= studentId %></div>
+                                            <div class="student-college" style="font-size: 11px; color: #176fe5; margin-top: 2px; font-weight: 600;">
+                                                <i class="fa-solid fa-graduation-cap"></i> <%= esc(collegeName != null && !collegeName.trim().isEmpty() ? collegeName : "Independent / Off-Campus") %>
+                                            </div>
                                         </div>
                                     </div>
                                 </td>
@@ -1276,7 +1354,15 @@ try {
                                     <div class="job-title"><%= esc(jobTitle) %></div>
                                 </td>
                                 <td>
-                                    <span class="drive-type"><%= esc(driveType) %></span>
+                                    <% if (isOnCampus) { %>
+                                        <span class="drive-badge on-campus">
+                                            <i class="fa-solid fa-building-columns"></i> On-Campus
+                                        </span>
+                                    <% } else { %>
+                                        <span class="drive-badge off-campus">
+                                            <i class="fa-solid fa-globe"></i> Off-Campus
+                                        </span>
+                                    <% } %>
                                 </td>
                                 <td>
                                     <span class="date-text"><%= esc(appliedDate) %></span>
@@ -1287,10 +1373,27 @@ try {
                                     </span>
                                 </td>
                                 <td>
-                                    <span class="status status-college">
-                                        <i class="fa-solid fa-check" style="font-size:9px;"></i>
-                                        <%= esc(collegeStatus) %>
-                                    </span>
+                                    <% if (isOnCampus) { %>
+                                        <span class="status status-college">
+                                            <i class="fa-solid fa-check" style="font-size:9px;"></i>
+                                            College Verified
+                                        </span>
+                                    <% } else { %>
+                                        <span class="status status-na">
+                                            <i class="fa-solid fa-minus" style="font-size:9px;"></i>
+                                            N/A (Direct)
+                                        </span>
+                                    <% } %>
+                                </td>
+                                <td>
+                                    <div style="display:flex; align-items:center; gap:6px;">
+                                        <a href="company-candidate-details.jsp?appId=<%= applicationId %>" class="btn-schedule-sm" style="background:#475569;" title="View <%= esc(studentName) %>'s full profile & resume">
+                                            <i class="fa-solid fa-file-lines"></i> Profile
+                                        </a>
+                                        <a href="company-interviews.jsp" class="btn-schedule-sm" title="Schedule interview for <%= esc(studentName) %>">
+                                            <i class="fa-solid fa-calendar-plus"></i> Interview
+                                        </a>
+                                    </div>
                                 </td>
                             </tr>
                         <%
@@ -1317,8 +1420,8 @@ try {
                         </div>
                         <h3>No shortlisted candidates yet</h3>
                         <p>
-                            Candidates will appear here once their colleges shortlist
-                            applications for your recruitment drives.
+                            Candidates will appear here once colleges verify applicants for On-Campus drives,
+                            or when your company shortlists applicants for Off-Campus drives.
                         </p>
                         <a href="company-applicants.jsp" class="btn btn-primary">
                             <i class="fa-solid fa-users"></i>

@@ -1,4 +1,4 @@
-<%@ page contentType="text/html;charset=UTF-8" %>
+<%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 
 <%
 
@@ -55,7 +55,7 @@
                 companyLogoName.contains("tata consultancy")) {
             logoPath = "images/company/tcs-logo.png";
         } else {
-            logoPath = "images/company/tcs-logo.png";
+            logoPath = "images/company/default-logo.png";
         }
     }
 
@@ -75,7 +75,7 @@
     }
 
     String logoUrl = logoPath + (logoPath.contains("?") ? "&" : "?") + "v=2";
-    String defaultLogoUrl = request.getContextPath() + "/images/company/tcs-logo.png";
+    String defaultLogoUrl = request.getContextPath() + "/images/company/default-logo.png";
 %>
 
 <!DOCTYPE html>

@@ -14,17 +14,13 @@ import jakarta.servlet.http.HttpSession;
 
 public class SystemSettingsServlet extends HttpServlet {
 
-    // ==========================
     // LOAD SETTINGS PAGE
-    // ==========================
 
     public void doGet(HttpServletRequest req,
             HttpServletResponse res)
             throws IOException, ServletException {
 
-        // ==========================
         // SESSION CHECK
-        // ==========================
 
         HttpSession session = req.getSession(false);
 
@@ -37,9 +33,7 @@ public class SystemSettingsServlet extends HttpServlet {
 
         }
 
-        // ==========================
         // LOAD SETTINGS
-        // ==========================
 
         SystemSettingDAO dao = new SystemSettingDAO();
 
@@ -55,9 +49,7 @@ public class SystemSettingsServlet extends HttpServlet {
 
     }
 
-    // ==========================
     // SAVE SETTINGS
-    // ==========================
 
     public void doPost(HttpServletRequest req,
             HttpServletResponse res)
@@ -92,7 +84,7 @@ public class SystemSettingsServlet extends HttpServlet {
         dao.updateSystemSettings(setting);
 
         res.sendRedirect(req.getContextPath()
-                + "/SystemSettingsServlet");
+                + "/SystemSettingsServlet?msg=updated");
 
     }
 

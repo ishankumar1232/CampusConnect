@@ -75,7 +75,6 @@ public class InterviewController extends HttpServlet {
             rs.close();
             ps.close();
 
-
             // Check whether interview already exists
             String checkInterview =
                 "SELECT INTERVIEW_ID " +
@@ -136,7 +135,6 @@ public class InterviewController extends HttpServlet {
 
                 rs.close();
                 ps.close();
-
 
                 // Insert interview
                 String insertSql =

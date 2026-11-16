@@ -54,97 +54,68 @@ public class CollegeAdmin {
         this.password = password;
     }
 
-
     // Insert College Admin
 
     public boolean InsertMethod() {
 
-        try {
+        String qid = "SELECT NVL(MAX(ADMIN_ID),0)+1 FROM COLLEGE_ADMIN";
+        String q1 = "INSERT INTO COLLEGE_ADMIN (ADMIN_ID, COLLEGE_ID, NAME, EMAIL, PASSWORD) VALUES (?, ?, ?, ?, ?)";
 
-            Class.forName("oracle.jdbc.driver.OracleDriver");
+        try (Connection con = com.campusconnect.util.DBConnection.getConnection()) {
 
-            Connection con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
-            Statement stmt = con.createStatement();
-
-            String qid =
-                "SELECT NVL(MAX(ADMIN_ID),0)+1 FROM COLLEGE_ADMIN";
-
-            ResultSet rs = stmt.executeQuery(qid);
+            if (con == null) return false;
 
             int id = 1;
-
-            if(rs.next()) {
-                id = rs.getInt(1);
+            try (Statement stmt = con.createStatement();
+                 ResultSet rs = stmt.executeQuery(qid)) {
+                if (rs.next()) {
+                    id = rs.getInt(1);
+                }
             }
 
-            rs.close();
+            try (PreparedStatement ps = con.prepareStatement(q1)) {
+                ps.setInt(1, id);
+                ps.setInt(2, collegeId);
+                ps.setString(3, name);
+                ps.setString(4, email);
+                ps.setString(5, password);
 
-            String q1 =
-                "INSERT INTO COLLEGE_ADMIN "
-                + "(ADMIN_ID, COLLEGE_ID, NAME, EMAIL, PASSWORD) "
-                + "VALUES ("
-                + id + ", "
-                + collegeId + ", '"
-                + name + "', '"
-                + email + "', '"
-                + password + "')";
-
-            int x = stmt.executeUpdate(q1);
-
-            stmt.close();
-            con.close();
-
-            if(x > 0) {
-                return true;
+                int x = ps.executeUpdate();
+                return x > 0;
             }
 
-        }
-        catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
 
         return false;
     }
+
     public boolean LoginMethod() {
 
         boolean x = false;
+        String sql = "SELECT ADMIN_ID, COLLEGE_ID, NAME FROM COLLEGE_ADMIN WHERE LOWER(EMAIL)=LOWER(?) AND PASSWORD=?";
 
-        try {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
+        try (Connection con = com.campusconnect.util.DBConnection.getConnection()) {
 
-            java.sql.Connection con = java.sql.DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
+            if (con == null) return false;
 
-            String sql = "SELECT * FROM COLLEGE_ADMIN WHERE EMAIL=? AND PASSWORD=?";
+            try (PreparedStatement ps = con.prepareStatement(sql)) {
+                ps.setString(1, email);
+                ps.setString(2, password);
 
-            java.sql.PreparedStatement ps = con.prepareStatement(sql);
-
-            ps.setString(1, email);
-            ps.setString(2, password);
-
-            java.sql.ResultSet rs = ps.executeQuery();
-
-            if(rs.next()) {
-
-                adminId = rs.getInt("ADMIN_ID");
-                collegeId = rs.getInt("COLLEGE_ID");
-                name = rs.getString("NAME");
-
-                x = true;
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        adminId = rs.getInt("ADMIN_ID");
+                        collegeId = rs.getInt("COLLEGE_ID");
+                        name = rs.getString("NAME");
+                        x = true;
+                    }
+                }
             }
 
-            con.close();
-
-        } catch(Exception e) {
-            System.out.println(e);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
 
         return x;

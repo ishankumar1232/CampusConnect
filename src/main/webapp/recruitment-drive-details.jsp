@@ -349,7 +349,6 @@
 
     </div>
 
-
     <div class="main-card">
 
         <div class="card-header">
@@ -483,7 +482,6 @@
             </div>
 
         </div>
-
 
         <div class="buttons">
 

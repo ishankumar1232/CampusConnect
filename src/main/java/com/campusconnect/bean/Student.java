@@ -1,6 +1,7 @@
 package com.campusconnect.bean;
 
 import java.sql.*;
+import com.campusconnect.util.DBConnection;
 
 public class Student {
 
@@ -24,7 +25,6 @@ public class Student {
     public Student() {
 
     }
-
 
     // Getters and Setters
 
@@ -160,82 +160,54 @@ public class Student {
         this.courseName = courseName;
     }
 
-    
-    
     // Student Registration
 
     public boolean InsertMethod() {
 
-        try {
+        String qid = "SELECT NVL(MAX(STUDENT_ID),0)+1 FROM STUDENT";
+        String q1 =
+            "INSERT INTO STUDENT " +
+            "(STUDENT_ID, COLLEGE_ID, COURSE_ID, NAME, EMAIL, " +
+            "PHONE, PASSWORD, DOB, GENDER, ADDRESS, " +
+            "ADMISSION_DATE, STATUS) " +
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, SYSDATE, 'ACTIVE')";
 
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-
-            Connection con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
-            Statement stmt = con.createStatement();
-
-            String qid =
-                "SELECT NVL(MAX(STUDENT_ID),0)+1 FROM STUDENT";
-
-            ResultSet rs = stmt.executeQuery(qid);
+        try (Connection con = DBConnection.getConnection();
+             Statement stmt = con.createStatement();
+             ResultSet rs = stmt.executeQuery(qid)) {
 
             int id = 1;
 
             if(rs.next()) {
                 id = rs.getInt(1);
             }
+            this.studentId = id;
 
-            rs.close();
+            try (PreparedStatement ps = con.prepareStatement(q1)) {
+                ps.setInt(1, id);
+                ps.setInt(2, collegeId);
+                ps.setInt(3, courseId);
+                ps.setString(4, name);
+                ps.setString(5, email);
+                ps.setString(6, phone);
+                ps.setString(7, password);
+                ps.setDate(8, dob);
+                ps.setString(9, gender);
+                ps.setString(10, address);
 
-
-            String q1 =
-                "INSERT INTO STUDENT " +
-                "(STUDENT_ID, COLLEGE_ID, COURSE_ID, NAME, EMAIL, " +
-                "PHONE, PASSWORD, DOB, GENDER, ADDRESS, " +
-                "ADMISSION_DATE, STATUS) " +
-                "VALUES (" +
-                id + ", " +
-                collegeId + ", " +
-                courseId + ", '" +
-                name + "', '" +
-                email + "', '" +
-                phone + "', '" +
-                password + "', " +
-                "TO_DATE('" + dob + "','YYYY-MM-DD'), '" +
-                gender + "', '" +
-                address + "', " +
-                "SYSDATE, " +
-                "'ACTIVE')";
-
-
-            int x = stmt.executeUpdate(q1);
-
-            stmt.close();
-            con.close();
-
-
-            if(x > 0) {
-                return true;
+                int x = ps.executeUpdate();
+                return x > 0;
             }
 
         }
         catch(Exception e) {
-
             e.printStackTrace();
-
         }
 
         return false;
     }
 
-
     // Student Login
-
- // Student Login
     public boolean LoginMethod() {
 
         String sql =
@@ -244,37 +216,28 @@ public class Student {
             "FROM STUDENT " +
             "WHERE LOWER(EMAIL) = LOWER(?) " +
             "AND PASSWORD = ? " +
-            "AND STATUS = 'ACTIVE'";
+            "AND (STATUS = 'ACTIVE' OR STATUS IS NULL)";
 
-        try {
-            Class.forName("oracle.jdbc.driver.OracleDriver");
+        try (
+            Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql)
+        ) {
+            ps.setString(1, email);
+            ps.setString(2, password);
 
-            try (
-                Connection con = DriverManager.getConnection(
-                    "jdbc:oracle:thin:@localhost:1521:XE",
-                    "CAMPUSCONNECT",
-                    "campus123"
-                );
+            try (ResultSet rs = ps.executeQuery()) {
 
-                PreparedStatement ps = con.prepareStatement(sql)
-            ) {
-                ps.setString(1, email);
-                ps.setString(2, password);
+                if (rs.next()) {
 
-                try (ResultSet rs = ps.executeQuery()) {
+                    this.studentId = rs.getInt("STUDENT_ID");
+                    this.name = rs.getString("NAME");
+                    this.collegeId = rs.getInt("COLLEGE_ID");
+                    this.courseId = rs.getInt("COURSE_ID");
+                    this.email = rs.getString("EMAIL");
+                    this.phone = rs.getString("PHONE");
+                    this.profileImage = rs.getString("PROFILE_IMAGE");
 
-                    if (rs.next()) {
-
-                        this.studentId = rs.getInt("STUDENT_ID");
-                        this.name = rs.getString("NAME");
-                        this.collegeId = rs.getInt("COLLEGE_ID");
-                        this.courseId = rs.getInt("COURSE_ID");
-                        this.email = rs.getString("EMAIL");
-                        this.phone = rs.getString("PHONE");
-                        this.profileImage = rs.getString("PROFILE_IMAGE");
-
-                        return true;
-                    }
+                    return true;
                 }
             }
 
@@ -284,72 +247,46 @@ public class Student {
 
         return false;
     }
+
     // Total Students of a College
 
     public int getStudentCount(int collegeId) {
 
         int count = 0;
+        String sql = "SELECT COUNT(*) FROM STUDENT WHERE COLLEGE_ID=?";
 
-        try {
-
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-
-            Connection con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
-            String sql =
-                "SELECT COUNT(*) FROM STUDENT WHERE COLLEGE_ID=?";
-
-            PreparedStatement ps =
-                con.prepareStatement(sql);
-
+        try (
+            Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql)
+        ) {
             ps.setInt(1, collegeId);
 
-            ResultSet rs =
-                ps.executeQuery();
-
-            if(rs.next()) {
-
-                count = rs.getInt(1);
-
+            try (ResultSet rs = ps.executeQuery()) {
+                if(rs.next()) {
+                    count = rs.getInt(1);
+                }
             }
-
-            rs.close();
-            ps.close();
-            con.close();
 
         }
         catch(Exception e) {
-
             e.printStackTrace();
-
         }
 
         return count;
     }
- // Update Student Profile
+
+    // Update Student Profile
     public boolean updateProfile() {
 
-        try {
+        String sql =
+            "UPDATE STUDENT SET " +
+            "NAME=?, PHONE=?, DOB=?, GENDER=?, ADDRESS=? " +
+            "WHERE STUDENT_ID=?";
 
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-
-            Connection con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
-            String sql =
-                "UPDATE STUDENT SET " +
-                "NAME=?, PHONE=?, DOB=?, GENDER=?, ADDRESS=? " +
-                "WHERE STUDENT_ID=?";
-
-            PreparedStatement ps = con.prepareStatement(sql);
-
+        try (
+            Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql)
+        ) {
             ps.setString(1, name);
             ps.setString(2, phone);
             ps.setDate(3, dob);
@@ -358,13 +295,7 @@ public class Student {
             ps.setInt(6, studentId);
 
             int x = ps.executeUpdate();
-
-            ps.close();
-            con.close();
-
-            if(x > 0) {
-                return true;
-            }
+            return x > 0;
 
         }
         catch(Exception e) {
@@ -373,37 +304,23 @@ public class Student {
 
         return false;
     }
- // Update Profile Image
+
+    // Update Profile Image
     public boolean updateProfileImage() {
 
-        try {
+        String sql =
+            "UPDATE STUDENT SET PROFILE_IMAGE=? " +
+            "WHERE STUDENT_ID=?";
 
-            Class.forName("oracle.jdbc.driver.OracleDriver");
-
-            Connection con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
-            String sql =
-                "UPDATE STUDENT SET PROFILE_IMAGE=? " +
-                "WHERE STUDENT_ID=?";
-
-            PreparedStatement ps =
-                con.prepareStatement(sql);
-
+        try (
+            Connection con = DBConnection.getConnection();
+            PreparedStatement ps = con.prepareStatement(sql)
+        ) {
             ps.setString(1, profileImage);
             ps.setInt(2, studentId);
 
             int x = ps.executeUpdate();
-
-            ps.close();
-            con.close();
-
-            if(x > 0) {
-                return true;
-            }
+            return x > 0;
 
         }
         catch(Exception e) {
@@ -429,7 +346,6 @@ public class Student {
 
         rs.close();
         ps1.close();
-
 
         PreparedStatement ps = con.prepareStatement(
             "INSERT INTO STUDENT " +

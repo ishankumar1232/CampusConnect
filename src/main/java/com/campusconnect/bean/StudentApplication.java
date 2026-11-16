@@ -1,6 +1,7 @@
 package com.campusconnect.bean;
 
 import java.sql.*;
+import com.campusconnect.util.DBConnection;
 
 public class StudentApplication
 {
@@ -11,11 +12,9 @@ public class StudentApplication
     private String status;
     private String collegeShortlistStatus;
 
-
     public StudentApplication()
     {
     }
-
 
     public int getApplicationId()
     {
@@ -27,7 +26,6 @@ public class StudentApplication
         this.applicationId = applicationId;
     }
 
-
     public int getDriveId()
     {
         return driveId;
@@ -37,7 +35,6 @@ public class StudentApplication
     {
         this.driveId = driveId;
     }
-
 
     public int getStudentId()
     {
@@ -49,7 +46,6 @@ public class StudentApplication
         this.studentId = studentId;
     }
 
-
     public Date getAppliedDate()
     {
         return appliedDate;
@@ -59,7 +55,6 @@ public class StudentApplication
     {
         this.appliedDate = appliedDate;
     }
-
 
     public String getStatus()
     {
@@ -71,7 +66,6 @@ public class StudentApplication
         this.status = status;
     }
 
-
     public String getCollegeShortlistStatus()
     {
         return collegeShortlistStatus;
@@ -82,190 +76,96 @@ public class StudentApplication
         this.collegeShortlistStatus = collegeShortlistStatus;
     }
 
-
     // ================= INSERT / APPLY =================
 
     public boolean InsertMethod()
     {
-        Connection con = null;
-        PreparedStatement ps = null;
-        ResultSet rs = null;
+        String checkSql =
+            "SELECT APPLICATION_ID " +
+            "FROM APPLICATION " +
+            "WHERE DRIVE_ID=? " +
+            "AND STUDENT_ID=?";
 
-        try
+        String idSql =
+            "SELECT NVL(MAX(APPLICATION_ID),0)+1 " +
+            "FROM APPLICATION";
+
+        String insertSql =
+            "INSERT INTO APPLICATION " +
+            "(APPLICATION_ID, DRIVE_ID, STUDENT_ID, " +
+            "APPLIED_DATE, STATUS, COLLEGE_SHORTLIST_STATUS) " +
+            "VALUES (?, ?, ?, SYSDATE, 'APPLIED', 'PENDING')";
+
+        try (Connection con = DBConnection.getConnection())
         {
-            Class.forName(
-                "oracle.jdbc.driver.OracleDriver"
-            );
-
-            con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
-
             // Check whether already applied
-
-            String checkSql =
-                "SELECT APPLICATION_ID " +
-                "FROM APPLICATION " +
-                "WHERE DRIVE_ID=? " +
-                "AND STUDENT_ID=?";
-
-
-            ps = con.prepareStatement(checkSql);
-
-            ps.setInt(1, driveId);
-            ps.setInt(2, studentId);
-
-            rs = ps.executeQuery();
-
-
-            if(rs.next())
+            try (PreparedStatement checkPs = con.prepareStatement(checkSql))
             {
-                rs.close();
-                ps.close();
-                con.close();
-
-                return false;
+                checkPs.setInt(1, driveId);
+                checkPs.setInt(2, studentId);
+                try (ResultSet checkRs = checkPs.executeQuery())
+                {
+                    if(checkRs.next())
+                    {
+                        return false;
+                    }
+                }
             }
-
-
-            rs.close();
-            ps.close();
-
 
             // Generate Application ID
-
-            Statement stmt =
-                con.createStatement();
-
-            rs = stmt.executeQuery(
-                "SELECT NVL(MAX(APPLICATION_ID),0)+1 " +
-                "FROM APPLICATION"
-            );
-
-
             int id = 1;
-
-            if(rs.next())
+            try (Statement stmt = con.createStatement();
+                 ResultSet rs = stmt.executeQuery(idSql))
             {
-                id = rs.getInt(1);
+                if(rs.next())
+                {
+                    id = rs.getInt(1);
+                }
             }
-
-
-            rs.close();
-            stmt.close();
-
+            this.applicationId = id;
 
             // Insert Application
+            try (PreparedStatement ps = con.prepareStatement(insertSql))
+            {
+                ps.setInt(1, id);
+                ps.setInt(2, driveId);
+                ps.setInt(3, studentId);
 
-            String sql =
-                "INSERT INTO APPLICATION " +
-                "(APPLICATION_ID, DRIVE_ID, STUDENT_ID, " +
-                "APPLIED_DATE, STATUS, COLLEGE_SHORTLIST_STATUS) " +
-                "VALUES (?, ?, ?, SYSDATE, 'APPLIED', 'PENDING')";
-
-
-            ps = con.prepareStatement(sql);
-
-            ps.setInt(1, id);
-            ps.setInt(2, driveId);
-            ps.setInt(3, studentId);
-
-
-            int x =
-                ps.executeUpdate();
-
-
-            return x > 0;
+                int x = ps.executeUpdate();
+                return x > 0;
+            }
         }
         catch(Exception e)
         {
             e.printStackTrace();
-
             return false;
         }
-        finally
-        {
-            try
-            {
-                if(rs != null)
-                    rs.close();
-
-                if(ps != null)
-                    ps.close();
-
-                if(con != null)
-                    con.close();
-            }
-            catch(Exception e)
-            {
-            }
-        }
     }
-
 
     // ================= DELETE / WITHDRAW =================
 
     public boolean DeleteMethod()
     {
-        Connection con = null;
-        PreparedStatement ps = null;
+        String sql =
+            "DELETE FROM APPLICATION " +
+            "WHERE APPLICATION_ID=? " +
+            "AND STUDENT_ID=?";
 
-        try
+        try (Connection con = DBConnection.getConnection();
+             PreparedStatement ps = con.prepareStatement(sql))
         {
-            Class.forName(
-                "oracle.jdbc.driver.OracleDriver"
-            );
-
-            con = DriverManager.getConnection(
-                "jdbc:oracle:thin:@localhost:1521:XE",
-                "CAMPUSCONNECT",
-                "campus123"
-            );
-
-
-            String sql =
-                "DELETE FROM APPLICATION " +
-                "WHERE APPLICATION_ID=? " +
-                "AND STUDENT_ID=?";
-
-
-            ps = con.prepareStatement(sql);
-
             ps.setInt(1, applicationId);
             ps.setInt(2, studentId);
 
-
-            int x =
-                ps.executeUpdate();
-
-
+            int x = ps.executeUpdate();
             return x > 0;
         }
         catch(Exception e)
         {
             e.printStackTrace();
-
             return false;
         }
-        finally
-        {
-            try
-            {
-                if(ps != null)
-                    ps.close();
-
-                if(con != null)
-                    con.close();
-            }
-            catch(Exception e)
-            {
-            }
-        }
     }
-
 
     // ================= VIEW =================
 
@@ -277,7 +177,6 @@ public class StudentApplication
         {
             Statement stmt =
                 con.createStatement();
-
 
             String q1 =
                 "SELECT A.APPLICATION_ID, " +
@@ -295,7 +194,6 @@ public class StudentApplication
                 "AND A.STUDENT_ID = " +
                 studentId +
                 " ORDER BY A.APPLICATION_ID";
-
 
             rs =
                 stmt.executeQuery(q1);

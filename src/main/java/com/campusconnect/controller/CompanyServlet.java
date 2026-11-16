@@ -14,15 +14,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import com.campusconnect.bean.Company;
 import com.campusconnect.dao.CompanyDAO;
 
-@WebServlet("/CompanyServlet")
 public class CompanyServlet extends HttpServlet
 {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException
     {
-    	// ======================================
     	// CHECK COMPANY REGISTRATION STATUS
-    	// ======================================
 
     	SystemSettingDAO settingDAO = new SystemSettingDAO();
 

@@ -2,9 +2,7 @@ package com.campusconnect.bean;
 
 public class DashboardBean {
 
-    // ============================================
     // DASHBOARD CARDS
-    // ============================================
 
     private int totalColleges;
     private int totalCompanies;
@@ -13,41 +11,31 @@ public class DashboardBean {
     private int activeDrives;
     private int pendingApprovals;
 
-    // ============================================
     // COLLEGE STATUS
-    // ============================================
 
     private int approvedColleges;
     private int pendingColleges;
     private int rejectedColleges;
 
-    // ============================================
     // COMPANY STATUS
-    // ============================================
 
     private int approvedCompanies;
     private int pendingCompanies;
     private int rejectedCompanies;
 
-    // ============================================
     // RECRUITMENT STATUS
-    // ============================================
 
     private int openDrives;
     private int activeDriveCount;
     private int completedDrives;
 
-    // ============================================
     // APPLICATIONS / SELECTIONS / PLACEMENTS
-    // ============================================
 
     private int totalApplications;
     private int totalSelections;
     private int totalPlacements;
 
-    // ============================================
     // SYSTEM NOTIFICATIONS
-    // ============================================
 
     private int pendingCollegeApprovals;
     private int pendingCompanyApprovals;
@@ -55,23 +43,17 @@ public class DashboardBean {
     private int registeredCompanies;
     private int registeredStudents;
 
-    // ============================================
     // COLLEGE WISE PLACEMENT CHART
-    // ============================================
 
     private String[] collegeNames;
     private int[] collegePlacementCounts;
 
-    // ============================================
     // MONTHLY RECRUITMENT TREND
-    // ============================================
 
     private String[] months;
     private int[] monthlyRecruitmentCounts;
 
-    // ============================================
     // DASHBOARD CARDS
-    // ============================================
 
     public int getTotalColleges() {
         return totalColleges;
@@ -121,9 +103,7 @@ public class DashboardBean {
         this.pendingApprovals = pendingApprovals;
     }
 
-    // ============================================
     // COLLEGE STATUS
-    // ============================================
 
     public int getApprovedColleges() {
         return approvedColleges;
@@ -149,9 +129,7 @@ public class DashboardBean {
         this.rejectedColleges = rejectedColleges;
     }
 
-    // ============================================
     // COMPANY STATUS
-    // ============================================
 
     public int getApprovedCompanies() {
         return approvedCompanies;
@@ -177,9 +155,7 @@ public class DashboardBean {
         this.rejectedCompanies = rejectedCompanies;
     }
     
-    // ============================================
     // RECRUITMENT STATUS
-    // ============================================
 
     public int getOpenDrives() {
         return openDrives;
@@ -205,9 +181,7 @@ public class DashboardBean {
         this.completedDrives = completedDrives;
     }
 
-    // ============================================
     // SYSTEM NOTIFICATIONS
-    // ============================================
 
     public int getPendingCollegeApprovals() {
         return pendingCollegeApprovals;
@@ -249,9 +223,7 @@ public class DashboardBean {
         this.registeredStudents = registeredStudents;
     }
 
-    // ============================================
     // APPLICATIONS / SELECTIONS / PLACEMENTS
-    // ============================================
 
     public int getTotalApplications() {
         return totalApplications;
@@ -277,9 +249,7 @@ public class DashboardBean {
         this.totalPlacements = totalPlacements;
     }
 
-    // ============================================
     // COLLEGE WISE PLACEMENT CHART
-    // ============================================
 
     public String[] getCollegeNames() {
         return collegeNames;
@@ -297,9 +267,7 @@ public class DashboardBean {
         this.collegePlacementCounts = collegePlacementCounts;
     }
 
-    // ============================================
     // MONTHLY RECRUITMENT TREND
-    // ============================================
 
     public String[] getMonths() {
         return months;

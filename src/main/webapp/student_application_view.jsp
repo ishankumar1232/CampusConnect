@@ -1,5 +1,6 @@
 <%@ page pageEncoding="UTF-8" contentType="text/html; charset=UTF-8" %>
 <%@ page import="java.sql.*" %>
+<%@ page import="java.util.*" %>
 <%@ page import="java.net.URLEncoder" %>
 <%@ page import="java.nio.charset.StandardCharsets" %>
 
@@ -12,7 +13,6 @@
     }
 
     int studentId = (Integer) session1.getAttribute("studentId");
-
     String studentName = "Student";
     String profileImage = null;
 
@@ -22,7 +22,6 @@
 
     try {
         Class.forName("oracle.jdbc.driver.OracleDriver");
-
         try (
             Connection con = DriverManager.getConnection(
                 "jdbc:oracle:thin:@localhost:1521:XE",
@@ -53,6 +52,83 @@
     if (studentName != null && !studentName.trim().isEmpty()) {
         firstLetter = studentName.trim().substring(0, 1).toUpperCase();
     }
+
+    // Flash Messages
+    String flashMsg = (String) session1.getAttribute("applyMsg");
+    session1.removeAttribute("applyMsg");
+    String flashErr = (String) session1.getAttribute("applyError");
+    session1.removeAttribute("applyError");
+
+    class AppRecord {
+        int applicationId;
+        int driveId;
+        String companyName;
+        String jobTitle;
+        String driveType;
+        java.sql.Date appliedDate;
+        String status;
+        String collegeShortlistStatus;
+    }
+
+    List<AppRecord> appList = new ArrayList<>();
+    int totalCount = 0;
+    int shortlistedCount = 0;
+    int pendingCount = 0;
+    int selectedCount = 0;
+
+    try {
+        Class.forName("oracle.jdbc.driver.OracleDriver");
+        try (
+            Connection con = DriverManager.getConnection(
+                "jdbc:oracle:thin:@localhost:1521:XE",
+                "CAMPUSCONNECT",
+                "campus123"
+            );
+            PreparedStatement ps = con.prepareStatement(
+                "SELECT A.APPLICATION_ID, A.DRIVE_ID, C.COMPANY_NAME, R.JOB_TITLE, R.DRIVE_TYPE, " +
+                "A.APPLIED_DATE, A.STATUS, A.COLLEGE_SHORTLIST_STATUS " +
+                "FROM APPLICATION A " +
+                "JOIN RECRUITMENT_DRIVE R ON A.DRIVE_ID = R.DRIVE_ID " +
+                "JOIN COMPANY C ON R.COMPANY_ID = C.COMPANY_ID " +
+                "WHERE A.STUDENT_ID = ? " +
+                "ORDER BY A.APPLICATION_ID DESC"
+            )
+        ) {
+            ps.setInt(1, studentId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    AppRecord rec = new AppRecord();
+                    rec.applicationId = rs.getInt("APPLICATION_ID");
+                    rec.driveId = rs.getInt("DRIVE_ID");
+                    rec.companyName = rs.getString("COMPANY_NAME");
+                    rec.jobTitle = rs.getString("JOB_TITLE");
+                    rec.driveType = rs.getString("DRIVE_TYPE");
+                    rec.appliedDate = rs.getDate("APPLIED_DATE");
+                    rec.status = rs.getString("STATUS");
+                    rec.collegeShortlistStatus = rs.getString("COLLEGE_SHORTLIST_STATUS");
+
+                    if (rec.driveType == null) rec.driveType = "On-Campus";
+                    if (rec.status == null) rec.status = "APPLIED";
+                    if (rec.collegeShortlistStatus == null) rec.collegeShortlistStatus = "PENDING";
+
+                    totalCount++;
+                    if ("SELECTED".equalsIgnoreCase(rec.status)) {
+                        selectedCount++;
+                    } else if ("SHORTLISTED".equalsIgnoreCase(rec.status) || "SHORTLISTED".equalsIgnoreCase(rec.collegeShortlistStatus)) {
+                        shortlistedCount++;
+                    } else if ("REJECTED".equalsIgnoreCase(rec.status) || "REJECTED".equalsIgnoreCase(rec.collegeShortlistStatus)) {
+                        // rejected
+                    } else {
+                        pendingCount++;
+                    }
+
+                    appList.add(rec);
+                }
+            }
+        }
+    } catch (Exception e) {
+        application.log("Error loading applications for student: " + studentId, e);
+    }
 %>
 
 <!DOCTYPE html>
@@ -71,6 +147,7 @@
     --bg-color: #f8fafc;
     --card-bg: #ffffff;
     --primary: #2563eb;
+    --primary-hover: #1d4ed8;
     --primary-light: #eff6ff;
     --text-main: #0f172a;
     --text-muted: #64748b;
@@ -246,7 +323,7 @@ a {
     margin-left: 88px;
     margin-top: 76px;
     padding: 32px 36px 40px;
-    max-width: 1700px;
+    max-width: 1320px;
     width: calc(100% - 88px);
 }
 
@@ -262,43 +339,163 @@ a {
 
 .page-title h1 {
     font-size: 24px;
-    font-weight: 750;
+    font-weight: 800;
     color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .page-title p {
-    font-size: 13px;
+    font-size: 13.5px;
     color: var(--text-muted);
     margin-top: 4px;
+}
+
+.btn-header {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 700;
+    transition: .2s;
 }
 
 .btn-primary {
     background: var(--primary);
     color: white;
-    padding: 10px 18px;
-    border-radius: 10px;
-    font-size: 14px;
-    font-weight: 600;
-    display: inline-flex;
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+}
+.btn-primary:hover { background: var(--primary-hover); transform: translateY(-1px); }
+
+.btn-secondary {
+    background: #e2e8f0;
+    color: #334155;
+}
+.btn-secondary:hover { background: #cbd5e1; }
+
+/* ALERTS */
+.alert {
+    display: flex;
     align-items: center;
-    gap: 8px;
-    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-    transition: .2s;
+    gap: 12px;
+    padding: 14px 18px;
+    border-radius: 10px;
+    font-size: 13.5px;
+    font-weight: 600;
+    margin-bottom: 22px;
+}
+.alert-success {
+    background: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+}
+.alert-error {
+    background: #fef2f2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
 }
 
-.btn-primary:hover {
-    background: #1d4ed8;
+/* KPI CARDS */
+.kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 18px;
+    margin-bottom: 26px;
+}
+
+.kpi-card {
+    background: var(--card-bg);
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    padding: 20px 22px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    transition: transform .2s ease;
+}
+.kpi-card:hover {
     transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
 }
 
-/* TABLE CARD CONTAINER */
+.kpi-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: grid;
+    place-items: center;
+    font-size: 20px;
+    flex-shrink: 0;
+}
+
+.kpi-icon.blue { background: #eff6ff; color: #2563eb; }
+.kpi-icon.amber { background: #fffbeb; color: #d97706; }
+.kpi-icon.green { background: #ecfdf5; color: #059669; }
+.kpi-icon.purple { background: #f5f3ff; color: #7c3aed; }
+
+.kpi-info h3 {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: .5px;
+}
+
+.kpi-info .kpi-value {
+    font-size: 22px;
+    font-weight: 800;
+    color: var(--text-main);
+    margin-top: 3px;
+    line-height: 1.2;
+}
+
+.kpi-info .kpi-sub {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+/* TABLE CARD */
 .content-card {
     background: var(--card-bg);
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-color);
     box-shadow: var(--shadow-sm);
     overflow: hidden;
-    margin-bottom: 30px;
+    margin-bottom: 28px;
+}
+
+.table-header {
+    padding: 20px 24px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.table-header h2 {
+    font-size: 16.5px;
+    font-weight: 800;
+    color: var(--text-main);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.count-badge {
+    background: #f1f5f9;
+    color: #475569;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 20px;
+    border: 1px solid #e2e8f0;
 }
 
 .table-responsive {
@@ -310,79 +507,191 @@ a {
     width: 100%;
     border-collapse: collapse;
     text-align: left;
-    font-size: 14px;
+    font-size: 13.5px;
 }
 
 .data-table th {
-    background: #f1f5f9;
-    color: #334155;
+    background: #f8fafc;
+    color: #475569;
     font-weight: 700;
-    padding: 16px 20px;
+    padding: 14px 20px;
     border-bottom: 1px solid var(--border-color);
     white-space: nowrap;
+    text-transform: uppercase;
+    font-size: 11.5px;
+    letter-spacing: .5px;
 }
 
 .data-table td {
     padding: 16px 20px;
     border-bottom: 1px solid var(--border-color);
     color: var(--text-main);
-    white-space: nowrap;
+    vertical-align: middle;
 }
 
 .data-table tbody tr:hover {
-    background: var(--primary-light);
+    background: #f8fafc;
 }
 
 .data-table tbody tr:last-child td {
     border-bottom: none;
 }
 
-/* BADGES */
-.badge-status {
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 700;
+/* BADGES & PILLS */
+.id-badge {
     display: inline-block;
+    padding: 4px 8px;
+    background: #f1f5f9;
+    color: #64748b;
+    border-radius: 6px;
+    font-weight: 700;
+    font-size: 12px;
+    font-family: monospace;
 }
-.badge-applied { background: #dbeafe; color: #1e40af; }
-.badge-pending { background: #fef3c7; color: #92400e; }
-.badge-selected { background: #dcfce7; color: #166534; }
-.badge-rejected { background: #fee2e2; color: #991b1b; }
 
-/* WITHDRAW BUTTON */
-.action-btn {
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
+.company-cell {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.company-avatar {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+    color: white;
+    display: grid;
+    place-items: center;
+    font-size: 15px;
+    font-weight: 800;
+    flex-shrink: 0;
+}
+
+.company-name {
+    font-weight: 700;
+    color: var(--text-main);
+    font-size: 14px;
+}
+
+.drive-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    margin-top: 3px;
+}
+
+.drive-tag.on-campus {
+    background: #eff6ff;
+    color: #2563eb;
+    border: 1px solid #bfdbfe;
+}
+
+.drive-tag.off-campus {
+    background: #f0fdfa;
+    color: #0d9488;
+    border: 1px solid #99f6e4;
+}
+
+.status-badge {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    cursor: pointer;
+    padding: 5px 11px;
+    border-radius: 20px;
+    font-size: 11.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .3px;
+}
+
+.badge-applied {
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1px solid #bfdbfe;
+}
+
+.badge-pending {
+    background: #fffbeb;
+    color: #b45309;
+    border: 1px solid #fde68a;
+}
+
+.badge-shortlisted {
+    background: #ecfdf5;
+    color: #059669;
+    border: 1px solid #a7f3d0;
+}
+
+.badge-selected {
+    background: #f5f3ff;
+    color: #7c3aed;
+    border: 1px solid #ddd6fe;
+}
+
+.badge-rejected {
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+/* ACTIONS */
+.action-btn {
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 12.5px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: .15s;
     border: none;
-    transition: .2s;
+    cursor: pointer;
+    text-decoration: none;
 }
 
 .btn-withdraw {
-    background: #fee2e2;
-    color: #991b1b;
+    background: #fef2f2;
+    color: #dc2626;
+    border: 1px solid #fecaca;
 }
+.btn-withdraw:hover { background: #fee2e2; }
 
-.btn-withdraw:hover {
-    background: #fecaca;
-}
-
+/* EMPTY STATE */
 .empty-state {
-    padding: 40px;
+    padding: 50px 24px;
     text-align: center;
     color: var(--text-muted);
 }
 
-.empty-state i {
-    font-size: 36px;
-    margin-bottom: 12px;
-    color: #cbd5e1;
+.empty-state-icon {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #f1f5f9;
+    color: #94a3b8;
+    display: grid;
+    place-items: center;
+    font-size: 26px;
+    margin: 0 auto 16px;
+}
+
+.empty-state h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 6px;
+}
+
+.empty-state p {
+    font-size: 13.5px;
+    max-width: 440px;
+    margin: 0 auto 20px;
+    line-height: 1.5;
 }
 
 /* FOOTER */
@@ -390,30 +699,27 @@ a {
     text-align: center;
     color: var(--text-muted);
     font-size: 12px;
-    padding: 20px 10px;
+    padding: 24px 10px;
     border-top: 1px solid var(--border-color);
     margin-top: 40px;
 }
 
-@media(max-width: 900px) {
+/* RESPONSIVE */
+@media(max-width: 768px) {
     .main {
         margin-left: 70px;
         width: calc(100% - 70px);
         padding: 24px 20px;
     }
-    .sidebar {
-        width: 70px;
-    }
-    .side-link {
-        width: 54px;
-    }
+    .sidebar { width: 70px; }
+    .side-link { width: 56px; }
 }
 </style>
 </head>
 
 <body>
 
-<!-- TOP HEADER -->
+<!-- TOPBAR -->
 <header class="topbar">
     <a href="student_dashboard.jsp" class="brand">
         <div class="brand-mark"><i class="fa-solid fa-graduation-cap"></i></div>
@@ -462,153 +768,223 @@ a {
 
     <div class="page-header-bar">
         <div class="page-title">
-            <h1>My Applications <i class="fa-solid fa-paper-plane" style="font-size: 20px; color: var(--primary);"></i></h1>
-            <p>Track your submitted campus placement applications</p>
+            <h1><i class="fa-solid fa-paper-plane" style="color: var(--primary);"></i> My Job Applications</h1>
+            <p>Track your recruitment drive applications, shortlists, interview eligibility, and offers in real time.</p>
         </div>
-        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-            <a href="student_drive_view.jsp" class="btn-primary">
-                <i class="fa-solid fa-building"></i> View Placement Drives
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <a href="student_drive_view.jsp" class="btn-header btn-primary">
+                <i class="fa-solid fa-magnifying-glass"></i> Explore Placement Drives
             </a>
-            <a href="student_dashboard.jsp" class="btn-primary" style="background: #475569; box-shadow: 0 4px 12px rgba(71, 85, 105, 0.2);">
-                <i class="fa-solid fa-arrow-left"></i> Back to Dashboard
+            <a href="student_dashboard.jsp" class="btn-header btn-secondary">
+                <i class="fa-solid fa-arrow-left"></i> Dashboard
             </a>
+        </div>
+    </div>
+
+    <!-- FLASH MESSAGES -->
+    <% if (flashMsg != null) { %>
+        <div class="alert alert-success">
+            <i class="fa-solid fa-circle-check" style="font-size: 18px;"></i>
+            <%= flashMsg %>
+        </div>
+    <% } %>
+
+    <% if (flashErr != null) { %>
+        <div class="alert alert-error">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 18px;"></i>
+            <%= flashErr %>
+        </div>
+    <% } %>
+
+    <!-- KPI STATS CARDS -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-icon blue">
+                <i class="fa-solid fa-paper-plane"></i>
+            </div>
+            <div class="kpi-info">
+                <h3>Total Applied</h3>
+                <div class="kpi-value"><%= totalCount %></div>
+                <div class="kpi-sub">Placement drive submissions</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon amber">
+                <i class="fa-solid fa-hourglass-half"></i>
+            </div>
+            <div class="kpi-info">
+                <h3>Under Review</h3>
+                <div class="kpi-value"><%= pendingCount %></div>
+                <div class="kpi-sub">Awaiting shortlisting</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon green">
+                <i class="fa-solid fa-user-check"></i>
+            </div>
+            <div class="kpi-info">
+                <h3>Shortlisted</h3>
+                <div class="kpi-value"><%= shortlistedCount %></div>
+                <div class="kpi-sub">Invited to interview rounds</div>
+            </div>
+        </div>
+
+        <div class="kpi-card">
+            <div class="kpi-icon purple">
+                <div style="font-size: 18px;"><i class="fa-solid fa-award"></i></div>
+            </div>
+            <div class="kpi-info">
+                <h3>Offers &amp; Selected</h3>
+                <div class="kpi-value"><%= selectedCount %></div>
+                <div class="kpi-sub">Final selections achieved</div>
+            </div>
         </div>
     </div>
 
     <!-- TABLE CARD -->
     <div class="content-card">
+        <div class="table-header">
+            <h2>
+                <i class="fa-solid fa-list-check" style="color: var(--primary);"></i>
+                Application Tracking History
+            </h2>
+            <span class="count-badge"><%= totalCount %> Application<%= totalCount == 1 ? "" : "s" %></span>
+        </div>
+
         <div class="table-responsive">
             <table class="data-table">
                 <thead>
                     <tr>
                         <th>App ID</th>
-                        <th>Drive ID</th>
-                        <th>Company</th>
-                        <th>Job Title</th>
-                        <th>Applied Date</th>
-                        <th>Status</th>
-                        <th>College Shortlist</th>
-                        <th>Action</th>
+                        <th>Company &amp; Organization</th>
+                        <th>Job Title &amp; Drive</th>
+                        <th>Applied On</th>
+                        <th>College Status</th>
+                        <th>Company Decision</th>
+                        <th>Actions</th>
                     </tr>
                 </thead>
                 <tbody>
-                <%
-                    Connection con = null;
-                    PreparedStatement ps = null;
-                    ResultSet rs = null;
+                <% if (!appList.isEmpty()) {
+                    for (AppRecord rec : appList) {
+                        String compInitial = "C";
+                        if (rec.companyName != null && !rec.companyName.trim().isEmpty()) {
+                            compInitial = rec.companyName.trim().substring(0, 1).toUpperCase();
+                        }
 
-                    try {
-                        Class.forName("oracle.jdbc.driver.OracleDriver");
-
-                        con = DriverManager.getConnection(
-                            "jdbc:oracle:thin:@localhost:1521:XE",
-                            "CAMPUSCONNECT",
-                            "campus123"
-                        );
-
-                        String q =
-                            "SELECT A.APPLICATION_ID, " +
-                            "A.DRIVE_ID, " +
-                            "C.COMPANY_NAME, " +
-                            "R.JOB_TITLE, " +
-                            "A.APPLIED_DATE, " +
-                            "A.STATUS, " +
-                            "A.COLLEGE_SHORTLIST_STATUS " +
-                            "FROM APPLICATION A, " +
-                            "RECRUITMENT_DRIVE R, " +
-                            "COMPANY C " +
-                            "WHERE A.DRIVE_ID = R.DRIVE_ID " +
-                            "AND R.COMPANY_ID = C.COMPANY_ID " +
-                            "AND A.STUDENT_ID = ? " +
-                            "ORDER BY A.APPLICATION_ID";
-
-                        ps = con.prepareStatement(q);
-                        ps.setInt(1, studentId);
-                        rs = ps.executeQuery();
-
-                        boolean found = false;
-
-                        while(rs.next()) {
-                            found = true;
-                            int applicationId = rs.getInt("APPLICATION_ID");
-                            String status = rs.getString("STATUS");
-                            String shortlistStatus = rs.getString("COLLEGE_SHORTLIST_STATUS");
+                        boolean isOnCampus = !"Off-Campus".equalsIgnoreCase(rec.driveType) && !"Off Campus".equalsIgnoreCase(rec.driveType);
+                        boolean canWithdraw = ("APPLIED".equalsIgnoreCase(rec.status) || "PENDING".equalsIgnoreCase(rec.status)) &&
+                                              ("PENDING".equalsIgnoreCase(rec.collegeShortlistStatus));
                 %>
                     <tr>
-                        <td><strong>#<%= applicationId %></strong></td>
-                        <td><%= rs.getInt("DRIVE_ID") %></td>
-                        <td><strong><%= rs.getString("COMPANY_NAME") %></strong></td>
-                        <td><%= rs.getString("JOB_TITLE") %></td>
-                        <td><%= rs.getDate("APPLIED_DATE") %></td>
                         <td>
-                            <span class="badge-status <%= "SELECTED".equalsIgnoreCase(status) ? "badge-selected" : ("REJECTED".equalsIgnoreCase(status) ? "badge-rejected" : "badge-applied") %>">
-                                <%= status %>
+                            <span class="id-badge">#APP-<%= rec.applicationId %></span>
+                        </td>
+                        <td>
+                            <div class="company-cell">
+                                <div class="company-avatar"><%= compInitial %></div>
+                                <div>
+                                    <div class="company-name"><%= rec.companyName %></div>
+                                    <div style="font-size: 11px; color: var(--text-muted);">Drive #<%= rec.driveId %></div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 700; color: var(--text-main);"><%= rec.jobTitle %></div>
+                            <span class="drive-tag <%= isOnCampus ? "on-campus" : "off-campus" %>">
+                                <i class="fa-solid <%= isOnCampus ? "fa-building-columns" : "fa-globe" %>"></i>
+                                <%= rec.driveType %>
                             </span>
                         </td>
                         <td>
-                            <span class="badge-status <%= "SHORTLISTED".equalsIgnoreCase(shortlistStatus) ? "badge-selected" : ("REJECTED".equalsIgnoreCase(shortlistStatus) ? "badge-rejected" : "badge-pending") %>">
-                                <%= shortlistStatus %>
+                            <span style="font-size: 13px; color: var(--text-muted);">
+                                <i class="fa-regular fa-calendar" style="margin-right: 4px;"></i>
+                                <%= rec.appliedDate != null ? rec.appliedDate.toString() : "N/A" %>
                             </span>
                         </td>
                         <td>
-                        <%
-                            if(("APPLIED".equalsIgnoreCase(status) || "PENDING".equalsIgnoreCase(status)) &&
-                               ("PENDING".equalsIgnoreCase(shortlistStatus))) {
-                        %>
-                            <form method="post" action="studentApplication" style="display:inline;"
-                                  onsubmit="return confirm('Are you sure you want to withdraw this application?');">
-                                <input type="hidden" name="action" value="delete">
-                                <input type="hidden" name="applicationId" value="<%= applicationId %>">
-                                <button type="submit" class="action-btn btn-withdraw">
-                                    <i class="fa-regular fa-trash-can"></i> Withdraw
-                                </button>
-                            </form>
-                        <%
-                            } else {
-                        %>
-                            <span style="color: var(--text-muted); font-size: 13px; font-weight: 500;">Cannot Withdraw</span>
-                        <%
-                            }
-                        %>
+                            <% if ("SHORTLISTED".equalsIgnoreCase(rec.collegeShortlistStatus)) { %>
+                                <span class="status-badge badge-shortlisted">
+                                    <i class="fa-solid fa-circle-check"></i> Shortlisted
+                                </span>
+                            <% } else if ("REJECTED".equalsIgnoreCase(rec.collegeShortlistStatus)) { %>
+                                <span class="status-badge badge-rejected">
+                                    <i class="fa-solid fa-circle-xmark"></i> Rejected
+                                </span>
+                            <% } else if (!isOnCampus) { %>
+                                <span class="status-badge badge-applied" style="background:#f8fafc; color:#64748b; border-color:#e2e8f0;">
+                                    Direct
+                                </span>
+                            <% } else { %>
+                                <span class="status-badge badge-pending">
+                                    <i class="fa-regular fa-clock"></i> Pending
+                                </span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <% if ("SELECTED".equalsIgnoreCase(rec.status)) { %>
+                                <span class="status-badge badge-selected">
+                                    <i class="fa-solid fa-award"></i> Selected
+                                </span>
+                            <% } else if ("SHORTLISTED".equalsIgnoreCase(rec.status)) { %>
+                                <span class="status-badge badge-shortlisted">
+                                    <i class="fa-solid fa-circle-check"></i> Shortlisted
+                                </span>
+                            <% } else if ("REJECTED".equalsIgnoreCase(rec.status)) { %>
+                                <span class="status-badge badge-rejected">
+                                    <i class="fa-solid fa-circle-xmark"></i> Rejected
+                                </span>
+                            <% } else { %>
+                                <span class="status-badge badge-applied">
+                                    <i class="fa-solid fa-paper-plane"></i> Applied
+                                </span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <% if (canWithdraw) { %>
+                                <form method="post" action="studentApply" style="display:inline;"
+                                      onsubmit="return confirm('Are you sure you want to withdraw your application for <%= rec.jobTitle %> (#APP-<%= rec.applicationId %>)?');">
+                                    <input type="hidden" name="action" value="delete">
+                                    <input type="hidden" name="applicationId" value="<%= rec.applicationId %>">
+                                    <button type="submit" class="action-btn btn-withdraw" title="Withdraw application">
+                                        <i class="fa-regular fa-trash-can"></i> Withdraw
+                                    </button>
+                                </form>
+                            <% } else { %>
+                                <span style="font-size: 12px; color: var(--text-muted); font-weight: 600;">
+                                    <i class="fa-solid fa-lock" style="font-size: 11px;"></i> In Review
+                                </span>
+                            <% } %>
                         </td>
                     </tr>
                 <%
-                        }
-
-                        if(!found) {
-                %>
-                    <tr>
-                        <td colspan="8" class="empty-state">
-                            <i class="fa-regular fa-folder-open"></i><br>
-                            No Applications Found. Go to <strong>"View Placement Drives"</strong> to apply for upcoming opportunities.
-                        </td>
-                    </tr>
-                <%
-                        }
-                    } catch(Exception e) {
-                %>
-                    <tr>
-                        <td colspan="8" class="empty-state" style="color: #dc2626;">
-                            <i class="fa-solid fa-triangle-exclamation"></i><br>
-                            Error loading applications: <%= e.getMessage() %>
-                        </td>
-                    </tr>
-                <%
-                    } finally {
-                        try {
-                            if(rs != null) rs.close();
-                            if(ps != null) ps.close();
-                            if(con != null) con.close();
-                        } catch(Exception e) {}
                     }
+                } else {
                 %>
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">
+                                    <i class="fa-regular fa-paper-plane"></i>
+                                </div>
+                                <h3>No Placement Applications Yet</h3>
+                                <p>You haven't applied to any active campus recruitment drives. Discover upcoming opportunities tailored to your branch and academic profile.</p>
+                                <a href="student_drive_view.jsp" class="btn-header btn-primary">
+                                    <i class="fa-solid fa-briefcase"></i> Explore Placement Drives
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                <% } %>
                 </tbody>
             </table>
         </div>
     </div>
 
     <footer class="footer">
-        CampusConnect Student Portal &bull; Campus Recruitment Management System
+        CampusConnect Student Portal &bull; Campus Recruitment &amp; Placement Management System
     </footer>
 
 </main>

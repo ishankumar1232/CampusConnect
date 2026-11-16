@@ -53,6 +53,44 @@
     if (studentName != null && !studentName.trim().isEmpty()) {
         firstLetter = studentName.trim().substring(0, 1).toUpperCase();
     }
+
+    String message = (String) session1.getAttribute("studentOfferMsg");
+    session1.removeAttribute("studentOfferMsg");
+    String errorMsg = (String) session1.getAttribute("studentOfferErr");
+    session1.removeAttribute("studentOfferErr");
+
+    String offerAction = request.getParameter("offerAction");
+    String offerIdStr = request.getParameter("offerId");
+
+    if ("POST".equalsIgnoreCase(request.getMethod()) && offerAction != null && offerIdStr != null) {
+        try {
+            int targetOfferId = Integer.parseInt(offerIdStr.trim());
+            String targetStatus = "accept".equalsIgnoreCase(offerAction) ? "ACCEPTED" : "DECLINED";
+
+            Class.forName("oracle.jdbc.driver.OracleDriver");
+            try (Connection con = DriverManager.getConnection("jdbc:oracle:thin:@localhost:1521:XE", "CAMPUSCONNECT", "campus123")) {
+                con.setAutoCommit(false);
+                String updateOffer = "UPDATE OFFER SET OFFER_STATUS = ? WHERE OFFER_ID = ? AND APPLICATION_ID IN (SELECT APPLICATION_ID FROM APPLICATION WHERE STUDENT_ID = ?)";
+                try (PreparedStatement ps = con.prepareStatement(updateOffer)) {
+                    ps.setString(1, targetStatus);
+                    ps.setInt(2, targetOfferId);
+                    ps.setInt(3, studentId);
+                    int updated = ps.executeUpdate();
+                    if (updated > 0) {
+                        con.commit();
+                        session1.setAttribute("studentOfferMsg", "Job offer successfully " + targetStatus.toLowerCase() + "!");
+                    } else {
+                        con.rollback();
+                        session1.setAttribute("studentOfferErr", "Offer could not be updated or unauthorized.");
+                    }
+                }
+            }
+            response.sendRedirect("student_selection_view.jsp");
+            return;
+        } catch (Exception ex) {
+            errorMsg = "Action failed: " + ex.getMessage();
+        }
+    }
 %>
 
 <!DOCTYPE html>
@@ -349,6 +387,17 @@ a {
 .badge-rejected { background: #fee2e2; color: #991b1b; }
 .badge-pending { background: #fef3c7; color: #92400e; }
 
+.badge-offer-pending { background: #fffbeb; color: #b45309; border: 1px solid #fde68a; font-weight:700; padding: 4px 10px; border-radius: 20px; font-size: 11.5px; display: inline-flex; align-items:center; gap: 4px; }
+.badge-offer-accepted { background: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; font-weight:700; padding: 4px 10px; border-radius: 20px; font-size: 11.5px; display: inline-flex; align-items:center; gap: 4px; }
+.badge-offer-declined { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; font-weight:700; padding: 4px 10px; border-radius: 20px; font-size: 11.5px; display: inline-flex; align-items:center; gap: 4px; }
+.badge-offer-withdrawn { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-weight:700; padding: 4px 10px; border-radius: 20px; font-size: 11.5px; display: inline-flex; align-items:center; gap: 4px; }
+
+.btn-offer-accept { background: #10b981; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; transition: 0.15s; display: inline-flex; align-items: center; gap: 4px; }
+.btn-offer-accept:hover { background: #059669; }
+.btn-offer-decline { background: #ef4444; color: white; padding: 6px 12px; border-radius: 6px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; transition: 0.15s; display: inline-flex; align-items: center; gap: 4px; }
+.btn-offer-decline:hover { background: #dc2626; }
+.offer-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 12px; font-size: 12.5px; line-height: 1.45; }
+
 .empty-state {
     padding: 40px;
     text-align: center;
@@ -439,7 +488,7 @@ a {
     <div class="page-header-bar">
         <div class="page-title">
             <h1>My Selection Results <i class="fa-solid fa-award" style="font-size: 20px; color: var(--primary);"></i></h1>
-            <p>Check your final recruitment selection outcomes and remarks</p>
+            <p>Check your final recruitment selection outcomes and job offers</p>
         </div>
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
             <a href="student_application_view.jsp" class="btn-primary">
@@ -451,19 +500,31 @@ a {
         </div>
     </div>
 
+    <% if (message != null) { %>
+        <div style="padding: 14px 18px; background: #ecfdf5; border: 1px solid #a7f3d0; border-radius: 10px; color: #065f46; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-circle-check" style="font-size: 18px;"></i>
+            <%= message %>
+        </div>
+    <% } %>
+    <% if (errorMsg != null) { %>
+        <div style="padding: 14px 18px; background: #fef2f2; border: 1px solid #fecaca; border-radius: 10px; color: #991b1b; font-weight: 600; margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+            <i class="fa-solid fa-triangle-exclamation" style="font-size: 18px;"></i>
+            <%= errorMsg %>
+        </div>
+    <% } %>
+
     <!-- TABLE CARD -->
     <div class="content-card">
         <div class="table-responsive">
             <table class="data-table">
                 <thead>
                     <tr>
-                        <th>Selection ID</th>
-                        <th>App ID</th>
-                        <th>Company</th>
-                        <th>Job Title</th>
-                        <th>Result</th>
-                        <th>Selection Date</th>
-                        <th>Remarks</th>
+                        <th>Company &amp; Job</th>
+                        <th>Drive &amp; Date</th>
+                        <th>Selection Outcome</th>
+                        <th>Offer Package (CTC)</th>
+                        <th>Offer Status &amp; Action</th>
+                        <th>Offer Letter</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -482,20 +543,28 @@ a {
                         );
 
                         String sql =
-                            "SELECT S.SELECTION_ID, " +
-                            "S.APPLICATION_ID, " +
+                            "SELECT NVL(S.SELECTION_ID, 0) AS SELECTION_ID, " +
+                            "A.APPLICATION_ID, " +
                             "C.COMPANY_NAME, " +
                             "R.JOB_TITLE, " +
-                            "S.RESULT, " +
-                            "S.SELECTION_DATE, " +
-                            "S.REMARKS " +
-                            "FROM SELECTION S, APPLICATION A, " +
-                            "RECRUITMENT_DRIVE R, COMPANY C " +
-                            "WHERE S.APPLICATION_ID = A.APPLICATION_ID " +
-                            "AND A.DRIVE_ID = R.DRIVE_ID " +
-                            "AND R.COMPANY_ID = C.COMPANY_ID " +
-                            "AND A.STUDENT_ID = ? " +
-                            "ORDER BY S.SELECTION_ID";
+                            "R.DRIVE_TYPE, " +
+                            "NVL(S.RESULT, A.STATUS) AS RESULT, " +
+                            "NVL(S.SELECTION_DATE, A.APPLIED_DATE) AS SELECTION_DATE, " +
+                            "S.REMARKS, " +
+                            "O.OFFER_ID, " +
+                            "O.DESIGNATION, " +
+                            "O.ANNUAL_CTC, " +
+                            "O.JOINING_DATE, " +
+                            "O.OFFER_STATUS, " +
+                            "O.OFFER_LETTER " +
+                            "FROM APPLICATION A " +
+                            "JOIN RECRUITMENT_DRIVE R ON A.DRIVE_ID = R.DRIVE_ID " +
+                            "JOIN COMPANY C ON R.COMPANY_ID = C.COMPANY_ID " +
+                            "LEFT JOIN SELECTION S ON S.APPLICATION_ID = A.APPLICATION_ID " +
+                            "LEFT JOIN OFFER O ON O.APPLICATION_ID = A.APPLICATION_ID " +
+                            "WHERE A.STUDENT_ID = ? " +
+                            "AND (S.SELECTION_ID IS NOT NULL OR UPPER(NVL(A.STATUS,'PENDING')) IN ('SELECTED', 'HIRED') OR O.OFFER_ID IS NOT NULL) " +
+                            "ORDER BY A.APPLICATION_ID DESC";
 
                         ps = con.prepareStatement(sql);
                         ps.setInt(1, studentId);
@@ -505,7 +574,21 @@ a {
 
                         while(rs.next()) {
                             found = true;
+                            int appId = rs.getInt("APPLICATION_ID");
+                            String companyNameStr = rs.getString("COMPANY_NAME");
+                            String jobTitle = rs.getString("JOB_TITLE");
+                            String driveType = rs.getString("DRIVE_TYPE");
                             String result = rs.getString("RESULT");
+                            java.sql.Date selDate = rs.getDate("SELECTION_DATE");
+                            String remarks = rs.getString("REMARKS");
+
+                            int offerId = rs.getInt("OFFER_ID");
+                            String designation = rs.getString("DESIGNATION");
+                            java.math.BigDecimal ctc = rs.getBigDecimal("ANNUAL_CTC");
+                            java.sql.Date joiningDate = rs.getDate("JOINING_DATE");
+                            String offerStatus = rs.getString("OFFER_STATUS");
+                            String offerLetter = rs.getString("OFFER_LETTER");
+
                             String resultClass = "badge-pending";
                             if ("SELECTED".equalsIgnoreCase(result) || "HIRED".equalsIgnoreCase(result) || "PASSED".equalsIgnoreCase(result)) {
                                 resultClass = "badge-selected";
@@ -514,17 +597,95 @@ a {
                             }
                 %>
                     <tr>
-                        <td><strong>#<%= rs.getInt("SELECTION_ID") %></strong></td>
-                        <td>#<%= rs.getInt("APPLICATION_ID") %></td>
-                        <td><strong><%= rs.getString("COMPANY_NAME") %></strong></td>
-                        <td><%= rs.getString("JOB_TITLE") %></td>
+                        <td>
+                            <div><strong><%= companyNameStr %></strong></div>
+                            <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
+                                <%= jobTitle %> &bull; App #<%= appId %>
+                            </div>
+                        </td>
+                        <td>
+                            <div><span style="font-size: 11.5px; font-weight: 700; color: #475569; background: #f1f5f9; padding: 2px 7px; border-radius: 4px;"><%= driveType != null ? driveType : "Campus" %></span></div>
+                            <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">
+                                <%= selDate != null ? selDate : "-" %>
+                            </div>
+                        </td>
                         <td>
                             <span class="badge-result <%= resultClass %>">
+                                <% if ("SELECTED".equalsIgnoreCase(result) || "HIRED".equalsIgnoreCase(result)) { %>
+                                    <i class="fa-solid fa-circle-check"></i>
+                                <% } %>
                                 <%= result != null ? result : "PENDING" %>
                             </span>
+                            <% if (remarks != null && !remarks.trim().isEmpty()) { %>
+                                <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px; max-width: 180px; overflow-wrap: break-word;">
+                                    <%= remarks %>
+                                </div>
+                            <% } %>
                         </td>
-                        <td><%= rs.getDate("SELECTION_DATE") != null ? rs.getDate("SELECTION_DATE") : "-" %></td>
-                        <td><%= rs.getString("REMARKS") != null ? rs.getString("REMARKS") : "-" %></td>
+                        <td>
+                            <% if (offerId > 0 && designation != null) { %>
+                                <div style="font-weight: 700; color: #0f172a;"><%= designation %></div>
+                                <div style="font-weight: 800; color: #16a34a; font-size: 13.5px; margin-top: 2px;">
+                                    ₹ <%= ctc != null ? ctc.toString() : "-" %> <span style="font-size: 11px; font-weight: 500; color: var(--text-muted);">/ year</span>
+                                </div>
+                                <% if (joiningDate != null) { %>
+                                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 3px;">
+                                        Joining: <strong><%= joiningDate %></strong>
+                                    </div>
+                                <% } %>
+                            <% } else { %>
+                                <span style="color: var(--text-muted); font-size: 12.5px; font-style: italic;">
+                                    Offer in preparation
+                                </span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <% if (offerId > 0 && offerStatus != null) { %>
+                                <% if ("PENDING".equalsIgnoreCase(offerStatus)) { %>
+                                    <div><span class="badge-offer-pending"><i class="fa-regular fa-clock"></i> Action Needed</span></div>
+                                    <div style="margin-top: 8px; display: flex; gap: 6px;">
+                                        <form method="post" onsubmit="return confirm('Accept official job offer from <%= companyNameStr %>?');" style="margin:0;">
+                                            <input type="hidden" name="offerAction" value="accept">
+                                            <input type="hidden" name="offerId" value="<%= offerId %>">
+                                            <button type="submit" class="btn-offer-accept">
+                                                <i class="fa-solid fa-check"></i> Accept
+                                            </button>
+                                        </form>
+                                        <form method="post" onsubmit="return confirm('Decline this job offer?');" style="margin:0;">
+                                            <input type="hidden" name="offerAction" value="decline">
+                                            <input type="hidden" name="offerId" value="<%= offerId %>">
+                                            <button type="submit" class="btn-offer-decline">
+                                                <i class="fa-solid fa-xmark"></i> Decline
+                                            </button>
+                                        </form>
+                                    </div>
+                                <% } else if ("ACCEPTED".equalsIgnoreCase(offerStatus)) { %>
+                                    <span class="badge-offer-accepted"><i class="fa-solid fa-check-double"></i> Offer Accepted</span>
+                                <% } else if ("DECLINED".equalsIgnoreCase(offerStatus)) { %>
+                                    <span class="badge-offer-declined"><i class="fa-solid fa-ban"></i> Offer Declined</span>
+                                <% } else if ("WITHDRAWN".equalsIgnoreCase(offerStatus)) { %>
+                                    <span class="badge-offer-withdrawn"><i class="fa-solid fa-rotate-left"></i> Offer Withdrawn</span>
+                                <% } else { %>
+                                    <span class="badge-offer-pending"><%= offerStatus %></span>
+                                <% } %>
+                            <% } else { %>
+                                <span style="color: var(--text-muted); font-size: 12px;">&mdash;</span>
+                            <% } %>
+                        </td>
+                        <td>
+                            <% if (offerLetter != null && !offerLetter.trim().isEmpty()) { 
+                                String letterUrl = offerLetter.trim();
+                                if (!letterUrl.startsWith("http://") && !letterUrl.startsWith("https://") && !letterUrl.startsWith("/")) {
+                                    letterUrl = "https://" + letterUrl;
+                                }
+                            %>
+                                <a href="<%= letterUrl %>" target="_blank" rel="noopener noreferrer" style="color: var(--primary); font-weight: 700; font-size: 12.5px; display: inline-flex; align-items: center; gap: 5px;">
+                                    <i class="fa-solid fa-arrow-up-right-from-square"></i> View Doc
+                                </a>
+                            <% } else { %>
+                                <span style="color: var(--text-muted); font-size: 12px;">&mdash;</span>
+                            <% } %>
+                        </td>
                     </tr>
                 <%
                         }
@@ -532,9 +693,9 @@ a {
                         if(!found) {
                 %>
                     <tr>
-                        <td colspan="7" class="empty-state">
+                        <td colspan="6" class="empty-state">
                             <i class="fa-regular fa-folder-open"></i><br>
-                            No Selection Results Found at the moment.
+                            No Selection Results or Offers Found at the moment.
                         </td>
                     </tr>
                 <%
@@ -542,7 +703,7 @@ a {
                     } catch(Exception e) {
                 %>
                     <tr>
-                        <td colspan="7" class="empty-state" style="color: #dc2626;">
+                        <td colspan="6" class="empty-state" style="color: #dc2626;">
                             <i class="fa-solid fa-triangle-exclamation"></i><br>
                             Error loading selection results: <%= e.getMessage() %>
                         </td>

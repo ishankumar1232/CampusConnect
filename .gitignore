@@ -1,2 +1,6 @@
 /build/
 src/main/resources/db.properties
+tomcat.*/
+src/main/webapp/WEB-INF/classes/
+*.class
+.metadata/

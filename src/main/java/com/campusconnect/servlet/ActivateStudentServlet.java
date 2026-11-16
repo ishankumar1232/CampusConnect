@@ -26,11 +26,25 @@ public class ActivateStudentServlet extends HttpServlet {
             return;
         }
 
-        int id = Integer.parseInt(req.getParameter("id"));
+        String idStr = req.getParameter("id");
 
-        StudentDAO dao = new StudentDAO();
+        if (idStr == null || idStr.trim().isEmpty()) {
 
-        dao.activateStudent(id);
+            res.sendRedirect(req.getContextPath()
+                    + "/StudentManagementServlet");
+            return;
+        }
+
+        try {
+            int id = Integer.parseInt(idStr.trim());
+
+            StudentDAO dao = new StudentDAO();
+
+            dao.activateStudent(id);
+
+        } catch (NumberFormatException e) {
+            // Invalid ID format, ignore
+        }
 
         res.sendRedirect(req.getContextPath()
                 + "/StudentManagementServlet");

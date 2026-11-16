@@ -15,18 +15,15 @@
         return;
     }
 
-
     String name = "";
     String email = "";
     String phone = "";
     String collegeName = "";
     String courseName = "";
 
-
     Connection con = null;
     PreparedStatement ps = null;
     ResultSet rs = null;
-
 
     try
     {
@@ -34,13 +31,11 @@
             "oracle.jdbc.driver.OracleDriver"
         );
 
-
         con = DriverManager.getConnection(
             "jdbc:oracle:thin:@localhost:1521:XE",
             "CAMPUSCONNECT",
             "campus123"
         );
-
 
         String sql =
             "SELECT A.APPLICANT_NAME, " +
@@ -57,7 +52,6 @@
             "AND A.STATUS='CONFIRMED' " +
             "AND A.STUDENT_ID IS NULL";
 
-
         ps = con.prepareStatement(sql);
 
         ps.setInt(
@@ -65,9 +59,7 @@
             Integer.parseInt(admissionId)
         );
 
-
         rs = ps.executeQuery();
-
 
         if(rs.next())
         {
@@ -92,28 +84,14 @@
             ps.close();
             con.close();
 
-            out.println(
-                "<h2>Registration Not Available</h2>"
-            );
-
-            out.println(
-                "<p>Admission is not confirmed or registration is already completed.</p>"
-            );
-
+            response.sendRedirect("student_register_status.jsp?status=not_available&admissionId=" + admissionId);
             return;
         }
 
     }
     catch(Exception e)
     {
-        out.println(
-            "<h2>Error</h2>"
-        );
-
-        out.println(
-            "<p>" + e.getMessage() + "</p>"
-        );
-
+        response.sendRedirect("student_register_status.jsp?status=error&message=" + java.net.URLEncoder.encode(e.getMessage() != null ? e.getMessage() : "Error loading admission", "UTF-8"));
         return;
     }
     finally
@@ -136,7 +114,6 @@
     }
 %>
 
-
 <!DOCTYPE html>
 
 <html lang="en">
@@ -151,7 +128,6 @@
 <title>
     Student Registration | CampusConnect
 </title>
-
 
 <style>
 
@@ -185,7 +161,6 @@ body {
 
     color: #26364f;
 }
-
 
 /* =====================================
    HEADER
@@ -260,7 +235,6 @@ body {
     transform: translateY(-1px);
 }
 
-
 /* =====================================
    MAIN
 ===================================== */
@@ -273,7 +247,6 @@ body {
 
     margin: 42px auto 70px;
 }
-
 
 /* =====================================
    PAGE TITLE
@@ -303,7 +276,6 @@ body {
 
     font-size: 15px;
 }
-
 
 /* =====================================
    CARD
@@ -354,7 +326,6 @@ body {
         );
 }
 
-
 /* =====================================
    SECTION TITLE
 ===================================== */
@@ -391,7 +362,6 @@ body {
             #49a5ff
         );
 }
-
 
 /* =====================================
    ADMISSION INFO
@@ -456,7 +426,6 @@ body {
 
     word-break: break-word;
 }
-
 
 /* =====================================
    FORM
@@ -547,7 +516,6 @@ textarea {
     min-height: 110px;
 }
 
-
 /* =====================================
    GENDER
 ===================================== */
@@ -581,7 +549,6 @@ textarea {
     accent-color: #1769e0;
 
 }
-
 
 /* =====================================
    NOTE
@@ -619,7 +586,6 @@ textarea {
 
     color: #173c76;
 }
-
 
 /* =====================================
    BUTTONS
@@ -697,7 +663,6 @@ button {
     transform: translateY(-2px);
 }
 
-
 /* =====================================
    FOOTER
 ===================================== */
@@ -716,7 +681,6 @@ button {
 
     font-size: 13px;
 }
-
 
 /* =====================================
    RESPONSIVE
@@ -777,7 +741,6 @@ button {
 
 </style>
 
-
 <script>
 
 function validateForm()
@@ -785,7 +748,6 @@ function validateForm()
 
     var form =
         document.forms["studentForm"];
-
 
     var password =
         form["password"].value;
@@ -802,7 +764,6 @@ function validateForm()
     var address =
         form["address"].value;
 
-
     /* PASSWORD */
 
     if(password == "")
@@ -814,7 +775,6 @@ function validateForm()
         return false;
     }
 
-
     if(password.length < 6)
     {
         alert(
@@ -825,7 +785,6 @@ function validateForm()
 
         return false;
     }
-
 
     /* CONFIRM PASSWORD */
 
@@ -840,7 +799,6 @@ function validateForm()
         return false;
     }
 
-
     if(password != cpassword)
     {
         alert(
@@ -851,7 +809,6 @@ function validateForm()
 
         return false;
     }
-
 
     /* DOB */
 
@@ -866,7 +823,6 @@ function validateForm()
         return false;
     }
 
-
     /* GENDER */
 
     if(!gender[0].checked &&
@@ -878,7 +834,6 @@ function validateForm()
 
         return false;
     }
-
 
     /* ADDRESS */
 
@@ -893,7 +848,6 @@ function validateForm()
         return false;
     }
 
-
     return true;
 }
 
@@ -901,9 +855,7 @@ function validateForm()
 
 </head>
 
-
 <body>
-
 
 <!-- =====================================
      HEADER
@@ -917,7 +869,6 @@ function validateForm()
 
     </div>
 
-
     <a
         href="new_student_colleges.jsp"
         class="back-btn">
@@ -928,14 +879,11 @@ function validateForm()
 
 </div>
 
-
-
 <!-- =====================================
      MAIN
 ===================================== -->
 
 <div class="container">
-
 
     <!-- TITLE -->
 
@@ -952,7 +900,19 @@ function validateForm()
 
     </div>
 
-
+    <% if ("already_exists".equals(request.getParameter("error"))) { %>
+        <div style="background:#fffbeb; border:1px solid #fde68a; border-left:4px solid #d97706; border-radius:12px; padding:16px 20px; margin-bottom:24px; color:#92400e; font-size:14px; display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap;">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <span style="font-size:20px;">⚠️</span>
+                <div>
+                    <strong>Account Already Exists:</strong> An account with this Email ID already exists in CampusConnect.
+                </div>
+            </div>
+            <a href="student_login.jsp" style="background:#d97706; color:white; padding:8px 16px; border-radius:8px; font-weight:bold; font-size:13px; text-decoration:none; display:inline-flex; align-items:center; gap:6px;">
+                Go to Login &rarr;
+            </a>
+        </div>
+    <% } %>
 
     <!-- =================================
          ADMISSION INFORMATION
@@ -966,9 +926,7 @@ function validateForm()
 
         </h2>
 
-
         <div class="info-grid">
-
 
             <!-- ADMISSION ID -->
 
@@ -984,8 +942,6 @@ function validateForm()
 
             </div>
 
-
-
             <!-- NAME -->
 
             <div class="info-box">
@@ -999,8 +955,6 @@ function validateForm()
                 </span>
 
             </div>
-
-
 
             <!-- EMAIL -->
 
@@ -1016,8 +970,6 @@ function validateForm()
 
             </div>
 
-
-
             <!-- PHONE -->
 
             <div class="info-box">
@@ -1031,8 +983,6 @@ function validateForm()
                 </span>
 
             </div>
-
-
 
             <!-- COLLEGE -->
 
@@ -1048,8 +998,6 @@ function validateForm()
 
             </div>
 
-
-
             <!-- COURSE -->
 
             <div class="info-box">
@@ -1064,12 +1012,9 @@ function validateForm()
 
             </div>
 
-
         </div>
 
     </div>
-
-
 
     <!-- =================================
          REGISTRATION FORM
@@ -1083,7 +1028,6 @@ function validateForm()
 
         </h2>
 
-
         <p class="form-description">
 
             Your admission information is already
@@ -1092,13 +1036,11 @@ function validateForm()
 
         </p>
 
-
         <form
             name="studentForm"
             method="post"
             action="studentRegister"
             onsubmit="return validateForm();">
-
 
             <!-- ADMISSION ID -->
 
@@ -1106,8 +1048,6 @@ function validateForm()
                 type="hidden"
                 name="admissionId"
                 value="<%= admissionId %>">
-
-
 
             <!-- PASSWORD -->
 
@@ -1123,7 +1063,6 @@ function validateForm()
 
                 </label>
 
-
                 <input
                     type="password"
                     name="password"
@@ -1133,8 +1072,6 @@ function validateForm()
                     required>
 
             </div>
-
-
 
             <!-- CONFIRM PASSWORD -->
 
@@ -1150,7 +1087,6 @@ function validateForm()
 
                 </label>
 
-
                 <input
                     type="password"
                     name="cpassword"
@@ -1160,8 +1096,6 @@ function validateForm()
                     required>
 
             </div>
-
-
 
             <!-- DOB -->
 
@@ -1177,15 +1111,12 @@ function validateForm()
 
                 </label>
 
-
                 <input
                     type="date"
                     name="dob"
                     required>
 
             </div>
-
-
 
             <!-- GENDER -->
 
@@ -1201,7 +1132,6 @@ function validateForm()
 
                 </label>
 
-
                 <div class="gender">
 
                     <label>
@@ -1214,7 +1144,6 @@ function validateForm()
                         Male
 
                     </label>
-
 
                     <label>
 
@@ -1231,8 +1160,6 @@ function validateForm()
 
             </div>
 
-
-
             <!-- ADDRESS -->
 
             <div class="form-group">
@@ -1247,7 +1174,6 @@ function validateForm()
 
                 </label>
 
-
                 <textarea
                     name="address"
                     rows="4"
@@ -1256,8 +1182,6 @@ function validateForm()
                     required></textarea>
 
             </div>
-
-
 
             <!-- NOTE -->
 
@@ -1271,8 +1195,6 @@ function validateForm()
 
             </div>
 
-
-
             <!-- BUTTONS -->
 
             <div class="buttons">
@@ -1285,7 +1207,6 @@ function validateForm()
 
                 </button>
 
-
                 <button
                     type="reset"
                     class="reset-btn">
@@ -1296,15 +1217,11 @@ function validateForm()
 
             </div>
 
-
         </form>
 
     </div>
 
-
 </div>
-
-
 
 <!-- =====================================
      FOOTER
@@ -1316,7 +1233,6 @@ function validateForm()
     Campus Recruitment Management System
 
 </div>
-
 
 </body>
 

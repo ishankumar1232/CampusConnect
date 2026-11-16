@@ -173,6 +173,25 @@
                         throw new SQLException("Offer was not created.");
                 }
 
+                // Synchronize with SELECTION table
+                String checkSel = "SELECT COUNT(*) FROM SELECTION WHERE APPLICATION_ID = ?";
+                boolean selExists = false;
+                try (PreparedStatement sp = con.prepareStatement(checkSel)) {
+                    sp.setInt(1, appId);
+                    try (ResultSet sr = sp.executeQuery()) {
+                        if (sr.next() && sr.getInt(1) > 0) selExists = true;
+                    }
+                }
+                if (!selExists) {
+                    String insSel = "INSERT INTO SELECTION (SELECTION_ID, APPLICATION_ID, RESULT, SELECTION_DATE, REMARKS) " +
+                                    "VALUES (NVL((SELECT MAX(SELECTION_ID) FROM SELECTION), 0) + 1, ?, 'SELECTED', SYSDATE, ?)";
+                    try (PreparedStatement sp = con.prepareStatement(insSel)) {
+                        sp.setInt(1, appId);
+                        sp.setString(2, "Offered: " + designation + " (CTC: Rs." + ctc + ")");
+                        sp.executeUpdate();
+                    }
+                }
+
                 con.commit();
                 session.setAttribute("offerFlash",
                     "Offer created and marked pending.");
@@ -200,6 +219,47 @@
                 con.commit();
                 session.setAttribute("offerFlash", "Pending offer withdrawn.");
                 response.sendRedirect("company-offers.jsp");
+                return;
+
+            } else if ("markSelected".equals(action)) {
+                int appId = number(request.getParameter("applicationId"));
+                if (appId <= 0)
+                    throw new IllegalArgumentException("Choose a valid candidate.");
+
+                String updateSql =
+                    "UPDATE APPLICATION A SET STATUS='SELECTED' " +
+                    "WHERE A.APPLICATION_ID=? " +
+                    "AND EXISTS (SELECT 1 FROM RECRUITMENT_DRIVE R WHERE R.DRIVE_ID=A.DRIVE_ID AND R.COMPANY_ID=?)";
+
+                try (PreparedStatement p = con.prepareStatement(updateSql)) {
+                    p.setInt(1, appId);
+                    p.setInt(2, companyId);
+                    if (p.executeUpdate() != 1) {
+                        throw new IllegalArgumentException("Candidate not found or unauthorized.");
+                    }
+                }
+
+                // Synchronize with SELECTION table
+                String checkSel = "SELECT COUNT(*) FROM SELECTION WHERE APPLICATION_ID = ?";
+                boolean selExists = false;
+                try (PreparedStatement sp = con.prepareStatement(checkSel)) {
+                    sp.setInt(1, appId);
+                    try (ResultSet sr = sp.executeQuery()) {
+                        if (sr.next() && sr.getInt(1) > 0) selExists = true;
+                    }
+                }
+                if (!selExists) {
+                    String insSel = "INSERT INTO SELECTION (SELECTION_ID, APPLICATION_ID, RESULT, SELECTION_DATE, REMARKS) " +
+                                    "VALUES (NVL((SELECT MAX(SELECTION_ID) FROM SELECTION), 0) + 1, ?, 'SELECTED', SYSDATE, 'Marked as Selected for Job Offer')";
+                    try (PreparedStatement sp = con.prepareStatement(insSel)) {
+                        sp.setInt(1, appId);
+                        sp.executeUpdate();
+                    }
+                }
+
+                con.commit();
+                session.setAttribute("offerFlash", "Candidate successfully marked as Selected! You can now create an offer.");
+                response.sendRedirect("company-offers.jsp?appId=" + appId);
                 return;
 
             } else {
@@ -230,8 +290,12 @@
 
     List<Map<String,Object>> selected =
         new ArrayList<Map<String,Object>>();
+    List<Map<String,Object>> shortlistedCandidates =
+        new ArrayList<Map<String,Object>>();
     List<Map<String,Object>> offers =
         new ArrayList<Map<String,Object>>();
+
+    int preselectedAppId = number(request.getParameter("appId"));
 
     int pendingCount = 0, acceptedCount = 0,
         declinedCount = 0, withdrawnCount = 0;
@@ -240,9 +304,10 @@
         con = DBConnection.getConnection();
 
         String selectedSql =
-            "SELECT A.APPLICATION_ID,S.NAME,S.EMAIL,R.JOB_TITLE " +
+            "SELECT A.APPLICATION_ID,S.NAME,S.EMAIL,R.JOB_TITLE,COL.COLLEGE_NAME " +
             "FROM APPLICATION A " +
             "JOIN STUDENT S ON S.STUDENT_ID=A.STUDENT_ID " +
+            "LEFT JOIN COLLEGE COL ON S.COLLEGE_ID=COL.COLLEGE_ID " +
             "JOIN RECRUITMENT_DRIVE R ON R.DRIVE_ID=A.DRIVE_ID " +
             "WHERE R.COMPANY_ID=? " +
             "AND UPPER(NVL(A.STATUS,'PENDING'))='SELECTED' " +
@@ -260,7 +325,35 @@
                     m.put("name", r.getString("NAME"));
                     m.put("email", r.getString("EMAIL"));
                     m.put("job", r.getString("JOB_TITLE"));
+                    m.put("college", r.getString("COLLEGE_NAME") != null ? r.getString("COLLEGE_NAME") : "Off-Campus");
                     selected.add(m);
+                }
+            }
+        }
+
+        String shortSql =
+            "SELECT A.APPLICATION_ID,S.NAME,S.EMAIL,R.JOB_TITLE,COL.COLLEGE_NAME,R.DRIVE_TYPE " +
+            "FROM APPLICATION A " +
+            "JOIN STUDENT S ON S.STUDENT_ID=A.STUDENT_ID " +
+            "LEFT JOIN COLLEGE COL ON S.COLLEGE_ID=COL.COLLEGE_ID " +
+            "JOIN RECRUITMENT_DRIVE R ON R.DRIVE_ID=A.DRIVE_ID " +
+            "WHERE R.COMPANY_ID=? " +
+            "AND UPPER(NVL(A.STATUS,'PENDING'))='SHORTLISTED' " +
+            "AND NOT EXISTS (SELECT 1 FROM OFFER O WHERE O.APPLICATION_ID=A.APPLICATION_ID) " +
+            "ORDER BY A.APPLICATION_ID DESC";
+
+        try (PreparedStatement sp = con.prepareStatement(shortSql)) {
+            sp.setInt(1, companyId);
+            try (ResultSet sr = sp.executeQuery()) {
+                while (sr.next()) {
+                    Map<String,Object> m = new HashMap<String,Object>();
+                    m.put("id", sr.getInt("APPLICATION_ID"));
+                    m.put("name", sr.getString("NAME"));
+                    m.put("email", sr.getString("EMAIL"));
+                    m.put("job", sr.getString("JOB_TITLE"));
+                    m.put("driveType", sr.getString("DRIVE_TYPE"));
+                    m.put("college", sr.getString("COLLEGE_NAME") != null ? sr.getString("COLLEGE_NAME") : "Off-Campus");
+                    shortlistedCandidates.add(m);
                 }
             }
         }
@@ -504,11 +597,75 @@ body{overflow-x:hidden}
     </div>
 
     <% if (selected.isEmpty()) { %>
-        <div class="empty">
-            <i class="fa-solid fa-user-check"></i>
-            <b>No eligible candidates.</b>
-            A candidate must have the company-side application status
-            <strong>SELECTED</strong> before an offer can be created.
+        <div style="padding: 24px; text-align: left;">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px; color: #1e3a8a;">
+                <div style="width: 36px; height: 36px; border-radius: 50%; background: #e0f2fe; color: #0284c7; display: flex; align-items: center; justify-content: center; font-size: 16px;">
+                    <i class="fa-solid fa-info"></i>
+                </div>
+                <div>
+                    <h3 style="margin:0; font-size: 15px; font-weight: 700; color: #0f172a;">How to Issue Offers</h3>
+                    <p style="margin:2px 0 0; font-size: 12px; color: #64748b;">Candidates must have status <b>SELECTED</b></p>
+                </div>
+            </div>
+
+            <p style="font-size: 13px; color: #475569; line-height: 1.5; margin-bottom: 16px;">
+                Before an offer letter can be created, the candidate must be finalized as 
+                <span class="status accepted" style="font-size: 11px; padding: 2px 8px;">SELECTED</span>. You have two ways:
+            </p>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px;">
+                <div style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 3px; display:flex; align-items:center; gap:6px;">
+                    <i class="fa-solid fa-calendar-check" style="color: #2563eb;"></i> Way 1: Complete Interview Process
+                </div>
+                <div style="font-size: 12px; color: #64748b; line-height: 1.45;">
+                    Schedule rounds on <a href="company-interviews.jsp" style="color:#2563eb; font-weight:600;">Interviews</a>, submit round evaluation, and mark final decision as <b>SELECTED</b>.
+                </div>
+            </div>
+
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px 14px; margin-bottom: 18px;">
+                <div style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 3px; display:flex; align-items:center; gap:6px;">
+                    <i class="fa-solid fa-bolt" style="color: #f59e0b;"></i> Way 2: Fast-Track Shortlisted Candidates
+                </div>
+                <div style="font-size: 12px; color: #64748b; line-height: 1.45;">
+                    Directly select candidates from your shortlisted pool below without additional interviews.
+                </div>
+            </div>
+
+            <% if (!shortlistedCandidates.isEmpty()) { %>
+                <div style="border-top: 1px dashed #cbd5e1; padding-top: 16px;">
+                    <div style="font-weight: 700; font-size: 13px; color: #0f172a; margin-bottom: 12px; display:flex; justify-content:space-between; align-items:center;">
+                        <span><i class="fa-solid fa-star" style="color:#f59e0b; margin-right:4px;"></i> Shortlisted Candidates (<%= shortlistedCandidates.size() %>)</span>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 9px; max-height: 320px; overflow-y: auto;">
+                        <% for (Map<String,Object> sc : shortlistedCandidates) { %>
+                            <div style="background:white; padding:10px 12px; border-radius:8px; border:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                                <div style="min-width:0;">
+                                    <div style="font-weight:700; font-size:13px; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><%= esc((String)sc.get("name")) %></div>
+                                    <div style="font-size:11.5px; color:#64748b;"><%= esc((String)sc.get("job")) %> &bull; <%= esc((String)sc.get("college")) %></div>
+                                </div>
+                                <form method="post" style="margin:0; flex-shrink:0;">
+                                    <input type="hidden" name="csrf" value="<%= esc(csrf) %>">
+                                    <input type="hidden" name="action" value="markSelected">
+                                    <input type="hidden" name="applicationId" value="<%= sc.get("id") %>">
+                                    <button class="btn primary" type="submit" style="padding: 7px 12px; font-size: 11.5px; border-radius: 6px; white-space: nowrap;">
+                                        <i class="fa-solid fa-check"></i> Select &amp; Offer
+                                    </button>
+                                </form>
+                            </div>
+                        <% } %>
+                    </div>
+                </div>
+            <% } else { %>
+                <div style="padding: 16px; background: #f1f5f9; border-radius: 8px; text-align: center; color: #64748b; font-size: 12.5px;">
+                    <i class="fa-solid fa-user-xmark" style="font-size: 20px; margin-bottom: 6px; display:block; color: #94a3b8;"></i>
+                    No candidates are currently shortlisted.
+                    <div style="margin-top: 8px;">
+                        <a href="company-applicants.jsp" class="btn" style="padding: 6px 12px; font-size: 12px; font-weight: 600;">
+                            <i class="fa-solid fa-users"></i> Review Applicants
+                        </a>
+                    </div>
+                </div>
+            <% } %>
         </div>
     <% } else { %>
     <form class="form" method="post">
@@ -519,9 +676,11 @@ body{overflow-x:hidden}
             <label for="applicationId">Selected Candidate *</label>
             <select id="applicationId" name="applicationId" required>
                 <option value="">Choose a candidate</option>
-                <% for (Map<String,Object> c : selected) { %>
-                    <option value="<%=c.get("id")%>">
-                        <%=esc((String)c.get("name"))%> — <%=esc((String)c.get("job"))%>
+                <% for (Map<String,Object> c : selected) { 
+                    boolean isPre = preselectedAppId > 0 && ((Integer)c.get("id")).intValue() == preselectedAppId;
+                %>
+                    <option value="<%=c.get("id")%>" data-job="<%=esc((String)c.get("job"))%>" <%= isPre ? "selected" : "" %>>
+                        <%=esc((String)c.get("name"))%> (<%=esc((String)c.get("college"))%>) — <%=esc((String)c.get("job"))%>
                     </option>
                 <% } %>
             </select>
@@ -529,13 +688,13 @@ body{overflow-x:hidden}
 
         <div class="field full">
             <label for="designation">Offer Designation *</label>
-            <input id="designation" name="designation" maxlength="100" required>
+            <input id="designation" name="designation" maxlength="100" required placeholder="e.g. Associate Software Engineer">
         </div>
 
         <div class="field full">
             <label for="annualCtc">Annual CTC (₹) *</label>
             <input id="annualCtc" name="annualCtc" type="number"
-                   min="0.01" step="0.01" required>
+                   min="0.01" step="0.01" required placeholder="e.g. 700000">
         </div>
 
         <div class="field full">
@@ -545,12 +704,12 @@ body{overflow-x:hidden}
 
         <div class="field full">
             <label for="offerLetter">Offer Letter Link / Reference</label>
-            <input id="offerLetter" name="offerLetter" maxlength="500">
+            <input id="offerLetter" name="offerLetter" maxlength="500" placeholder="https://drive.google.com/... or Doc ID">
         </div>
 
         <div class="field full">
             <label for="remarks">Remarks</label>
-            <textarea id="remarks" name="remarks" maxlength="500" rows="3"></textarea>
+            <textarea id="remarks" name="remarks" maxlength="500" rows="3" placeholder="Additional details or instructions for the student..."></textarea>
         </div>
 
         <div class="field-help">
@@ -563,10 +722,63 @@ body{overflow-x:hidden}
             </button>
         </div>
     </form>
+
+    <% if (!shortlistedCandidates.isEmpty()) { %>
+        <div style="padding: 16px 24px 24px; border-top: 1px dashed #e2e8f0; background: #fafcff;">
+            <div style="font-weight: 700; font-size: 13px; color: #1e293b; margin-bottom: 8px; display:flex; justify-content:space-between; align-items:center;">
+                <span><i class="fa-solid fa-users" style="color:#2563eb;"></i> Select Another Candidate (<%= shortlistedCandidates.size() %>)</span>
+            </div>
+            <p style="font-size: 12px; color: #64748b; margin-bottom: 10px;">Fast-track candidate from shortlisted to selected:</p>
+            <div style="display: flex; flex-direction: column; gap: 8px; max-height: 220px; overflow-y: auto;">
+                <% for (Map<String,Object> sc : shortlistedCandidates) { %>
+                    <div style="background:white; padding:8px 10px; border-radius:6px; border:1px solid #e2e8f0; display:flex; justify-content:space-between; align-items:center; gap:6px;">
+                        <div style="min-width:0;">
+                            <div style="font-weight:600; font-size:12.5px; color:#1e293b; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><%= esc((String)sc.get("name")) %></div>
+                            <div style="font-size:11px; color:#64748b;"><%= esc((String)sc.get("job")) %></div>
+                        </div>
+                        <form method="post" style="margin:0; flex-shrink:0;">
+                            <input type="hidden" name="csrf" value="<%= esc(csrf) %>">
+                            <input type="hidden" name="action" value="markSelected">
+                            <input type="hidden" name="applicationId" value="<%= sc.get("id") %>">
+                            <button class="btn" type="submit" style="padding: 5px 10px; font-size: 11px; border-radius: 5px;">
+                                <i class="fa-solid fa-plus"></i> Select
+                            </button>
+                        </form>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    <% } %>
     <% } %>
 </aside>
 </div>
 </main>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var appSelect = document.getElementById('applicationId');
+    var desigInput = document.getElementById('designation');
+    if (appSelect && desigInput) {
+        function updateJobTitle() {
+            var opt = appSelect.options[appSelect.selectedIndex];
+            if (opt && opt.getAttribute('data-job') && (!desigInput.value || desigInput.dataset.autofilled === 'true')) {
+                desigInput.value = opt.getAttribute('data-job');
+                desigInput.dataset.autofilled = 'true';
+            }
+        }
+        appSelect.addEventListener('change', function() {
+            desigInput.dataset.autofilled = 'true';
+            updateJobTitle();
+        });
+        desigInput.addEventListener('input', function() {
+            desigInput.dataset.autofilled = 'false';
+        });
+        if (appSelect.value) {
+            updateJobTitle();
+        }
+    }
+});
+</script>
 </body>
 </html>

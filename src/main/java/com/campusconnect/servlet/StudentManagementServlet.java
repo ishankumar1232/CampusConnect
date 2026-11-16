@@ -9,24 +9,31 @@ import com.campusconnect.dao.StudentDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.*;
 
-public class StudentManagementServlet extends HttpServlet
-{
+public class StudentManagementServlet extends HttpServlet {
 
     public void doGet(HttpServletRequest req,
             HttpServletResponse res)
-            throws IOException,ServletException
-    {
+            throws IOException, ServletException {
 
-        StudentDAO dao=new StudentDAO();
+        // ================= SESSION CHECK =================
 
-        ArrayList<Student> list=
-                dao.getAllStudents();
+        HttpSession session = req.getSession(false);
+
+        if (session == null || session.getAttribute("admin") == null) {
+
+            res.sendRedirect(req.getContextPath()
+                    + "/superadmin/login.jsp");
+            return;
+        }
+
+        StudentDAO dao = new StudentDAO();
+
+        ArrayList<Student> list = dao.getAllStudents();
 
         req.setAttribute("studentList", list);
 
-        req.getRequestDispatcher(
-                "superadmin/studentManagement.jsp")
-                .forward(req,res);
+        req.getRequestDispatcher("superadmin/studentManagement.jsp")
+                .forward(req, res);
 
     }
 
