@@ -4,3 +4,4 @@ tomcat.*/
 src/main/webapp/WEB-INF/classes/
 *.class
 .metadata/
+*.war
